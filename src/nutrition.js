@@ -59,6 +59,101 @@ export function parseDietCSV(text) {
   return days.length ? { name: 'Dieta importata', days } : null
 }
 
+// --- Tabella alimenti/piatti comuni (kcal per 100g) ------------------------
+// Curata per i cibi freschi e i piatti italiani dove Open Food Facts è debole.
+export const COMMON_FOODS = [
+  { name: 'Pizza margherita', en: 'Margherita pizza', kcal100: 270 },
+  { name: 'Pizza diavola', en: 'Spicy salami pizza', kcal100: 280 },
+  { name: 'Focaccia', en: 'Focaccia', kcal100: 290 },
+  { name: 'Pasta al pomodoro (cotta)', en: 'Pasta with tomato (cooked)', kcal100: 130 },
+  { name: 'Pasta in bianco (cotta)', en: 'Plain pasta (cooked)', kcal100: 160 },
+  { name: 'Pasta al ragù (cotta)', en: 'Pasta with meat sauce', kcal100: 170 },
+  { name: 'Lasagne', en: 'Lasagna', kcal100: 135 },
+  { name: 'Risotto', en: 'Risotto', kcal100: 160 },
+  { name: 'Riso bianco (cotto)', en: 'White rice (cooked)', kcal100: 130 },
+  { name: 'Pane', en: 'Bread', kcal100: 270 },
+  { name: 'Pane integrale', en: 'Wholemeal bread', kcal100: 240 },
+  { name: 'Fette biscottate', en: 'Rusks', kcal100: 410 },
+  { name: 'Fiocchi d\'avena', en: 'Oats', kcal100: 370 },
+  { name: 'Cornetto/brioche', en: 'Croissant', kcal100: 400 },
+  { name: 'Petto di pollo (cotto)', en: 'Chicken breast (cooked)', kcal100: 165 },
+  { name: 'Fesa di tacchino', en: 'Turkey breast', kcal100: 110 },
+  { name: 'Manzo magro (cotto)', en: 'Lean beef (cooked)', kcal100: 250 },
+  { name: 'Hamburger (carne)', en: 'Beef burger patty', kcal100: 250 },
+  { name: 'Salmone', en: 'Salmon', kcal100: 208 },
+  { name: 'Tonno al naturale', en: 'Tuna in water', kcal100: 116 },
+  { name: 'Merluzzo/nasello', en: 'Cod', kcal100: 82 },
+  { name: 'Uovo', en: 'Egg', kcal100: 155 },
+  { name: 'Prosciutto crudo', en: 'Cured ham', kcal100: 270 },
+  { name: 'Prosciutto cotto', en: 'Cooked ham', kcal100: 145 },
+  { name: 'Bresaola', en: 'Bresaola', kcal100: 150 },
+  { name: 'Mozzarella', en: 'Mozzarella', kcal100: 250 },
+  { name: 'Parmigiano', en: 'Parmesan', kcal100: 392 },
+  { name: 'Ricotta', en: 'Ricotta', kcal100: 146 },
+  { name: 'Yogurt greco', en: 'Greek yogurt', kcal100: 59 },
+  { name: 'Yogurt intero', en: 'Whole yogurt', kcal100: 61 },
+  { name: 'Latte intero', en: 'Whole milk', kcal100: 64 },
+  { name: 'Latte parz. scremato', en: 'Semi-skimmed milk', kcal100: 46 },
+  { name: 'Patate lesse', en: 'Boiled potatoes', kcal100: 80 },
+  { name: 'Patatine fritte', en: 'French fries', kcal100: 312 },
+  { name: 'Patatine in busta', en: 'Potato chips', kcal100: 536 },
+  { name: 'Insalata', en: 'Salad greens', kcal100: 20 },
+  { name: 'Pomodoro', en: 'Tomato', kcal100: 18 },
+  { name: 'Zucchine', en: 'Zucchini', kcal100: 17 },
+  { name: 'Broccoli', en: 'Broccoli', kcal100: 34 },
+  { name: 'Carote', en: 'Carrots', kcal100: 41 },
+  { name: 'Spinaci', en: 'Spinach', kcal100: 23 },
+  { name: 'Fagioli (cotti)', en: 'Beans (cooked)', kcal100: 120 },
+  { name: 'Ceci (cotti)', en: 'Chickpeas (cooked)', kcal100: 160 },
+  { name: 'Lenticchie (cotte)', en: 'Lentils (cooked)', kcal100: 116 },
+  { name: 'Mela', en: 'Apple', kcal100: 52 },
+  { name: 'Banana', en: 'Banana', kcal100: 89 },
+  { name: 'Arancia', en: 'Orange', kcal100: 47 },
+  { name: 'Mandorle', en: 'Almonds', kcal100: 579 },
+  { name: 'Noci', en: 'Walnuts', kcal100: 654 },
+  { name: 'Olio d\'oliva', en: 'Olive oil', kcal100: 884 },
+  { name: 'Burro', en: 'Butter', kcal100: 717 },
+  { name: 'Zucchero', en: 'Sugar', kcal100: 387 },
+  { name: 'Miele', en: 'Honey', kcal100: 304 },
+  { name: 'Nutella/crema nocciole', en: 'Hazelnut spread', kcal100: 530 },
+  { name: 'Biscotti', en: 'Biscuits', kcal100: 450 },
+  { name: 'Cioccolato fondente', en: 'Dark chocolate', kcal100: 546 },
+  { name: 'Cioccolato al latte', en: 'Milk chocolate', kcal100: 535 },
+  { name: 'Gelato', en: 'Ice cream', kcal100: 200 },
+  { name: 'Tiramisù', en: 'Tiramisu', kcal100: 300 },
+  { name: 'Sushi (nigiri/maki)', en: 'Sushi', kcal100: 140 },
+  { name: 'Panino con hamburger', en: 'Burger sandwich', kcal100: 250 },
+  { name: 'Birra', en: 'Beer', kcal100: 43 },
+  { name: 'Vino', en: 'Wine', kcal100: 85 },
+  { name: 'Coca-Cola', en: 'Coca-Cola', kcal100: 42 },
+]
+
+export function searchLocal(query) {
+  const q = query.trim().toLowerCase()
+  if (!q) return []
+  return COMMON_FOODS
+    .filter((f) => f.name.toLowerCase().includes(q) || f.en.toLowerCase().includes(q))
+    .slice(0, 6)
+}
+
+// --- Stima calorie con AI (free-text, con chiave locale) -------------------
+export async function estimateKcalAI(foodText, grams, apiKey, lang = 'it') {
+  const g = parseFloat(grams) || 100
+  const prompt = `Stima le calorie totali di: "${foodText}" per ${g} grammi (o per la porzione indicata). Rispondi SOLO con un numero intero di kcal, senza testo né unità.`
+  const body = { model: 'claude-haiku-4-5', max_tokens: 20, messages: [{ role: 'user', content: prompt }] }
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) throw new Error(`API ${res.status}`)
+  const data = await res.json()
+  const text = (data.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('')
+  const n = parseInt(String(text).replace(/[^0-9]/g, ''), 10)
+  if (!n) throw new Error('stima non valida')
+  return n
+}
+
 // --- Open Food Facts: ricerca cibo (gratis, senza chiave) ------------------
 // Ritorna [{name, kcal100}] con kcal per 100g.
 export async function searchFood(query) {

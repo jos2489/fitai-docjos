@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useLang } from '../i18n.jsx'
 import {
   uid, todayKey, dayPlannedKcal, mealKcal, dayEatenKcal,
-  parseDietCSV, searchFood, kcalFor, parseDietWithAI,
+  parseDietCSV, searchFood, searchLocal, kcalFor, parseDietWithAI, estimateKcalAI,
 } from '../nutrition.js'
 
 export default function Nutrition({ state, setState }) {
@@ -84,7 +84,7 @@ function Today({ state, setState }) {
             <button className="rm" onClick={() => removeExtra(e.id)}>×</button>
           </div>
         ))}
-        {adding ? <FoodPicker onAdd={addExtra} onCancel={() => setAdding(false)} />
+        {adding ? <FoodPicker apiKey={state.anthropicKey} onAdd={addExtra} onCancel={() => setAdding(false)} />
           : <button className="addset" onClick={() => setAdding(true)}>{t('addExtra')}</button>}
       </div>
     </div>
@@ -157,7 +157,7 @@ function Plan({ state, setState }) {
                     </div>
                   ))}
                   {picker && picker.dayId === day.id && picker.mealId === meal.id
-                    ? <FoodPicker onAdd={(food) => addFood(day.id, meal.id, food)} onCancel={() => setPicker(null)} />
+                    ? <FoodPicker apiKey={state.anthropicKey} onAdd={(food) => addFood(day.id, meal.id, food)} onCancel={() => setPicker(null)} />
                     : <button className="addset" onClick={() => setPicker({ dayId: day.id, mealId: meal.id })}>{t('addFood')}</button>}
                 </div>
               ))}
@@ -197,20 +197,33 @@ function Plan({ state, setState }) {
 }
 
 // ============================ Food picker ============================
-function FoodPicker({ onAdd, onCancel }) {
-  const { t } = useLang()
+function FoodPicker({ onAdd, onCancel, apiKey }) {
+  const { t, lang } = useLang()
   const [q, setQ] = useState('')
   const [results, setResults] = useState(null)
   const [busy, setBusy] = useState(false)
   const [sel, setSel] = useState(null)   // {name, kcal100}
   const [grams, setGrams] = useState('')
   const [manual, setManual] = useState({ name: '', qty: '', kcal: '' })
+  const [aiBusy, setAiBusy] = useState(false)
+  const [aiErr, setAiErr] = useState('')
 
   const doSearch = async () => {
     if (!q.trim()) return
-    setBusy(true); setResults(null)
-    try { setResults(await searchFood(q)) } catch { setResults([]) }
+    setBusy(true); setResults(null); setSel(null)
+    const local = searchLocal(q).map((r) => ({ name: r.name, kcal100: r.kcal100, src: 'tab' }))
+    let off = []
+    try { off = (await searchFood(q)).map((r) => ({ ...r, src: 'off' })) } catch { /* rete */ }
+    setResults([...local, ...off])
     setBusy(false)
+  }
+
+  const aiEstimate = async () => {
+    if (!manual.name) return
+    setAiErr(''); setAiBusy(true)
+    try { const kcal = await estimateKcalAI(manual.name, manual.qty, apiKey, lang); setManual((m) => ({ ...m, kcal: String(kcal) })) }
+    catch (e) { setAiErr(String(e.message || e)) }
+    setAiBusy(false)
   }
 
   return (
@@ -222,7 +235,7 @@ function FoodPicker({ onAdd, onCancel }) {
       {busy && <div className="csv-hint">{t('searching')}</div>}
       {results && results.length > 0 && !sel && results.map((r, i) => (
         <button key={i} className="alt-opt" onClick={() => setSel(r)}>
-          <span>{r.name}</span><span className="alt-type">{r.kcal100} kcal/100g</span>
+          <span>{r.src === 'tab' ? '📋 ' : ''}{r.name}</span><span className="alt-type">{r.kcal100} kcal/100g</span>
         </button>
       ))}
       {results && results.length === 0 && !sel && <div className="csv-hint">{t('noResults')}</div>}
@@ -244,6 +257,10 @@ function FoodPicker({ onAdd, onCancel }) {
         <input className="in" style={{ width: 80 }} inputMode="numeric" placeholder={t('kcal')} value={manual.kcal} onChange={(e) => setManual({ ...manual, kcal: e.target.value })} />
         <button className="btn" style={{ width: 'auto', padding: '0 14px' }} disabled={!manual.name || !manual.kcal} onClick={() => onAdd({ name: manual.name, qty: manual.qty ? manual.qty + ' g' : '', kcal: parseInt(manual.kcal) || 0 })}>{t('add')}</button>
       </div>
+      {apiKey ? (
+        <button className="addset alt" style={{ marginTop: 6 }} disabled={!manual.name || aiBusy} onClick={aiEstimate}>{aiBusy ? t('estimating') : t('aiEstimate')}</button>
+      ) : null}
+      {aiErr && <div className="csv-hint" style={{ color: 'var(--bad)' }}>{aiErr}</div>}
       <button className="addset" style={{ marginTop: 8 }} onClick={onCancel}>{t('cancel')}</button>
     </div>
   )

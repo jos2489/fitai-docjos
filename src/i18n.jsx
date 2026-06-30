@@ -185,6 +185,9 @@ export const STRINGS = {
   readError: { it: 'Errore di lettura', en: 'Reading error' },
   needKey: { it: 'Inserisci prima la chiave Anthropic qui sotto.', en: 'Enter your Anthropic key below first.' },
   total: { it: 'Totale', en: 'Total' },
+  aiEstimate: { it: '🤖 Stima kcal con AI', en: '🤖 Estimate kcal with AI' },
+  estimating: { it: 'Stimo...', en: 'Estimating...' },
+  fromTable: { it: 'tabella', en: 'table' },
 }
 
 function interpolate(str, vars) {
