@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { logKey, dayKey, lastLogFor } from '../storage.js'
 import { alternativesFor, suggestNextSet, EXERCISE_BY_ID, TECHNIQUES } from '../engine.js'
+import { useLang } from '../i18n.jsx'
 
 // Beep con Web Audio API: nessun file audio, funziona offline.
 function playBeep() {
@@ -37,12 +38,13 @@ const READINESS_ADJ = {
   carico: { sets: 0, rir: -1, label: '🔋 Giornata TOP: RIR più basso, puoi avvicinarti di più al cedimento mantenendo la tecnica. Se te la senti, aggiungi una serie.' },
 }
 const READINESS_OPTS = [
-  { id: 'scarico', emoji: '🪫', label: 'Stanco' },
-  { id: 'normale', emoji: '😐', label: 'Normale' },
-  { id: 'carico', emoji: '🔋', label: 'Carico' },
+  { id: 'scarico', emoji: '🪫', key: 'tired' },
+  { id: 'normale', emoji: '😐', key: 'normal' },
+  { id: 'carico', emoji: '🔋', key: 'charged' },
 ]
 
 export default function Workout({ state, setState, week, dayIdx, onBack }) {
+  const { t } = useLang()
   const { program } = state
   const equip = program.profile.equipment || 'gym'
   const wk = program.weeks.find((w) => w.week === week)
@@ -77,8 +79,8 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
   return (
     <div className="app fade">
       <div className="topbar">
-        <button className="back" onClick={onBack}>‹ INDIETRO</button>
-        <span className="scanlabel">{wk.deload ? '🌙 SCARICO' : `SETT. ${week}`}</span>
+        <button className="back" onClick={onBack}>{t('back')}</button>
+        <span className="scanlabel">{wk.deload ? t('deloadPill') : `${t('weekShort')} ${week}`}</span>
       </div>
 
       <div className="hero" style={{ marginBottom: 14 }}>
@@ -88,13 +90,13 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
       </div>
 
       <div className="card readiness">
-        <h2>🌡️ COME TI SENTI OGGI?</h2>
-        <div className="sub">Adatto volume e intensità della seduta di conseguenza (autoregolazione su RIR).</div>
+        <h2>{t('feelToday')}</h2>
+        <div className="sub">{t('feelSub')}</div>
         <div className="opt-grid" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
           {READINESS_OPTS.map((o) => (
             <button key={o.id} className={'opt' + (readiness === o.id ? ' active' : '')} style={{ alignItems: 'center', textAlign: 'center' }} onClick={() => setReadiness(o.id)}>
               <span className="emoji">{o.emoji}</span>
-              <span className="lbl">{o.label}</span>
+              <span className="lbl">{t(o.key)}</span>
             </button>
           ))}
         </div>
@@ -122,16 +124,16 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
       })}
 
       <div className="card">
-        <h2>📝 NOTE SEDUTA</h2>
+        <h2>{t('notesTitle')}</h2>
         <textarea
           className="in"
-          placeholder="Come ti sei sentito? Dolori, energia, tecnica, regolazioni macchine..."
+          placeholder={t('notesPh')}
           value={note}
           onChange={(e) => saveNote(e.target.value)}
         />
       </div>
 
-      <button className="btn" onClick={complete}>✓ COMPLETA ALLENAMENTO</button>
+      <button className="btn" onClick={complete}>{t('completeWorkout')}</button>
       <div style={{ height: 20 }} />
 
       {rest != null && <RestTimer seconds={rest} onClose={() => setRest(null)} />}
@@ -140,6 +142,7 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
 }
 
 function RestTimer({ seconds, onClose }) {
+  const { t } = useLang()
   const [left, setLeft] = useState(seconds)
   const ref = useRef(null)
   useEffect(() => {
@@ -158,10 +161,10 @@ function RestTimer({ seconds, onClose }) {
     <div className="rest-bar">
       <div className="rest-fill" style={{ width: pct + '%' }} />
       <div className="rest-inner">
-        <span className="rest-time">{left === 0 ? '✅ GO!' : `⏱ ${mm}:${ss}`}</span>
+        <span className="rest-time">{left === 0 ? t('go') : `⏱ ${mm}:${ss}`}</span>
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={() => setLeft((l) => l + 15)}>+15s</button>
-          <button onClick={onClose}>{left === 0 ? 'CHIUDI' : 'SALTA'}</button>
+          <button onClick={onClose}>{left === 0 ? t('close') : t('skip')}</button>
         </div>
       </div>
     </div>
@@ -169,6 +172,7 @@ function RestTimer({ seconds, onClose }) {
 }
 
 function ExerciseCard({ ex, display, swapped, alternatives, existing, last, onChange, onRest, onSwap }) {
+  const { t } = useLang()
   const init = useMemo(() => {
     if (existing && existing.length) return existing
     return Array.from({ length: ex.sets }, (_, i) => {
@@ -199,11 +203,11 @@ function ExerciseCard({ ex, display, swapped, alternatives, existing, last, onCh
           </div>
           {last && (
             <div className="lastlog">
-              ⏮ Ultima: {last.map((s) => `${s.weight || '–'}×${s.reps || '–'}`).join(' ')}
+              ⏮ {t('lastTime')}: {last.map((s) => `${s.weight || '–'}×${s.reps || '–'}`).join(' ')}
             </div>
           )}
         </div>
-        <a className="video-btn" href={videoUrl(display.name)} target="_blank" rel="noreferrer">▶ TECNICA</a>
+        <a className="video-btn" href={videoUrl(display.name)} target="_blank" rel="noreferrer">{t('videoBtn')}</a>
       </div>
 
       <div className="suggestion">💡 {suggestion.text}</div>
@@ -211,13 +215,13 @@ function ExerciseCard({ ex, display, swapped, alternatives, existing, last, onCh
       {tech && (
         <div className="tech">
           <button className="tech-head" onClick={() => setShowTech((v) => !v)}>
-            <span>{tech.emoji} TECNICA: {tech.name}</span>
-            <span className="tech-toggle">{showTech ? '−' : 'ⓘ come si fa'}</span>
+            <span>{tech.emoji} {t('technique')}: {tech.name}</span>
+            <span className="tech-toggle">{showTech ? '−' : t('howto')}</span>
           </button>
           {showTech && (
             <div className="tech-body fade">
-              <div><b>Esecuzione:</b> {tech.how}</div>
-              <div style={{ marginTop: 6 }}><b>Perché:</b> {tech.why}</div>
+              <div><b>{t('execution')}:</b> {tech.how}</div>
+              <div style={{ marginTop: 6 }}><b>{t('why')}:</b> {tech.why}</div>
             </div>
           )}
         </div>
@@ -235,24 +239,24 @@ function ExerciseCard({ ex, display, swapped, alternatives, existing, last, onCh
         </div>
       ))}
       <div style={{ display: 'flex', gap: 8 }}>
-        <button className="addset" onClick={addSet}>+ SERIE</button>
-        <button className="addset rest" onClick={onRest}>⏱ REST {ex.rest}s</button>
-        <button className="addset alt" onClick={() => setShowAlts((v) => !v)}>🔄 CAMBIA</button>
+        <button className="addset" onClick={addSet}>{t('addSet')}</button>
+        <button className="addset rest" onClick={onRest}>{t('restBtn')} {ex.rest}s</button>
+        <button className="addset alt" onClick={() => setShowAlts((v) => !v)}>{t('swapBtn')}</button>
       </div>
 
       {showAlts && (
         <div className="alts fade">
-          <div className="alts-title">Macchina occupata o assente? Scegli un'alternativa per lo stesso muscolo:</div>
+          <div className="alts-title">{t('altTitle')}</div>
           {swapped && (
             <button className="alt-opt restore" onClick={() => { onSwap(null); setShowAlts(false) }}>
-              ↩ Ripristina esercizio originale
+              {t('restore')}
             </button>
           )}
-          {alternatives.length === 0 && <div className="alts-empty">Nessuna alternativa disponibile con la tua attrezzatura.</div>}
+          {alternatives.length === 0 && <div className="alts-empty">{t('altEmpty')}</div>}
           {alternatives.map((a) => (
             <button key={a.id} className="alt-opt" onClick={() => { onSwap(a.id); setShowAlts(false) }}>
               <span>{a.name}</span>
-              <span className="alt-type">{a.type === 'compound' ? 'multiart.' : 'isolam.'}</span>
+              <span className="alt-type">{a.type === 'compound' ? t('compoundShort') : t('isoShort')}</span>
             </button>
           ))}
         </div>

@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
 import { buildProgram, GOALS, EXPERIENCES, EQUIPMENTS } from '../engine.js'
+import { useLang, LANGUAGES, goalLabel, expLabel, expDesc, equipLabel } from '../i18n.jsx'
 
 // Wizard di profilazione del cliente: l'Ai userà queste risposte per costruire
 // il programma più adatto secondo le evidenze scientifiche.
 export default function Onboarding({ onCreate }) {
+  const { t, lang, setLang } = useLang()
   const [step, setStep] = useState(0)
   const [p, setP] = useState({
     name: '', sex: 'm', age: 28, weight: '', height: '',
@@ -20,17 +22,17 @@ export default function Onboarding({ onCreate }) {
           <div className="glow" />
           <img className="mascot" src="/mascot.webp" alt="Doc Jos" />
           <div className="welcome-text">
-            <h1>Ciao! Sono <span className="ai">Doc Jos</span> 💪</h1>
-            <p>Benvenuto in <b>FitAi</b>, il mio assistente di allenamento. Dimmi qualcosa su di te e ti costruisco un programma su misura seguendo le evidenze scientifiche — aggiornandolo man mano che progredisci.</p>
+            <h1 dangerouslySetInnerHTML={{ __html: t('welcomeTitle') }} />
+            <p dangerouslySetInnerHTML={{ __html: t('welcomeText') }} />
           </div>
         </div>
         <label className="field">
-          <span>Come ti chiami?</span>
-          <input className="in" value={p.name} placeholder="Il tuo nome" onChange={(e) => set({ name: e.target.value })} />
+          <span>{t('yourName')}</span>
+          <input className="in" value={p.name} placeholder={t('namePh')} onChange={(e) => set({ name: e.target.value })} />
         </label>
-        <div className="section-title" style={{ margin: '4px 4px 8px' }}>Sesso</div>
+        <div className="section-title" style={{ margin: '4px 4px 8px' }}>{t('sex')}</div>
         <div className="opt-grid">
-          {[{ id: 'm', l: 'Uomo' }, { id: 'f', l: 'Donna' }].map((o) => (
+          {[{ id: 'm', l: t('male') }, { id: 'f', l: t('female') }].map((o) => (
             <button key={o.id} className={'opt' + (p.sex === o.id ? ' active' : '')} onClick={() => set({ sex: o.id })} style={{ alignItems: 'center', textAlign: 'center' }}>
               <span className="lbl">{o.l}</span>
             </button>
@@ -38,16 +40,16 @@ export default function Onboarding({ onCreate }) {
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginTop: 12 }}>
           <label className="field" style={{ marginBottom: 0 }}>
-            <span>Età</span>
+            <span>{t('age')}</span>
             <input className="in" inputMode="numeric" value={p.age} onChange={(e) => set({ age: e.target.value })} />
           </label>
           <label className="field" style={{ marginBottom: 0 }}>
-            <span>Peso (kg)</span>
-            <input className="in" inputMode="decimal" placeholder="es. 75" value={p.weight} onChange={(e) => set({ weight: e.target.value })} />
+            <span>{t('weightKg')}</span>
+            <input className="in" inputMode="decimal" placeholder="75" value={p.weight} onChange={(e) => set({ weight: e.target.value })} />
           </label>
           <label className="field" style={{ marginBottom: 0 }}>
-            <span>Altezza (cm)</span>
-            <input className="in" inputMode="numeric" placeholder="es. 178" value={p.height} onChange={(e) => set({ height: e.target.value })} />
+            <span>{t('heightCm')}</span>
+            <input className="in" inputMode="numeric" placeholder="178" value={p.height} onChange={(e) => set({ height: e.target.value })} />
           </label>
         </div>
       </div>
@@ -55,13 +57,13 @@ export default function Onboarding({ onCreate }) {
     // 1 - obiettivo
     (
       <div className="card fade">
-        <h2>Qual è il tuo obiettivo?</h2>
-        <div className="sub">Determina rep range, intensità e recuperi.</div>
+        <h2>{t('goalQ')}</h2>
+        <div className="sub">{t('goalSub')}</div>
         <div className="opt-grid">
           {GOALS.map((g) => (
             <button key={g.id} className={'opt' + (p.goal === g.id ? ' active' : '')} onClick={() => set({ goal: g.id })}>
               <span className="emoji">{g.emoji}</span>
-              <span className="lbl">{g.label}</span>
+              <span className="lbl">{goalLabel(lang, g.id)}</span>
             </button>
           ))}
         </div>
@@ -70,13 +72,13 @@ export default function Onboarding({ onCreate }) {
     // 2 - esperienza
     (
       <div className="card fade">
-        <h2>Quanta esperienza hai?</h2>
-        <div className="sub">Regola il volume di partenza (zona MEV→MAV).</div>
+        <h2>{t('expQ')}</h2>
+        <div className="sub">{t('expSub')}</div>
         <div className="opt-grid">
           {EXPERIENCES.map((g) => (
             <button key={g.id} className={'opt' + (p.experience === g.id ? ' active' : '')} onClick={() => set({ experience: g.id })}>
-              <span className="lbl">{g.label}</span>
-              <span className="desc">{g.desc}</span>
+              <span className="lbl">{expLabel(lang, g.id)}</span>
+              <span className="desc">{expDesc(lang, g.id)}</span>
             </button>
           ))}
         </div>
@@ -85,13 +87,13 @@ export default function Onboarding({ onCreate }) {
     // 3 - attrezzatura
     (
       <div className="card fade">
-        <h2>Dove ti alleni?</h2>
-        <div className="sub">Sceglierò solo esercizi che puoi davvero eseguire.</div>
+        <h2>{t('whereQ')}</h2>
+        <div className="sub">{t('whereSub')}</div>
         <div className="opt-grid">
           {EQUIPMENTS.map((g) => (
             <button key={g.id} className={'opt' + (p.equipment === g.id ? ' active' : '')} onClick={() => set({ equipment: g.id })}>
               <span className="emoji">{g.emoji}</span>
-              <span className="lbl">{g.label}</span>
+              <span className="lbl">{equipLabel(lang, g.id)}</span>
             </button>
           ))}
         </div>
@@ -100,13 +102,13 @@ export default function Onboarding({ onCreate }) {
     // 4 - frequenza + durata
     (
       <div className="card fade">
-        <h2>Frequenza e durata</h2>
-        <div className="sub">Quante volte a settimana e per quante settimane.</div>
-        <div className="section-title">Giorni a settimana</div>
-        <Stepper value={p.daysPerWeek} min={2} max={6} unit="giorni / sett." onChange={(v) => set({ daysPerWeek: v })} />
-        <div className="section-title">Durata del mesociclo</div>
-        <Stepper value={p.weeks} min={2} max={12} unit="settimane" onChange={(v) => set({ weeks: v })} />
-        <div className="aigen"><span className="pulse" /> L'AI inserirà automaticamente una settimana di scarico se servirà.</div>
+        <h2>{t('freqTitle')}</h2>
+        <div className="sub">{t('freqSub')}</div>
+        <div className="section-title">{t('daysWeek')}</div>
+        <Stepper value={p.daysPerWeek} min={2} max={6} unit={t('daysUnit')} onChange={(v) => set({ daysPerWeek: v })} />
+        <div className="section-title">{t('mesoTitle')}</div>
+        <Stepper value={p.weeks} min={2} max={12} unit={t('weeksUnit')} onChange={(v) => set({ weeks: v })} />
+        <div className="aigen"><span className="pulse" /> {t('deloadHint')}</div>
       </div>
     ),
   ]
@@ -121,13 +123,18 @@ export default function Onboarding({ onCreate }) {
           <span className="logo">⚡</span>
           <span>Fit<span className="ai">Ai</span><small className="byline">by Doc Jos</small></span>
         </div>
-        <span style={{ color: 'var(--muted)', fontSize: 13, fontWeight: 700 }}>{step + 1}/{steps.length}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <button className="lang-toggle" onClick={() => setLang(lang === 'it' ? 'en' : 'it')}>
+            {LANGUAGES.find((l) => l.id === lang)?.flag} {lang.toUpperCase()}
+          </button>
+          <span style={{ color: 'var(--muted)', fontSize: 13, fontWeight: 700 }}>{step + 1}/{steps.length}</span>
+        </div>
       </div>
       {steps[step]}
       <div className="btn-row">
-        {step > 0 && <button className="btn secondary" onClick={() => setStep((s) => s - 1)}>Indietro</button>}
-        {!last && <button className="btn" onClick={() => setStep((s) => s + 1)}>Continua</button>}
-        {last && <button className="btn" onClick={generate}>✨ Genera il mio programma</button>}
+        {step > 0 && <button className="btn secondary" onClick={() => setStep((s) => s - 1)}>{t('goBack')}</button>}
+        {!last && <button className="btn" onClick={() => setStep((s) => s + 1)}>{t('continue')}</button>}
+        {last && <button className="btn" onClick={generate}>{t('genProgram')}</button>}
       </div>
     </div>
   )

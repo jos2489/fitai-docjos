@@ -9,6 +9,7 @@ const empty = {
   completed: {},        // chiave: `${week}-${dayIdx}` -> ISO date completamento
   swaps: {},            // chiave: `${week}-${dayIdx}-${exId}` -> nuovo exId (esercizio alternativo)
   readiness: {},        // chiave: `${week}-${dayIdx}` -> 'scarico' | 'normale' | 'carico'
+  lang: 'it',           // lingua interfaccia: 'it' | 'en'
 }
 
 export function loadState() {

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { generateWod, WOD_STYLES, WOD_LEVELS } from '../wods.js'
+import { useLang } from '../i18n.jsx'
 
 function playBeep() {
   try {
@@ -18,6 +19,7 @@ function playBeep() {
 }
 
 export default function Wod({ state }) {
+  const { t } = useLang()
   const equip = state.program?.profile?.equipment || 'gym'
   const [style, setStyle] = useState('crossfit')
   const [level, setLevel] = useState('normale')
@@ -31,39 +33,39 @@ export default function Wod({ state }) {
     <div className="fade">
       <div className="hero">
         <div className="glow" />
-        <h1>🔥 WOD GENERATOR</h1>
-        <p>Allenamenti <b>CrossFit</b> e circuiti <b>Hybrid</b> generati al volo, scalati per il tuo livello e la tua attrezzatura — con spiegazione del formato.</p>
+        <h1>{t('wodTitle')}</h1>
+        <p dangerouslySetInnerHTML={{ __html: t('wodIntro') }} />
       </div>
 
       <div className="card">
-        <div className="section-title" style={{ margin: '2px 2px 10px' }}>Stile</div>
+        <div className="section-title" style={{ margin: '2px 2px 10px' }}>{t('style')}</div>
         <div className="opt-grid">
           {WOD_STYLES.map((s) => (
             <button key={s.id} className={'opt' + (style === s.id ? ' active' : '')} onClick={() => setStyle(s.id)}>
               <span className="emoji">{s.emoji}</span>
               <span className="lbl">{s.label}</span>
-              <span className="desc">{s.desc}</span>
+              <span className="desc">{t(s.id === 'crossfit' ? 'wodCrossfitDesc' : 'wodHybridDesc')}</span>
             </button>
           ))}
         </div>
 
-        <div className="section-title" style={{ margin: '16px 2px 10px' }}>Livello</div>
+        <div className="section-title" style={{ margin: '16px 2px 10px' }}>{t('level')}</div>
         <div className="opt-grid" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
           {WOD_LEVELS.map((l) => (
             <button key={l.id} className={'opt' + (level === l.id ? ' active' : '')} style={{ alignItems: 'center', textAlign: 'center' }} onClick={() => setLevel(l.id)}>
-              <span className="lbl">{l.label}</span>
+              <span className="lbl">{t(l.id === 'scaled' ? 'lvlScaled' : l.id === 'rx' ? 'lvlRx' : 'lvlNormale')}</span>
             </button>
           ))}
         </div>
 
-        <div className="section-title" style={{ margin: '16px 2px 10px' }}>Durata</div>
+        <div className="section-title" style={{ margin: '16px 2px 10px' }}>{t('duration')}</div>
         <div className="stepper">
           <button onClick={() => setMinutes((m) => Math.max(4, m - 2))}>−</button>
-          <div className="val">{minutes}<small>minuti</small></div>
+          <div className="val">{minutes}<small>{t('minutes')}</small></div>
           <button onClick={() => setMinutes((m) => Math.min(30, m + 2))}>+</button>
         </div>
 
-        <button className="btn" style={{ marginTop: 16 }} onClick={gen}>⚡ GENERA WOD</button>
+        <button className="btn" style={{ marginTop: 16 }} onClick={gen}>{t('genWod')}</button>
       </div>
 
       {wod && <WodCard wod={wod} timer={timer} setTimer={setTimer} />}
@@ -72,6 +74,7 @@ export default function Wod({ state }) {
 }
 
 function WodCard({ wod, timer, setTimer }) {
+  const { t } = useLang()
   return (
     <div className="card fade" style={{ borderColor: 'var(--accent)' }}>
       <div className="wod-format">{wod.format} · {wod.minutes}'</div>
@@ -79,14 +82,14 @@ function WodCard({ wod, timer, setTimer }) {
 
       {wod.strength && (
         <div className="wod-block strength">
-          <div className="wod-block-title">💪 FORZA</div>
+          <div className="wod-block-title">{t('strength')}</div>
           <div className="wod-move"><b>{wod.strength.name}</b> — {wod.strength.scheme}</div>
           <div className="wod-note">{wod.strength.note}</div>
         </div>
       )}
 
       <div className="wod-block">
-        <div className="wod-block-title">🔥 METCON</div>
+        <div className="wod-block-title">{t('metcon')}</div>
         <div className="wod-presc">{wod.prescription}:</div>
         {wod.blocks.map((b, i) => (
           <div className="wod-move" key={i}>
@@ -97,18 +100,19 @@ function WodCard({ wod, timer, setTimer }) {
       </div>
 
       <div className="wod-expl">
-        <div><b>📖 Formato:</b> {wod.formatDesc}</div>
-        <div style={{ marginTop: 8 }}><b>🎯 Stimolo:</b> {wod.stimulus}</div>
-        <div style={{ marginTop: 8 }}><b>⚙️ Scaling:</b> {wod.scaling}</div>
+        <div><b>{t('format')}:</b> {wod.formatDesc}</div>
+        <div style={{ marginTop: 8 }}><b>{t('stimulus')}:</b> {wod.stimulus}</div>
+        <div style={{ marginTop: 8 }}><b>{t('scaling')}:</b> {wod.scaling}</div>
       </div>
 
-      <button className="btn" style={{ marginTop: 14 }} onClick={() => setTimer(true)}>⏱ AVVIA TIMER ({wod.minutes}')</button>
+      <button className="btn" style={{ marginTop: 14 }} onClick={() => setTimer(true)}>{t('startTimer')} ({wod.minutes}')</button>
       {timer && <WodTimer seconds={wod.timeCapSec} onClose={() => setTimer(false)} />}
     </div>
   )
 }
 
 function WodTimer({ seconds, onClose }) {
+  const { t } = useLang()
   const [left, setLeft] = useState(seconds)
   const ref = useRef(null)
   useEffect(() => {
@@ -129,8 +133,8 @@ function WodTimer({ seconds, onClose }) {
     <div className="rest-bar">
       <div className="rest-fill" style={{ width: pct + '%' }} />
       <div className="rest-inner">
-        <span className="rest-time">{left === 0 ? '✅ TIME!' : `${mm}:${ss}`}</span>
-        <button onClick={onClose}>{left === 0 ? 'CHIUDI' : 'STOP'}</button>
+        <span className="rest-time">{left === 0 ? t('timeUp') : `${mm}:${ss}`}</span>
+        <button onClick={onClose}>{left === 0 ? t('close') : t('stop')}</button>
       </div>
     </div>
   )

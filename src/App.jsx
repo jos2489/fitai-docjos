@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { loadState, saveState } from './storage.js'
+import { LangProvider, useLang } from './i18n.jsx'
 import Onboarding from './components/Onboarding.jsx'
 import Home from './components/Home.jsx'
 import Workout from './components/Workout.jsx'
@@ -10,13 +11,22 @@ import Profile from './components/Profile.jsx'
 
 export default function App() {
   const [state, setState] = useState(loadState)
-  const [tab, setTab] = useState('home')          // home | stats | profile
-  const [workout, setWorkout] = useState(null)     // { week, dayIdx } quando si allena
+  const setLang = (lang) => setState((s) => ({ ...s, lang }))
 
   // salva ad ogni cambiamento
   useEffect(() => { saveState(state) }, [state])
 
-  const update = (patch) => setState((s) => ({ ...s, ...patch }))
+  return (
+    <LangProvider lang={state.lang || 'it'} setLang={setLang}>
+      <Shell state={state} setState={setState} />
+    </LangProvider>
+  )
+}
+
+function Shell({ state, setState }) {
+  const { t } = useLang()
+  const [tab, setTab] = useState('home')
+  const [workout, setWorkout] = useState(null)
 
   // nessun programma -> onboarding
   if (!state.program) {
@@ -56,11 +66,11 @@ export default function App() {
       {tab === 'profile' && <Profile state={state} setState={setState} />}
 
       <nav className="nav">
-        <NavBtn id="home" tab={tab} setTab={setTab} ic="🗓️" label="Piano" />
+        <NavBtn id="home" tab={tab} setTab={setTab} ic="🗓️" label={t('plan')} />
         <NavBtn id="wod" tab={tab} setTab={setTab} ic="🔥" label="WOD" />
-        <NavBtn id="stats" tab={tab} setTab={setTab} ic="📈" label="Progressi" />
-        <NavBtn id="history" tab={tab} setTab={setTab} ic="📖" label="Storico" />
-        <NavBtn id="profile" tab={tab} setTab={setTab} ic="⚙️" label="Profilo" />
+        <NavBtn id="stats" tab={tab} setTab={setTab} ic="📈" label={t('progress')} />
+        <NavBtn id="history" tab={tab} setTab={setTab} ic="📖" label={t('history')} />
+        <NavBtn id="profile" tab={tab} setTab={setTab} ic="⚙️" label={t('profile')} />
       </nav>
     </div>
   )

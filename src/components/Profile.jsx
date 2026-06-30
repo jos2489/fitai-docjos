@@ -1,7 +1,9 @@
 import React, { useMemo, useState } from 'react'
 import { adaptProgram, assessProgress, levelUpProgram } from '../engine.js'
+import { useLang, LANGUAGES } from '../i18n.jsx'
 
 export default function Profile({ state, setState }) {
+  const { t, lang, setLang } = useLang()
   const { program } = state
   const p = program.profile
   const days = program.weeks[0].days
@@ -31,35 +33,47 @@ export default function Profile({ state, setState }) {
 
   return (
     <div className="fade">
-      <div className="section-title">🧠 Livello e progressi</div>
+      <div className="section-title">{t('language')}</div>
+      <div className="card">
+        <div className="opt-grid">
+          {LANGUAGES.map((l) => (
+            <button key={l.id} className={'opt' + (lang === l.id ? ' active' : '')} style={{ alignItems: 'center', textAlign: 'center' }} onClick={() => setLang(l.id)}>
+              <span className="emoji">{l.flag}</span>
+              <span className="lbl">{l.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="section-title">{t('levelProgress')}</div>
       <div className={'card' + (progress.suggestLevelUp ? ' levelup' : '')}>
         <div className="lu-msg">{progress.message}</div>
         {progress.suggestLevelUp && (
-          <button className="btn" onClick={levelUp}>🚀 Sali a livello "{progress.nextLevel}"</button>
+          <button className="btn" onClick={levelUp}>{t('levelUpTo')} "{progress.nextLevel}"</button>
         )}
       </div>
 
-      <div className="section-title">Il tuo profilo</div>
+      <div className="section-title">{t('yourProfile')}</div>
       <div className="card">
-        <Row k="Nome" v={p.name || '—'} />
-        <Row k="Obiettivo" v={labelGoal(p.goal)} />
-        <Row k="Esperienza" v={cap(p.experience)} />
-        <Row k="Attrezzatura" v={labelEquip(p.equipment)} />
-        <Row k="Frequenza" v={`${p.daysPerWeek} giorni / settimana`} />
-        <Row k="Mesociclo" v={`${program.weeks.length} settimane`} last />
+        <Row k={t('name')} v={p.name || '—'} />
+        <Row k={t('goal')} v={labelGoal(p.goal)} />
+        <Row k={t('experience')} v={cap(p.experience)} />
+        <Row k={t('equipment')} v={labelEquip(p.equipment)} />
+        <Row k={t('frequency')} v={`${p.daysPerWeek} ${t('daysPerWeekFull')}`} />
+        <Row k={t('mesocycle')} v={`${program.weeks.length} ${t('weeksFull')}`} last />
       </div>
 
-      <div className="section-title">🤖 Adatta il piano con l'AI</div>
+      <div className="section-title">{t('adaptTitle')}</div>
       <div className="card">
-        <div className="sub">Dimmi com'è andata ogni tipo di seduta: aggiusterò il volume di conseguenza (più serie se è troppo facile, meno se è troppo dura).</div>
+        <div className="sub">{t('adaptSub')}</div>
         {days.map((d, i) => (
           <div key={i} style={{ marginBottom: 14 }}>
             <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 8 }}>{d.name}</div>
             <div className="opt-grid" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
               {[
-                { id: 'facile', l: '😎 Facile' },
-                { id: 'giusto', l: '👍 Giusto' },
-                { id: 'duro', l: '🥵 Duro' },
+                { id: 'facile', l: t('fbEasy') },
+                { id: 'giusto', l: t('fbRight') },
+                { id: 'duro', l: t('fbHard') },
               ].map((o) => (
                 <button
                   key={o.id}
@@ -74,15 +88,15 @@ export default function Profile({ state, setState }) {
           </div>
         ))}
         <button className="btn" disabled={Object.keys(feedback).length === 0} onClick={adapt}>
-          ✨ Ricalibra il programma
+          {t('recalibrate')}
         </button>
         {msg && <div className="aigen" style={{ color: 'var(--good)' }}>{msg}</div>}
       </div>
 
-      <div className="section-title">Gestione dati</div>
+      <div className="section-title">{t('dataMgmt')}</div>
       <div className="card">
-        <div className="sub">I tuoi dati restano salvati solo su questo dispositivo.</div>
-        <button className="btn secondary" onClick={resetAll}>🗑️ Reset completo</button>
+        <div className="sub">{t('dataSub')}</div>
+        <button className="btn secondary" onClick={resetAll}>{t('resetAll')}</button>
       </div>
       <div style={{ height: 10 }} />
     </div>

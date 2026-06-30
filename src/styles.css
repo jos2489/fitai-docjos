@@ -64,6 +64,7 @@ h1, h2, .pix { font-family: var(--pix); line-height: 1.4; letter-spacing: 0.5px;
 .brand .ai { color: var(--accent-2); text-shadow: 0 0 8px var(--accent-2); }
 .brand .byline { display: block; font-family: var(--mono); font-size: 13px; color: var(--amber); letter-spacing: 1px; margin-top: 3px; }
 .scanlabel { font-family: var(--pix); font-size: 10px; color: var(--amber); text-shadow: 0 0 8px var(--amber); }
+.lang-toggle { font-family: var(--pix); font-size: 9px; color: var(--accent-2); background: var(--card-2); border: 2px solid var(--line); border-radius: 8px; padding: 8px 10px; }
 
 /* ---- Cards / panels ---- */
 .card {

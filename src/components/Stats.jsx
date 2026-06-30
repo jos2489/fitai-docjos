@@ -4,28 +4,30 @@ import {
   Tooltip, CartesianGrid, Cell,
 } from 'recharts'
 import { logKey, dayKey } from '../storage.js'
+import { useLang } from '../i18n.jsx'
 
 const ACCENT = '#ff2d95'
 const ACCENT2 = '#00f0ff'
 
 export default function Stats({ state, setState }) {
+  const { t } = useLang()
   const { program, logs, completed } = state
 
   const data = useMemo(() => computeStats(program, logs, completed), [program, logs, completed])
 
   return (
     <div className="fade">
-      <div className="section-title">Riepilogo</div>
+      <div className="section-title">{t('summary')}</div>
       <div className="stat-grid">
-        <div className="stat"><div className="k">Allenamenti completati</div><div className="v">{data.sessions}</div></div>
-        <div className="stat"><div className="k">Volume totale</div><div className="v">{fmt(data.totalTonnage)}<small> kg</small></div></div>
-        <div className="stat"><div className="k">Serie registrate</div><div className="v">{data.totalSets}</div></div>
-        <div className="stat"><div className="k">Settimana corrente</div><div className="v">{data.currentWeek}<small>/{program.weeks.length}</small></div></div>
+        <div className="stat"><div className="k">{t('workoutsDone')}</div><div className="v">{data.sessions}</div></div>
+        <div className="stat"><div className="k">{t('totalVolume')}</div><div className="v">{fmt(data.totalTonnage)}<small> kg</small></div></div>
+        <div className="stat"><div className="k">{t('setsLogged')}</div><div className="v">{data.totalSets}</div></div>
+        <div className="stat"><div className="k">{t('currentWeek')}</div><div className="v">{data.currentWeek}<small>/{program.weeks.length}</small></div></div>
       </div>
 
       {data.tonnageSeries.length > 0 ? (
         <>
-          <div className="section-title">Volume per seduta (kg sollevati)</div>
+          <div className="section-title">{t('volPerSession')}</div>
           <div className="card">
             <div className="chart-wrap">
               <ResponsiveContainer width="100%" height="100%">
@@ -45,7 +47,7 @@ export default function Stats({ state, setState }) {
             </div>
           </div>
 
-          <div className="section-title">Serie per gruppo muscolare</div>
+          <div className="section-title">{t('setsPerMuscle')}</div>
           <div className="card">
             <div className="chart-wrap">
               <ResponsiveContainer width="100%" height="100%">
@@ -65,7 +67,7 @@ export default function Stats({ state, setState }) {
       ) : (
         <div className="card empty">
           <div className="big">📊</div>
-          <div>Registra il tuo primo allenamento per vedere i grafici dei progressi.</div>
+          <div>{t('statsEmpty')}</div>
         </div>
       )}
 
@@ -75,6 +77,7 @@ export default function Stats({ state, setState }) {
 }
 
 function BodyweightTracker({ state, setState }) {
+  const { t } = useLang()
   const [val, setVal] = useState('')
   const bw = state.bodyweight || []
 
@@ -88,10 +91,10 @@ function BodyweightTracker({ state, setState }) {
 
   return (
     <>
-      <div className="section-title">Peso corporeo</div>
+      <div className="section-title">{t('bodyweight')}</div>
       <div className="card">
         <div style={{ display: 'flex', gap: 8, marginBottom: bw.length ? 14 : 0 }}>
-          <input className="in" inputMode="decimal" placeholder="es. 78.5 kg" value={val} onChange={(e) => setVal(e.target.value)} />
+          <input className="in" inputMode="decimal" placeholder={t('bwPh')} value={val} onChange={(e) => setVal(e.target.value)} />
           <button className="btn" style={{ width: 'auto', padding: '0 20px' }} onClick={add}>＋</button>
         </div>
         {bw.length > 1 && (
@@ -107,7 +110,7 @@ function BodyweightTracker({ state, setState }) {
             </ResponsiveContainer>
           </div>
         )}
-        {bw.length === 1 && <div style={{ color: 'var(--muted)', fontSize: 13 }}>Aggiungi almeno 2 misurazioni per vedere l'andamento.</div>}
+        {bw.length === 1 && <div style={{ color: 'var(--muted)', fontSize: 13 }}>{t('bwHint')}</div>}
       </div>
     </>
   )
