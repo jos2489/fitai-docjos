@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { logKey, dayKey, lastLogFor } from '../storage.js'
-import { alternativesFor, suggestNextSet, EXERCISE_BY_ID } from '../engine.js'
+import { alternativesFor, suggestNextSet, EXERCISE_BY_ID, TECHNIQUES } from '../engine.js'
 
 // Beep con Web Audio API: nessun file audio, funziona offline.
 function playBeep() {
@@ -147,6 +147,8 @@ function ExerciseCard({ ex, display, swapped, alternatives, existing, last, onCh
   }, [])
   const [sets, setSets] = useState(init)
   const [showAlts, setShowAlts] = useState(false)
+  const [showTech, setShowTech] = useState(false)
+  const tech = ex.technique ? TECHNIQUES[ex.technique] : null
 
   const apply = (next) => { setSets(next); onChange(next) }
   const setField = (i, field, val) => apply(sets.map((s, idx) => (idx === i ? { ...s, [field]: val } : s)))
@@ -174,6 +176,21 @@ function ExerciseCard({ ex, display, swapped, alternatives, existing, last, onCh
       </div>
 
       <div className="suggestion">💡 {suggestion.text}</div>
+
+      {tech && (
+        <div className="tech">
+          <button className="tech-head" onClick={() => setShowTech((v) => !v)}>
+            <span>{tech.emoji} TECNICA: {tech.name}</span>
+            <span className="tech-toggle">{showTech ? '−' : 'ⓘ come si fa'}</span>
+          </button>
+          {showTech && (
+            <div className="tech-body fade">
+              <div><b>Esecuzione:</b> {tech.how}</div>
+              <div style={{ marginTop: 6 }}><b>Perché:</b> {tech.why}</div>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="set-head"><span>#</span><span>KG</span><span>REP</span><span /></div>
       {sets.map((s, i) => (

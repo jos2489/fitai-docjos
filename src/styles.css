@@ -157,6 +157,17 @@ textarea.in { min-height: 84px; resize: vertical; }
 .addset.rest { color: var(--accent); }
 .addset.alt { color: var(--amber); }
 
+/* tecnica avanzata */
+.tech { border: 2px solid var(--amber); border-radius: 6px; margin-bottom: 12px; background: rgba(255, 210, 63, 0.08); overflow: hidden; }
+.tech-head { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; background: transparent; color: var(--amber); font-family: var(--pix); font-size: 8px; line-height: 1.5; text-align: left; }
+.tech-toggle { color: var(--text); font-family: var(--mono); font-size: 14px; white-space: nowrap; }
+.tech-body { padding: 0 12px 12px; font-size: 15px; color: var(--text); line-height: 1.35; }
+.tech-body b { color: var(--amber); }
+
+/* avanzamento di livello */
+.levelup { border: 2px solid var(--good); background: rgba(43, 255, 136, 0.08); box-shadow: 0 0 14px rgba(43, 255, 136, 0.3), var(--shadow); }
+.levelup .lu-msg { font-size: 16px; color: var(--text); line-height: 1.35; margin-bottom: 12px; }
+
 /* alternative esercizi */
 .alts { margin-top: 12px; border-top: 2px dashed var(--line); padding-top: 12px; }
 .alts-title { font-size: 15px; color: var(--muted); margin-bottom: 10px; }

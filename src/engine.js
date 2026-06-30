@@ -95,20 +95,25 @@ function splitForDays(days, experience) {
 }
 
 // --- Selezione esercizi ------------------------------------------------------
+// I primi slot della seduta sono fondamentali (compound), gli ultimi accessori
+// di isolamento: struttura sana per ipertrofia e necessaria perché le tecniche
+// di intensità (drop set, myo-reps...) abbiano un esercizio adatto su cui girare.
 function pickExercises(slots, equip, exercisesPerDay, usedIds) {
   const pool = EXERCISES.filter(e => e.equip.includes(equip))
   const chosen = []
   const localUsed = new Set()
-  for (const muscle of slots) {
+  const n = Math.min(slots.length, exercisesPerDay)
+  for (let i = 0; i < slots.length; i++) {
     if (chosen.length >= exercisesPerDay) break
-    // preferisci compound per il primo slot del muscolo, poi varia
+    const muscle = slots[i]
+    const preferIso = i >= Math.ceil(n / 2) // seconda metà = accessori di isolamento
     const candidates = pool
       .filter(e => e.muscle === muscle && !localUsed.has(e.id))
       .sort((a, b) => {
-        // i compound prima, e penalizza ciò che è già stato usato in settimana
-        const ca = a.type === 'compound' ? 0 : 1
-        const cb = b.type === 'compound' ? 0 : 1
-        if (ca !== cb) return ca - cb
+        // preferenza di tipo in base alla posizione nella seduta
+        const ra = (preferIso ? (a.type === 'isolation' ? 0 : 1) : (a.type === 'compound' ? 0 : 1))
+        const rb = (preferIso ? (b.type === 'isolation' ? 0 : 1) : (b.type === 'compound' ? 0 : 1))
+        if (ra !== rb) return ra - rb
         return (usedIds.get(a.id) || 0) - (usedIds.get(b.id) || 0)
       })
     const pick = candidates[0]
@@ -164,11 +169,13 @@ export function buildProgram(profile) {
     const days = baseDays.map((d) => ({
       name: d.name,
       focus: d.focus,
-      exercises: d.exercises.map((ex) => ({
+      exercises: d.exercises.map((ex, ei, arr) => ({
         ...ex,
         // in deload: -1 set e RIR più alto (intensità ridotta)
         sets: isDeload ? Math.max(2, ex.sets - 1) : ex.sets,
         rir: isDeload ? ex.rir + 2 : ex.rir,
+        // tecnica avanzata sbloccata in base a livello/settimana (no in deload)
+        technique: assignTechnique(ex, ei, arr, profile.experience, w, isDeload),
       })),
     }))
     weeks.push({
@@ -292,4 +299,105 @@ export function suggestNextSet(lastLog, ex) {
   }
   // dentro il range → aggiungi una ripetizione a parità di carico
   return { text: `Stesso carico (${topWeight} kg), prova ${minRepsAtTop + 1} rip mantenendo RIR ${ex.rir}.`, weight: topWeight, reps: minRepsAtTop + 1 }
+}
+
+// ============================================================================
+//  TECNICHE AVANZATE (sbloccate per livello/progressione)
+// ============================================================================
+// Razionale allineato alle meta-analisi: tecniche di intensità aggiungono
+// volume effettivo/stress vicino al cedimento. Vanno usate con parsimonia, sugli
+// esercizi giusti, da chi ha già una base tecnica (intermedio/avanzato).
+export const TECHNIQUES = {
+  back_off: {
+    name: 'Back-off set', emoji: '⬇️', target: 'compound',
+    how: "Dopo la serie pesante (top set), togli il 10-20% del carico e fai 1-2 serie con più ripetizioni allo stesso RIR.",
+    why: "Aggiunge volume effettivo dopo aver espresso forza sul top set: ottimo compromesso forza+ipertrofia.",
+  },
+  rest_pause: {
+    name: 'Rest-pause', emoji: '⏸️', target: 'any',
+    how: "Arriva a ~1 RIR, riposa 15-20s, riprendi per 2-4 rip con lo STESSO carico, ripeti 2-3 volte.",
+    why: "Accumula ripetizioni stimolanti vicino al cedimento risparmiando tempo (densità).",
+  },
+  drop_set: {
+    name: 'Drop set', emoji: '🪂', target: 'isolation',
+    how: "Sull'ultima serie, raggiunto ~1 RIR, riduci subito il carico del 20-30% e continua senza pausa fino a quasi cedimento (1-2 drop).",
+    why: "Massimizza stress metabolico e reclutamento nelle ultime ripetizioni. Ideale sugli isolamenti.",
+  },
+  myo_reps: {
+    name: 'Myo-reps', emoji: '🔁', target: 'isolation',
+    how: "Serie di attivazione fino a ~1 RIR, poi mini-serie da 3-5 rip con 3-5 respiri di pausa, finché riesci a completarle.",
+    why: "Tante ripetizioni stimolanti in pochissimo tempo: efficientissima su isolamenti e macchine.",
+  },
+}
+
+const ISO_TECHS = ['drop_set', 'myo_reps', 'rest_pause']
+
+// Decide se e quale tecnica assegnare a un esercizio.
+// Principiante: mai (prima la tecnica e la progressione). Intermedio: 1 tecnica
+// sull'ultimo isolamento dalla settimana 2. Avanzato: back-off sul fondamentale
+// principale + una tecnica sull'ultimo isolamento, dalla settimana 2.
+function assignTechnique(ex, index, arr, experience, week, isDeload) {
+  if (isDeload || experience === 'principiante' || week < 2) return null
+  const isMain = index === 0 && ex.type === 'compound'
+  // ultimo esercizio di ISOLAMENTO del giorno (lì applichiamo la tecnica)
+  let lastIsoIdx = -1
+  for (let i = 0; i < arr.length; i++) if (arr[i].type === 'isolation') lastIsoIdx = i
+  // avanzato: back-off sul fondamentale principale
+  if (experience === 'avanzato' && isMain) return 'back_off'
+  // intermedio/avanzato: tecnica di intensità sull'ultimo isolamento (ruota per varietà)
+  if (index === lastIsoIdx) return ISO_TECHS[(week - 2) % ISO_TECHS.length]
+  // se il giorno non ha isolamenti, l'avanzato usa rest-pause sull'ultimo esercizio
+  if (experience === 'avanzato' && lastIsoIdx === -1 && index === arr.length - 1) return 'rest_pause'
+  return null
+}
+
+// ============================================================================
+//  AVANZAMENTO AUTOMATICO DI LIVELLO (basato sui dati registrati)
+// ============================================================================
+const LEVEL_ORDER = ['principiante', 'intermedio', 'avanzato']
+
+// Analizza il mesociclo concluso: sessioni completate e se i carichi sono
+// cresciuti. Se è andato bene e non sei già avanzato, propone il salto di livello.
+export function assessProgress(program, logs, completed) {
+  const totalSessions = program.weeks.length * program.weeks[0].days.length
+  const doneSessions = Object.keys(completed || {}).length
+  const completion = totalSessions ? doneSessions / totalSessions : 0
+
+  // progressione carichi: confronta il primo e l'ultimo top-set registrato per esercizio
+  let improved = 0, tracked = 0
+  const first = {}, lastSeen = {}
+  program.weeks.forEach((wk) => {
+    wk.days.forEach((day, di) => {
+      day.exercises.forEach((ex) => {
+        const log = (logs || {})[`${wk.week}-${di}-${ex.id}`]
+        if (!log) return
+        const top = Math.max(0, ...log.map((s) => parseFloat(s.weight) || 0))
+        if (top <= 0) return
+        if (first[ex.id] === undefined) first[ex.id] = top
+        lastSeen[ex.id] = top
+      })
+    })
+  })
+  Object.keys(first).forEach((id) => { tracked++; if (lastSeen[id] > first[id]) improved++ })
+  const progressRatio = tracked ? improved / tracked : 0
+
+  const idx = LEVEL_ORDER.indexOf(program.profile.experience)
+  const canLevelUp = idx >= 0 && idx < LEVEL_ORDER.length - 1
+  const wellDone = completion >= 0.7 && progressRatio >= 0.5
+  const suggestLevelUp = canLevelUp && wellDone
+
+  let message
+  if (!doneSessions) message = 'Registra le tue sedute: analizzerò i progressi e adatterò volume, tecniche e livello.'
+  else if (suggestLevelUp) message = `Ottimo lavoro! Hai completato il ${Math.round(completion * 100)}% delle sedute e migliorato i carichi: sei pronto a salire a livello "${LEVEL_ORDER[idx + 1]}" (più volume e tecniche avanzate).`
+  else if (wellDone && !canLevelUp) message = 'Sei già a livello avanzato e stai progredendo: continua col sovraccarico progressivo e le tecniche di intensità.'
+  else message = `Progressi: ${Math.round(completion * 100)}% sedute completate, carichi migliorati su ${improved}/${tracked} esercizi. Completa il mesociclo progredendo per sbloccare il livello successivo.`
+
+  return { completion, progressRatio, suggestLevelUp, nextLevel: canLevelUp ? LEVEL_ORDER[idx + 1] : null, improved, tracked, message }
+}
+
+// Rigenera il programma al livello successivo mantenendo obiettivo e impostazioni.
+export function levelUpProgram(program) {
+  const idx = LEVEL_ORDER.indexOf(program.profile.experience)
+  const next = LEVEL_ORDER[Math.min(idx + 1, LEVEL_ORDER.length - 1)]
+  return buildProgram({ ...program.profile, experience: next })
 }

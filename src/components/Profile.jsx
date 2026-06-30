@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { adaptProgram } from '../engine.js'
+import React, { useMemo, useState } from 'react'
+import { adaptProgram, assessProgress, levelUpProgram } from '../engine.js'
 
 export default function Profile({ state, setState }) {
   const { program } = state
@@ -8,6 +8,8 @@ export default function Profile({ state, setState }) {
   const [feedback, setFeedback] = useState({})
   const [msg, setMsg] = useState('')
 
+  const progress = useMemo(() => assessProgress(program, state.logs, state.completed), [program, state.logs, state.completed])
+
   const adapt = () => {
     const next = adaptProgram(program, feedback)
     setState((s) => ({ ...s, program: next }))
@@ -15,13 +17,28 @@ export default function Profile({ state, setState }) {
     setTimeout(() => setMsg(''), 4000)
   }
 
+  const levelUp = () => {
+    if (!confirm(`Salire a livello "${progress.nextLevel}"? Genero un nuovo mesociclo con più volume e tecniche avanzate. Lo storico dei pesi resta salvato.`)) return
+    setState((s) => ({ ...s, program: levelUpProgram(program), completed: {} }))
+    setMsg(`🚀 Livello aggiornato a "${progress.nextLevel}"!`)
+    setTimeout(() => setMsg(''), 4000)
+  }
+
   const resetAll = () => {
     if (!confirm('Cancellare TUTTO (programma, pesi, note, grafici)? Operazione irreversibile.')) return
-    setState({ program: null, logs: {}, notes: {}, bodyweight: [], completed: {} })
+    setState({ program: null, logs: {}, notes: {}, bodyweight: [], completed: {}, swaps: {} })
   }
 
   return (
     <div className="fade">
+      <div className="section-title">🧠 Livello e progressi</div>
+      <div className={'card' + (progress.suggestLevelUp ? ' levelup' : '')}>
+        <div className="lu-msg">{progress.message}</div>
+        {progress.suggestLevelUp && (
+          <button className="btn" onClick={levelUp}>🚀 Sali a livello "{progress.nextLevel}"</button>
+        )}
+      </div>
+
       <div className="section-title">Il tuo profilo</div>
       <div className="card">
         <Row k="Nome" v={p.name || '—'} />
