@@ -199,8 +199,22 @@ textarea.in { min-height: 84px; resize: vertical; }
   background: rgba(13, 2, 33, 0.92); backdrop-filter: blur(10px); border-top: 2px solid var(--accent); z-index: 30;
   box-shadow: 0 -4px 20px rgba(255, 45, 149, 0.25);
 }
-.nav button { background: transparent; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 5px; font-family: var(--pix); font-size: 7px; padding: 4px 6px; }
-.nav button .ic { font-size: 20px; }
+.nav button { background: transparent; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: var(--pix); font-size: 6px; padding: 4px 2px; }
+.nav button .ic { font-size: 18px; }
+
+/* nutrizione */
+.food-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.food-row:last-child { border-bottom: none; }
+.food-row input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--accent); flex: 0 0 auto; }
+.food-name { flex: 1; font-size: 16px; min-width: 0; }
+.food-name small { color: var(--muted); }
+.food-kcal { font-size: 15px; color: var(--amber); white-space: nowrap; }
+.picker { border: 2px dashed var(--accent-2); border-radius: 8px; padding: 10px; margin-top: 8px; background: rgba(0, 240, 255, 0.05); }
+.picker-row { display: flex; gap: 8px; align-items: center; }
+.csv-hint { font-size: 13px; color: var(--muted); margin-top: 8px; line-height: 1.35; }
+.day-name-in { font-family: var(--pix); font-size: 11px; margin-bottom: 10px; }
+.meal-name-in { font-size: 16px; margin-bottom: 8px; }
+.meal-block { border-top: 2px dashed var(--line); padding-top: 10px; margin-top: 10px; }
 .nav button.active { color: var(--accent-2); text-shadow: 0 0 8px var(--accent-2); }
 .nav button.active .ic { filter: drop-shadow(0 0 8px var(--accent-2)); }
 

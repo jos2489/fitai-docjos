@@ -10,6 +10,9 @@ const empty = {
   swaps: {},            // chiave: `${week}-${dayIdx}-${exId}` -> nuovo exId (esercizio alternativo)
   readiness: {},        // chiave: `${week}-${dayIdx}` -> 'scarico' | 'normale' | 'carico'
   lang: 'it',           // lingua interfaccia: 'it' | 'en'
+  diet: null,           // piano alimentare: { name, days: [{ id, name, meals: [{ id, name, foods: [{id,name,qty,kcal}] }] }] }
+  nutritionLog: {},     // chiave: data 'YYYY-MM-DD' -> { planDayId, eaten: {foodId:true}, extras: [{id,name,qty,kcal}] }
+  anthropicKey: '',     // chiave Anthropic SOLO locale (per auto-lettura diete) — mai inviata altrove
 }
 
 export function loadState() {

@@ -7,6 +7,7 @@ import Workout from './components/Workout.jsx'
 import Stats from './components/Stats.jsx'
 import History from './components/History.jsx'
 import Wod from './components/Wod.jsx'
+import Nutrition from './components/Nutrition.jsx'
 import Profile from './components/Profile.jsx'
 
 export default function App() {
@@ -63,10 +64,12 @@ function Shell({ state, setState }) {
       {tab === 'stats' && <Stats state={state} setState={setState} />}
       {tab === 'history' && <History state={state} />}
       {tab === 'wod' && <Wod state={state} />}
+      {tab === 'nutrition' && <Nutrition state={state} setState={setState} />}
       {tab === 'profile' && <Profile state={state} setState={setState} />}
 
       <nav className="nav">
         <NavBtn id="home" tab={tab} setTab={setTab} ic="🗓️" label={t('plan')} />
+        <NavBtn id="nutrition" tab={tab} setTab={setTab} ic="🍎" label={t('diet')} />
         <NavBtn id="wod" tab={tab} setTab={setTab} ic="🔥" label="WOD" />
         <NavBtn id="stats" tab={tab} setTab={setTab} ic="📈" label={t('progress')} />
         <NavBtn id="history" tab={tab} setTab={setTab} ic="📖" label={t('history')} />
