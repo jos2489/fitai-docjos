@@ -5,6 +5,7 @@ import Home from './components/Home.jsx'
 import Workout from './components/Workout.jsx'
 import Stats from './components/Stats.jsx'
 import History from './components/History.jsx'
+import Wod from './components/Wod.jsx'
 import Profile from './components/Profile.jsx'
 
 export default function App() {
@@ -51,10 +52,12 @@ export default function App() {
       {tab === 'home' && <Home state={state} setState={setState} onOpenDay={(week, dayIdx) => setWorkout({ week, dayIdx })} />}
       {tab === 'stats' && <Stats state={state} setState={setState} />}
       {tab === 'history' && <History state={state} />}
+      {tab === 'wod' && <Wod state={state} />}
       {tab === 'profile' && <Profile state={state} setState={setState} />}
 
       <nav className="nav">
         <NavBtn id="home" tab={tab} setTab={setTab} ic="🗓️" label="Piano" />
+        <NavBtn id="wod" tab={tab} setTab={setTab} ic="🔥" label="WOD" />
         <NavBtn id="stats" tab={tab} setTab={setTab} ic="📈" label="Progressi" />
         <NavBtn id="history" tab={tab} setTab={setTab} ic="📖" label="Storico" />
         <NavBtn id="profile" tab={tab} setTab={setTab} ic="⚙️" label="Profilo" />

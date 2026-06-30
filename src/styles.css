@@ -237,6 +237,20 @@ textarea.in { min-height: 84px; resize: vertical; }
 .rest-time { font-family: var(--pix); font-size: 18px; color: var(--accent-2); text-shadow: 0 0 10px var(--accent-2); }
 .rest-inner button { background: var(--card-2); color: var(--text); border: 2px solid var(--line); padding: 12px 14px; border-radius: 6px; font-family: var(--pix); font-size: 9px; }
 
+/* ---- WOD ---- */
+.wod-format { font-family: var(--pix); font-size: 16px; color: var(--accent); text-shadow: 0 0 10px var(--accent); }
+.wod-full { font-size: 15px; color: var(--muted); margin: 4px 0 14px; letter-spacing: 0.5px; }
+.wod-block { border: 2px solid var(--line); border-radius: 6px; padding: 12px; margin-bottom: 12px; background: rgba(0, 0, 0, 0.2); }
+.wod-block.strength { border-color: var(--accent-2); }
+.wod-block-title { font-family: var(--pix); font-size: 9px; color: var(--accent-2); margin-bottom: 10px; }
+.wod-block.strength .wod-block-title { color: var(--accent-2); }
+.wod-presc { font-size: 15px; color: var(--amber); margin-bottom: 8px; }
+.wod-move { display: flex; align-items: baseline; gap: 10px; font-size: 18px; color: var(--text); padding: 5px 0; }
+.wod-reps { font-family: var(--pix); font-size: 12px; color: var(--accent); min-width: 54px; }
+.wod-note { font-size: 14px; color: var(--muted); margin-top: 6px; line-height: 1.35; }
+.wod-expl { border-top: 2px dashed var(--line); padding-top: 12px; font-size: 15px; color: var(--text); line-height: 1.4; }
+.wod-expl b { color: var(--accent-2); }
+
 /* ---- History ---- */
 .hist-head { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 16px; background: transparent; color: var(--text); text-align: left; font-family: var(--mono); }
 .hist-body { padding: 0 16px 16px; border-top: 2px solid var(--line); padding-top: 14px; }
