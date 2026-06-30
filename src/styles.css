@@ -222,6 +222,15 @@ textarea.in { min-height: 84px; resize: vertical; }
 .hero p b { color: var(--amber); }
 .hero .glow { position: absolute; width: 150px; height: 150px; border-radius: 50%; background: var(--accent-2); filter: blur(70px); opacity: 0.5; top: -40px; right: -30px; }
 
+/* mascotte Doc Jos */
+.hero-welcome { display: flex; align-items: center; gap: 14px; }
+.hero-welcome .welcome-text { flex: 1; min-width: 0; }
+.hero-welcome h1 { font-size: 14px; }
+.mascot { width: 116px; flex: 0 0 auto; image-rendering: pixelated; filter: drop-shadow(0 0 10px rgba(255, 45, 149, 0.7)); animation: mascotBob 2.6s ease-in-out infinite; }
+.hero-home { display: flex; align-items: center; gap: 12px; }
+.mascot-sm { width: 72px; flex: 0 0 auto; image-rendering: pixelated; filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.6)); animation: mascotBob 3s ease-in-out infinite; }
+@keyframes mascotBob { 0%, 100% { transform: translateY(0) rotate(-1.5deg); } 50% { transform: translateY(-7px) rotate(1.5deg); } }
+
 /* ---- Video link ---- */
 .video-btn { flex: 0 0 auto; text-decoration: none; font-family: var(--pix); font-size: 8px; color: #0d0221; background: var(--amber); border: 2px solid #fff4; padding: 8px 9px; border-radius: 6px; white-space: nowrap; box-shadow: 0 0 10px rgba(255, 210, 63, 0.5), var(--shadow); }
 .video-btn:active { transform: translate(2px, 2px); }

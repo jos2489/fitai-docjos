@@ -14,12 +14,15 @@ export default function Home({ state, setState, onOpenDay }) {
 
   return (
     <div className="fade">
-      <div className="hero">
+      <div className="hero hero-home">
         <div className="glow" />
-        <h1>Ciao{program.profile.name ? `, ${program.profile.name}` : ''} 👋</h1>
-        <p>{labelGoal(program.profile.goal)} · {program.profile.daysPerWeek} giorni/sett · {program.weeks.length} settimane</p>
-        <p style={{ marginTop: 8, fontSize: 13 }}>Split: <b style={{ color: 'var(--text)' }}>{program.splitName}</b></p>
-        <div className="aigen"><span className="pulse" /> Programma generato dall'AI · {progressPct}% completato</div>
+        <img className="mascot-sm" src="/mascot.webp" alt="Doc Jos" />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h1>Ciao{program.profile.name ? `, ${program.profile.name}` : ''} 👋</h1>
+          <p>{labelGoal(program.profile.goal)} · {program.profile.daysPerWeek} giorni/sett · {program.weeks.length} settimane</p>
+          <p style={{ marginTop: 8, fontSize: 13 }}>Split: <b style={{ color: 'var(--text)' }}>{program.splitName}</b></p>
+          <div className="aigen"><span className="pulse" /> Programma generato dall'AI · {progressPct}% completato</div>
+        </div>
       </div>
 
       <div className="section-title">Settimana</div>

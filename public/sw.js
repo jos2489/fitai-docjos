@@ -1,6 +1,6 @@
 // Service worker minimale: abilita l'installazione PWA e un caching base
 // per l'uso offline dell'app (i dati utente restano in localStorage).
-const CACHE = 'fitai-v1'
+const CACHE = 'fitai-v2'
 const ASSETS = ['/', '/index.html', '/manifest.webmanifest', '/icon.svg']
 
 self.addEventListener('install', (e) => {
@@ -15,11 +15,25 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return
+  const isNavigation = e.request.mode === 'navigate'
+  if (isNavigation) {
+    // network-first per le pagine: gli aggiornamenti si vedono subito; offline -> cache
+    e.respondWith(
+      fetch(e.request)
+        .then((res) => {
+          const copy = res.clone()
+          caches.open(CACHE).then((c) => c.put(e.request, copy))
+          return res
+        })
+        .catch(() => caches.match(e.request).then((c) => c || caches.match('/index.html')))
+    )
+    return
+  }
+  // cache-first per gli asset (hashati e immutabili), con aggiornamento in background
   e.respondWith(
     caches.match(e.request).then((cached) => {
       const network = fetch(e.request)
         .then((res) => {
-          // aggiorna la cache in background per le risorse same-origin
           if (res && res.status === 200 && e.request.url.startsWith(self.location.origin)) {
             const copy = res.clone()
             caches.open(CACHE).then((c) => c.put(e.request, copy))

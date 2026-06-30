@@ -16,10 +16,13 @@ export default function Onboarding({ onCreate }) {
     // 0 - intro + nome
     (
       <div className="card fade">
-        <div className="hero">
+        <div className="hero hero-welcome">
           <div className="glow" />
-          <h1>Ciao 👋 Sono FitAi</h1>
-          <p>L'assistente di allenamento creato da <b style={{ color: 'var(--text)' }}>Doc Jos</b>. Dimmi qualcosa su di te: costruirò un programma su misura seguendo le evidenze scientifiche e lo aggiornerò man mano che progredisci.</p>
+          <img className="mascot" src="/mascot.webp" alt="Doc Jos" />
+          <div className="welcome-text">
+            <h1>Ciao! Sono <span className="ai">Doc Jos</span> 💪</h1>
+            <p>Benvenuto in <b>FitAi</b>, il mio assistente di allenamento. Dimmi qualcosa su di te e ti costruisco un programma su misura seguendo le evidenze scientifiche — aggiornandolo man mano che progredisci.</p>
+          </div>
         </div>
         <label className="field">
           <span>Come ti chiami?</span>
