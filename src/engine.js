@@ -52,6 +52,62 @@ export const EXERCISES = [
   { id: 'plank', name: 'Plank', muscle: 'Core', type: 'isolation', equip: ['gym', 'dumbbell', 'body'] },
   { id: 'hanging_raise', name: 'Sollevamento ginocchia alla sbarra', muscle: 'Core', type: 'isolation', equip: ['gym', 'body'] },
   { id: 'cable_crunch', name: 'Crunch ai cavi', muscle: 'Core', type: 'isolation', equip: ['gym'] },
+
+  // ===== LIBRERIA AMPLIATA =====
+  // PETTO
+  { id: 'incline_barbell', name: 'Panca inclinata bilanciere', muscle: 'Petto', type: 'compound', equip: ['gym'] },
+  { id: 'machine_press', name: 'Chest press alla macchina', muscle: 'Petto', type: 'compound', equip: ['gym'] },
+  { id: 'decline_db', name: 'Panca declinata manubri', muscle: 'Petto', type: 'compound', equip: ['gym', 'dumbbell'] },
+  { id: 'pec_deck', name: 'Pectoral machine (pec deck)', muscle: 'Petto', type: 'isolation', equip: ['gym'] },
+  { id: 'low_cable_fly', name: 'Croci ai cavi bassi', muscle: 'Petto', type: 'isolation', equip: ['gym'] },
+  // SCHIENA
+  { id: 'tbar_row', name: 'T-bar row', muscle: 'Schiena', type: 'compound', equip: ['gym'] },
+  { id: 'pendlay_row', name: 'Pendlay row', muscle: 'Schiena', type: 'compound', equip: ['gym'] },
+  { id: 'machine_row', name: 'Rematore alla macchina', muscle: 'Schiena', type: 'compound', equip: ['gym'] },
+  { id: 'wide_pulldown', name: 'Lat machine presa larga', muscle: 'Schiena', type: 'compound', equip: ['gym'] },
+  { id: 'straight_arm_pd', name: 'Pulldown a braccia tese', muscle: 'Schiena', type: 'isolation', equip: ['gym'] },
+  { id: 'db_pullover', name: 'Pullover con manubrio', muscle: 'Schiena', type: 'isolation', equip: ['gym', 'dumbbell'] },
+  // SPALLE
+  { id: 'arnold_press', name: 'Arnold press', muscle: 'Spalle', type: 'compound', equip: ['gym', 'dumbbell'] },
+  { id: 'machine_shoulder', name: 'Shoulder press alla macchina', muscle: 'Spalle', type: 'compound', equip: ['gym'] },
+  { id: 'upright_row', name: 'Tirate al mento', muscle: 'Spalle', type: 'compound', equip: ['gym', 'dumbbell'] },
+  { id: 'cable_lateral', name: 'Alzate laterali ai cavi', muscle: 'Spalle', type: 'isolation', equip: ['gym'] },
+  { id: 'rear_delt_fly', name: 'Alzate posteriori (rear delt)', muscle: 'Spalle', type: 'isolation', equip: ['gym', 'dumbbell'] },
+  // QUADRICIPITI
+  { id: 'front_squat', name: 'Front squat', muscle: 'Quadricipiti', type: 'compound', equip: ['gym'] },
+  { id: 'hack_squat', name: 'Hack squat', muscle: 'Quadricipiti', type: 'compound', equip: ['gym'] },
+  { id: 'walking_lunge', name: 'Affondi camminata', muscle: 'Quadricipiti', type: 'compound', equip: ['gym', 'dumbbell', 'body'] },
+  { id: 'sissy_squat', name: 'Sissy squat', muscle: 'Quadricipiti', type: 'isolation', equip: ['gym', 'body'] },
+  // FEMORALI
+  { id: 'seated_leg_curl', name: 'Leg curl da seduto', muscle: 'Femorali', type: 'isolation', equip: ['gym'] },
+  { id: 'nordic_curl', name: 'Nordic hamstring curl', muscle: 'Femorali', type: 'compound', equip: ['body'] },
+  { id: 'good_morning', name: 'Good morning', muscle: 'Femorali', type: 'compound', equip: ['gym'] },
+  // GLUTEI
+  { id: 'step_up', name: 'Step-up', muscle: 'Glutei', type: 'compound', equip: ['gym', 'dumbbell', 'body'] },
+  { id: 'cable_pull_through', name: 'Pull-through ai cavi', muscle: 'Glutei', type: 'compound', equip: ['gym'] },
+  { id: 'cable_kickback', name: 'Slanci glutei ai cavi', muscle: 'Glutei', type: 'isolation', equip: ['gym'] },
+  { id: 'hip_abduction', name: 'Abduction machine', muscle: 'Glutei', type: 'isolation', equip: ['gym'] },
+  // BICIPITI
+  { id: 'hammer_curl', name: 'Hammer curl', muscle: 'Bicipiti', type: 'isolation', equip: ['gym', 'dumbbell'] },
+  { id: 'preacher_curl', name: 'Panca Scott (preacher)', muscle: 'Bicipiti', type: 'isolation', equip: ['gym'] },
+  { id: 'incline_db_curl', name: 'Curl su panca inclinata', muscle: 'Bicipiti', type: 'isolation', equip: ['gym', 'dumbbell'] },
+  { id: 'cable_curl', name: 'Curl ai cavi', muscle: 'Bicipiti', type: 'isolation', equip: ['gym'] },
+  // TRICIPITI
+  { id: 'rope_pushdown', name: 'Push-down con corda', muscle: 'Tricipiti', type: 'isolation', equip: ['gym'] },
+  { id: 'overhead_rope', name: 'Estensioni sopra la testa ai cavi', muscle: 'Tricipiti', type: 'isolation', equip: ['gym'] },
+  { id: 'close_grip_bench', name: 'Panca presa stretta', muscle: 'Tricipiti', type: 'compound', equip: ['gym'] },
+  { id: 'bench_dip', name: 'Dip tra le panche', muscle: 'Tricipiti', type: 'compound', equip: ['body'] },
+  { id: 'db_kickback', name: 'Kickback manubri', muscle: 'Tricipiti', type: 'isolation', equip: ['gym', 'dumbbell'] },
+  // CORE
+  { id: 'leg_raise', name: 'Sollevamento gambe a terra', muscle: 'Core', type: 'isolation', equip: ['gym', 'body'] },
+  { id: 'russian_twist', name: 'Russian twist', muscle: 'Core', type: 'isolation', equip: ['gym', 'dumbbell', 'body'] },
+  { id: 'ab_wheel', name: 'Ab wheel rollout', muscle: 'Core', type: 'isolation', equip: ['gym', 'body'] },
+  { id: 'side_plank', name: 'Plank laterale', muscle: 'Core', type: 'isolation', equip: ['gym', 'dumbbell', 'body'] },
+  { id: 'dead_bug', name: 'Dead bug', muscle: 'Core', type: 'isolation', equip: ['gym', 'dumbbell', 'body'] },
+  // POLPACCI
+  { id: 'standing_calf', name: 'Calf raise in piedi', muscle: 'Polpacci', type: 'isolation', equip: ['gym'] },
+  { id: 'seated_calf', name: 'Calf raise da seduto', muscle: 'Polpacci', type: 'isolation', equip: ['gym'] },
+  { id: 'calf_raise_bw', name: 'Calf raise a corpo libero', muscle: 'Polpacci', type: 'isolation', equip: ['gym', 'dumbbell', 'body'] },
 ]
 
 // --- Parametri per obiettivo (evidence-based) --------------------------------
@@ -77,9 +133,9 @@ const SETS_BY_EXPERIENCE = {
 function splitForDays(days, experience) {
   const PUSH = { name: 'Push (spinta)', focus: 'Petto · Spalle · Tricipiti', slots: ['Petto', 'Petto', 'Spalle', 'Spalle', 'Tricipiti', 'Tricipiti'] }
   const PULL = { name: 'Pull (tirata)', focus: 'Schiena · Bicipiti', slots: ['Schiena', 'Schiena', 'Schiena', 'Spalle', 'Bicipiti', 'Bicipiti'] }
-  const LEGS = { name: 'Legs (gambe)', focus: 'Quadricipiti · Femorali · Glutei', slots: ['Quadricipiti', 'Quadricipiti', 'Femorali', 'Glutei', 'Quadricipiti', 'Core'] }
+  const LEGS = { name: 'Legs (gambe)', focus: 'Quadricipiti · Femorali · Glutei', slots: ['Quadricipiti', 'Quadricipiti', 'Femorali', 'Glutei', 'Polpacci', 'Core'] }
   const UPPER = { name: 'Upper (parte alta)', focus: 'Petto · Schiena · Spalle · Braccia', slots: ['Petto', 'Schiena', 'Spalle', 'Schiena', 'Bicipiti', 'Tricipiti'] }
-  const LOWER = { name: 'Lower (parte bassa)', focus: 'Gambe · Glutei · Core', slots: ['Quadricipiti', 'Femorali', 'Quadricipiti', 'Glutei', 'Core', 'Core'] }
+  const LOWER = { name: 'Lower (parte bassa)', focus: 'Gambe · Glutei · Core', slots: ['Quadricipiti', 'Femorali', 'Quadricipiti', 'Glutei', 'Polpacci', 'Core'] }
   const FBA = { name: 'Full Body A', focus: 'Tutto il corpo', slots: ['Quadricipiti', 'Petto', 'Schiena', 'Spalle', 'Bicipiti', 'Core'] }
   const FBB = { name: 'Full Body B', focus: 'Tutto il corpo', slots: ['Femorali', 'Schiena', 'Petto', 'Spalle', 'Tricipiti', 'Core'] }
   const FBC = { name: 'Full Body C', focus: 'Tutto il corpo', slots: ['Quadricipiti', 'Petto', 'Schiena', 'Glutei', 'Bicipiti', 'Tricipiti'] }
