@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { logKey, dayKey, lastLogFor } from '../storage.js'
-import { alternativesFor, suggestNextSet, EXERCISE_BY_ID, TECHNIQUES } from '../engine.js'
+import { alternativesFor, suggestNextSet, EXERCISE_BY_ID, TECHNIQUES, exName, muscleName, dayName, focusName } from '../engine.js'
 import { useLang } from '../i18n.jsx'
 
 // Beep con Web Audio API: nessun file audio, funziona offline.
@@ -44,7 +44,7 @@ const READINESS_OPTS = [
 ]
 
 export default function Workout({ state, setState, week, dayIdx, onBack }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const { program } = state
   const equip = program.profile.equipment || 'gym'
   const wk = program.weeks.find((w) => w.week === week)
@@ -85,8 +85,8 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
 
       <div className="hero" style={{ marginBottom: 14 }}>
         <div className="glow" />
-        <h1>{day.name}</h1>
-        <p>{day.focus}</p>
+        <h1>{dayName(lang, day.name)}</h1>
+        <p>{focusName(lang, day.focus)}</p>
       </div>
 
       <div className="card readiness">
@@ -172,7 +172,8 @@ function RestTimer({ seconds, onClose }) {
 }
 
 function ExerciseCard({ ex, display, swapped, alternatives, existing, last, onChange, onRest, onSwap }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
+  const dispName = exName(lang, display.id)
   const init = useMemo(() => {
     if (existing && existing.length) return existing
     return Array.from({ length: ex.sets }, (_, i) => {
@@ -190,14 +191,14 @@ function ExerciseCard({ ex, display, swapped, alternatives, existing, last, onCh
   const addSet = () => apply([...sets, { weight: '', reps: '' }])
   const removeSet = (i) => apply(sets.filter((_, idx) => idx !== i))
 
-  const suggestion = useMemo(() => suggestNextSet(last, ex), [last, ex])
+  const suggestion = useMemo(() => suggestNextSet(last, ex, lang), [last, ex, lang])
 
   return (
     <div className="ex">
       <div className="ex-head">
         <div>
-          <div className="name">{display.name}{swapped && <span className="swapped-tag">↺ alt</span>}</div>
-          <div className="muscle">{display.muscle}</div>
+          <div className="name">{dispName}{swapped && <span className="swapped-tag">↺ alt</span>}</div>
+          <div className="muscle">{muscleName(lang, display.muscle)}</div>
           <div className="ex-prescription">
             {ex.sets} × {ex.repsLow}-{ex.repsHigh} REP · RIR {ex.rir} · REST {ex.rest}s
           </div>
@@ -207,7 +208,7 @@ function ExerciseCard({ ex, display, swapped, alternatives, existing, last, onCh
             </div>
           )}
         </div>
-        <a className="video-btn" href={videoUrl(display.name)} target="_blank" rel="noreferrer">{t('videoBtn')}</a>
+        <a className="video-btn" href={videoUrl(dispName)} target="_blank" rel="noreferrer">{t('videoBtn')}</a>
       </div>
 
       <div className="suggestion">💡 {suggestion.text}</div>
@@ -220,8 +221,8 @@ function ExerciseCard({ ex, display, swapped, alternatives, existing, last, onCh
           </button>
           {showTech && (
             <div className="tech-body fade">
-              <div><b>{t('execution')}:</b> {tech.how}</div>
-              <div style={{ marginTop: 6 }}><b>{t('why')}:</b> {tech.why}</div>
+              <div><b>{t('execution')}:</b> {lang === 'en' ? tech.howEn : tech.how}</div>
+              <div style={{ marginTop: 6 }}><b>{t('why')}:</b> {lang === 'en' ? tech.whyEn : tech.why}</div>
             </div>
           )}
         </div>
@@ -255,7 +256,7 @@ function ExerciseCard({ ex, display, swapped, alternatives, existing, last, onCh
           {alternatives.length === 0 && <div className="alts-empty">{t('altEmpty')}</div>}
           {alternatives.map((a) => (
             <button key={a.id} className="alt-opt" onClick={() => { onSwap(a.id); setShowAlts(false) }}>
-              <span>{a.name}</span>
+              <span>{exName(lang, a.id)}</span>
               <span className="alt-type">{a.type === 'compound' ? t('compoundShort') : t('isoShort')}</span>
             </button>
           ))}

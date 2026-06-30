@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { dayKey } from '../storage.js'
-import { buildProgram } from '../engine.js'
+import { buildProgram, dayName, focusName, weekNoteText } from '../engine.js'
 import { useLang, goalLabel } from '../i18n.jsx'
 
 export default function Home({ state, setState, onOpenDay }) {
@@ -42,7 +42,7 @@ export default function Home({ state, setState, onOpenDay }) {
 
       <div className="card" style={{ background: 'var(--card-2)' }}>
         <div style={{ fontSize: 13, color: 'var(--muted)' }}>
-          💡 {wk.note}
+          💡 {weekNoteText(lang, program, wk)}
         </div>
       </div>
 
@@ -52,8 +52,8 @@ export default function Home({ state, setState, onOpenDay }) {
         return (
           <button key={i} className="day" onClick={() => onOpenDay(week, i)}>
             <div className="meta">
-              <div className="name">{d.name}</div>
-              <div className="focus">{d.focus} · {d.exercises.length} {t('exercises')}</div>
+              <div className="name">{dayName(lang, d.name)}</div>
+              <div className="focus">{focusName(lang, d.focus)} · {d.exercises.length} {t('exercises')}</div>
             </div>
             <div className="right">
               {wk.deload && <span className="badge deload">{t('deloadBadge')}</span>}
@@ -64,7 +64,7 @@ export default function Home({ state, setState, onOpenDay }) {
         )
       })}
 
-      <button className="btn secondary" style={{ marginTop: 8 }} onClick={() => regenerate(state, setState)}>
+      <button className="btn secondary" style={{ marginTop: 8 }} onClick={() => regenerate(state, setState, lang)}>
         {t('regenerate')}
       </button>
     </div>
@@ -79,11 +79,8 @@ function firstIncompleteWeek(program, completed) {
   return program.weeks[program.weeks.length - 1].week
 }
 
-function regenerate(state, setState) {
-  if (!confirm('Vuoi rigenerare il programma? Manterrai lo storico dei pesi registrati ma la struttura potrebbe cambiare.')) return
+function regenerate(state, setState, lang) {
+  const q = lang === 'en' ? 'Regenerate the program? You keep your logged load history but the structure may change.' : 'Vuoi rigenerare il programma? Manterrai lo storico dei pesi registrati ma la struttura potrebbe cambiare.'
+  if (!confirm(q)) return
   setState((s) => ({ ...s, program: buildProgram(s.program.profile), completed: {} }))
-}
-
-function labelGoal(g) {
-  return { ipertrofia: '💪 Ipertrofia', forza: '🏋️ Forza', dimagrimento: '🔥 Dimagrimento', ricomp: '⚖️ Ricomposizione' }[g] || g
 }

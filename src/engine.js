@@ -303,6 +303,60 @@ export const EQUIPMENTS = [
 
 export const EXERCISE_BY_ID = Object.fromEntries(EXERCISES.map((e) => [e.id, e]))
 
+// --- Localizzazione contenuti (EN) ------------------------------------------
+const EXERCISE_NAME_EN = {
+  bench: 'Barbell bench press', db_bench: 'Dumbbell bench press', incline_db: 'Incline dumbbell press', pushup: 'Push-up', cable_fly: 'Cable fly', db_fly: 'Dumbbell fly',
+  pullup: 'Pull-up', lat_pulldown: 'Lat pulldown', barbell_row: 'Barbell row', db_row: 'One-arm dumbbell row', cable_row: 'Seated cable row', inv_row: 'Inverted row',
+  squat: 'Barbell squat', goblet_squat: 'Goblet squat', leg_press: 'Leg press', split_squat: 'Bulgarian split squat', leg_ext: 'Leg extension',
+  rdl: 'Romanian deadlift', deadlift: 'Deadlift', leg_curl: 'Lying leg curl', hip_thrust: 'Hip thrust', glute_bridge: 'Bodyweight glute bridge',
+  ohp: 'Barbell overhead press', db_ohp: 'Dumbbell shoulder press', lateral_raise: 'Lateral raise', pike_pushup: 'Pike push-up', face_pull: 'Face pull',
+  barbell_curl: 'Barbell curl', db_curl: 'Dumbbell curl', chinup: 'Chin-up', triceps_pushdown: 'Cable push-down', db_skull: 'Dumbbell skull crusher', dips: 'Parallel bar dips',
+  plank: 'Plank', hanging_raise: 'Hanging knee raise', cable_crunch: 'Cable crunch',
+  incline_barbell: 'Incline barbell press', machine_press: 'Machine chest press', decline_db: 'Decline dumbbell press', pec_deck: 'Pec deck', low_cable_fly: 'Low cable fly',
+  tbar_row: 'T-bar row', pendlay_row: 'Pendlay row', machine_row: 'Machine row', wide_pulldown: 'Wide-grip pulldown', straight_arm_pd: 'Straight-arm pulldown', db_pullover: 'Dumbbell pullover',
+  arnold_press: 'Arnold press', machine_shoulder: 'Machine shoulder press', upright_row: 'Upright row', cable_lateral: 'Cable lateral raise', rear_delt_fly: 'Rear delt fly',
+  front_squat: 'Front squat', hack_squat: 'Hack squat', walking_lunge: 'Walking lunge', sissy_squat: 'Sissy squat',
+  seated_leg_curl: 'Seated leg curl', nordic_curl: 'Nordic hamstring curl', good_morning: 'Good morning',
+  step_up: 'Step-up', cable_pull_through: 'Cable pull-through', cable_kickback: 'Cable glute kickback', hip_abduction: 'Hip abduction machine',
+  hammer_curl: 'Hammer curl', preacher_curl: 'Preacher curl', incline_db_curl: 'Incline dumbbell curl', cable_curl: 'Cable curl',
+  rope_pushdown: 'Rope push-down', overhead_rope: 'Overhead cable extension', close_grip_bench: 'Close-grip bench press', bench_dip: 'Bench dip', db_kickback: 'Dumbbell kickback',
+  leg_raise: 'Lying leg raise', russian_twist: 'Russian twist', ab_wheel: 'Ab wheel rollout', side_plank: 'Side plank', dead_bug: 'Dead bug',
+  standing_calf: 'Standing calf raise', seated_calf: 'Seated calf raise', calf_raise_bw: 'Bodyweight calf raise',
+}
+const MUSCLE_EN = { Petto: 'Chest', Schiena: 'Back', Quadricipiti: 'Quads', Femorali: 'Hamstrings', Glutei: 'Glutes', Spalle: 'Shoulders', Bicipiti: 'Biceps', Tricipiti: 'Triceps', Core: 'Core', Polpacci: 'Calves' }
+const DAY_NAME_EN = { 'Push (spinta)': 'Push', 'Pull (tirata)': 'Pull', 'Legs (gambe)': 'Legs', 'Upper (parte alta)': 'Upper', 'Lower (parte bassa)': 'Lower', 'Full Body A': 'Full Body A', 'Full Body B': 'Full Body B', 'Full Body C': 'Full Body C' }
+const FOCUS_EN = {
+  'Petto · Spalle · Tricipiti': 'Chest · Shoulders · Triceps', 'Schiena · Bicipiti': 'Back · Biceps',
+  'Quadricipiti · Femorali · Glutei': 'Quads · Hamstrings · Glutes', 'Petto · Schiena · Spalle · Braccia': 'Chest · Back · Shoulders · Arms',
+  'Gambe · Glutei · Core': 'Legs · Glutes · Core', 'Tutto il corpo': 'Full body',
+}
+export const exName = (lang, id) => (lang === 'en' && EXERCISE_NAME_EN[id]) || (EXERCISE_BY_ID[id] ? EXERCISE_BY_ID[id].name : id)
+export const muscleName = (lang, m) => (lang === 'en' ? (MUSCLE_EN[m] || m) : m)
+export const dayName = (lang, n) => (lang === 'en' ? (DAY_NAME_EN[n] || n) : n)
+export const focusName = (lang, f) => (lang === 'en' ? (FOCUS_EN[f] || f) : f)
+
+// Nota della settimana ricalcolata nella lingua scelta (non resta "congelata").
+export function weekNoteText(lang, program, wk) {
+  if (wk.deload) {
+    return lang === 'en'
+      ? 'Deload week: cut loads by ~40-50% and leave 3-4 reps in the tank. It lets you recover accumulated fatigue.'
+      : 'Settimana di scarico: riduci carichi del ~40-50%, lascia 3-4 ripetizioni in serbatoio. Serve a recuperare la fatica accumulata.'
+  }
+  const pw = wk.week - 1
+  if (pw === 0) {
+    return lang === 'en'
+      ? 'Base week: log loads that leave the prescribed reps in reserve (RIR). They are your starting point.'
+      : 'Settimana base: registra carichi che ti lasciano le ripetizioni indicate in serbatoio (RIR). Sono il tuo punto di partenza.'
+  }
+  const goal = program.profile.goal
+  if (lang === 'en') {
+    const tip = goal === 'forza' ? 'Add ~2.5 kg on the main lifts vs last week, keeping technique.' : 'Progressive overload: add 1 rep per set or +2.5% load vs last week.'
+    return `Week ${wk.week}: ${tip}`
+  }
+  const tip = goal === 'forza' ? 'Aggiungi ~2.5 kg sui fondamentali rispetto alla settimana scorsa mantenendo la tecnica.' : 'Sovraccarico progressivo: aggiungi 1 ripetizione per serie oppure +2.5% di carico rispetto alla settimana scorsa.'
+  return `Settimana ${wk.week}: ${tip}`
+}
+
 // Esercizi alternativi per lo stesso muscolo (macchina occupata o assente).
 // Ordina mettendo prima chi condivide il tipo (compound/isolation) e che usa
 // attrezzatura diversa, così proponiamo davvero una variante utile.
@@ -329,32 +383,28 @@ function loadIncrement(ex) {
   return 1.25
 }
 
-export function suggestNextSet(lastLog, ex) {
+export function suggestNextSet(lastLog, ex, lang = 'it') {
+  const en = lang === 'en'
   if (!lastLog || !lastLog.length) {
-    return { text: `Parti con un carico che ti lasci ~${ex.rir} ripetizioni in serbatoio (RIR ${ex.rir}) entro ${ex.repsLow}-${ex.repsHigh}.`, weight: null, reps: ex.repsLow }
+    return { text: en ? `Start with a load that leaves ~${ex.rir} reps in reserve (RIR ${ex.rir}) within ${ex.repsLow}-${ex.repsHigh}.` : `Parti con un carico che ti lasci ~${ex.rir} ripetizioni in serbatoio (RIR ${ex.rir}) entro ${ex.repsLow}-${ex.repsHigh}.`, weight: null, reps: ex.repsLow }
   }
-  // considera l'ultima serie "valida" (con peso e ripetizioni)
   const valid = lastLog.filter((s) => parseFloat(s.weight) > 0 && parseInt(s.reps) > 0)
   if (!valid.length) {
-    return { text: `Registra le serie: poi ti dirò automaticamente carico e ripetizioni della volta dopo.`, weight: null, reps: ex.repsLow }
+    return { text: en ? `Log your sets: then I'll automatically tell you load and reps for next time.` : `Registra le serie: poi ti dirò automaticamente carico e ripetizioni della volta dopo.`, weight: null, reps: ex.repsLow }
   }
   const topWeight = Math.max(...valid.map((s) => parseFloat(s.weight)))
-  // ripetizioni fatte alle serie eseguite con il carico più alto
   const repsAtTop = valid.filter((s) => parseFloat(s.weight) === topWeight).map((s) => parseInt(s.reps))
   const minRepsAtTop = Math.min(...repsAtTop)
   const inc = loadIncrement(ex)
 
   if (minRepsAtTop >= ex.repsHigh) {
-    // tetto del range raggiunto su tutte → aumenta carico, riparti dal fondo
     const next = +(topWeight + inc).toFixed(2)
-    return { text: `Hai chiuso ${ex.repsHigh}+ rip: sali a ${next} kg e riparti da ${ex.repsLow} rip (doppia progressione).`, weight: next, reps: ex.repsLow, up: true }
+    return { text: en ? `You hit ${ex.repsHigh}+ reps: go up to ${next} kg and restart from ${ex.repsLow} reps (double progression).` : `Hai chiuso ${ex.repsHigh}+ rip: sali a ${next} kg e riparti da ${ex.repsLow} rip (doppia progressione).`, weight: next, reps: ex.repsLow, up: true }
   }
   if (minRepsAtTop < ex.repsLow) {
-    // sotto il range → mantieni o cala leggermente per restare a RIR corretto
-    return { text: `Sei sotto ${ex.repsLow} rip: mantieni ${topWeight} kg e punta a una ripetizione in più, tenendo RIR ${ex.rir}.`, weight: topWeight, reps: minRepsAtTop + 1 }
+    return { text: en ? `Below ${ex.repsLow} reps: keep ${topWeight} kg and aim for one more rep, holding RIR ${ex.rir}.` : `Sei sotto ${ex.repsLow} rip: mantieni ${topWeight} kg e punta a una ripetizione in più, tenendo RIR ${ex.rir}.`, weight: topWeight, reps: minRepsAtTop + 1 }
   }
-  // dentro il range → aggiungi una ripetizione a parità di carico
-  return { text: `Stesso carico (${topWeight} kg), prova ${minRepsAtTop + 1} rip mantenendo RIR ${ex.rir}.`, weight: topWeight, reps: minRepsAtTop + 1 }
+  return { text: en ? `Same load (${topWeight} kg), try ${minRepsAtTop + 1} reps keeping RIR ${ex.rir}.` : `Stesso carico (${topWeight} kg), prova ${minRepsAtTop + 1} rip mantenendo RIR ${ex.rir}.`, weight: topWeight, reps: minRepsAtTop + 1 }
 }
 
 // ============================================================================
@@ -368,21 +418,29 @@ export const TECHNIQUES = {
     name: 'Back-off set', emoji: '⬇️', target: 'compound',
     how: "Dopo la serie pesante (top set), togli il 10-20% del carico e fai 1-2 serie con più ripetizioni allo stesso RIR.",
     why: "Aggiunge volume effettivo dopo aver espresso forza sul top set: ottimo compromesso forza+ipertrofia.",
+    howEn: "After the heavy top set, drop the load 10-20% and do 1-2 sets with more reps at the same RIR.",
+    whyEn: "Adds effective volume after expressing strength on the top set: a great strength+hypertrophy compromise.",
   },
   rest_pause: {
     name: 'Rest-pause', emoji: '⏸️', target: 'any',
     how: "Arriva a ~1 RIR, riposa 15-20s, riprendi per 2-4 rip con lo STESSO carico, ripeti 2-3 volte.",
     why: "Accumula ripetizioni stimolanti vicino al cedimento risparmiando tempo (densità).",
+    howEn: "Reach ~1 RIR, rest 15-20s, resume for 2-4 reps with the SAME load, repeat 2-3 times.",
+    whyEn: "Accumulates stimulating reps near failure while saving time (density).",
   },
   drop_set: {
     name: 'Drop set', emoji: '🪂', target: 'isolation',
     how: "Sull'ultima serie, raggiunto ~1 RIR, riduci subito il carico del 20-30% e continua senza pausa fino a quasi cedimento (1-2 drop).",
     why: "Massimizza stress metabolico e reclutamento nelle ultime ripetizioni. Ideale sugli isolamenti.",
+    howEn: "On the last set, at ~1 RIR, immediately cut the load 20-30% and continue without rest to near failure (1-2 drops).",
+    whyEn: "Maximises metabolic stress and recruitment in the final reps. Ideal on isolation moves.",
   },
   myo_reps: {
     name: 'Myo-reps', emoji: '🔁', target: 'isolation',
     how: "Serie di attivazione fino a ~1 RIR, poi mini-serie da 3-5 rip con 3-5 respiri di pausa, finché riesci a completarle.",
     why: "Tante ripetizioni stimolanti in pochissimo tempo: efficientissima su isolamenti e macchine.",
+    howEn: "Activation set to ~1 RIR, then mini-sets of 3-5 reps with 3-5 breaths of rest, until you can't complete them.",
+    whyEn: "Lots of stimulating reps in very little time: super efficient on isolation moves and machines.",
   },
 }
 
@@ -414,7 +472,8 @@ const LEVEL_ORDER = ['principiante', 'intermedio', 'avanzato']
 
 // Analizza il mesociclo concluso: sessioni completate e se i carichi sono
 // cresciuti. Se è andato bene e non sei già avanzato, propone il salto di livello.
-export function assessProgress(program, logs, completed) {
+export function assessProgress(program, logs, completed, lang = 'it') {
+  const en = lang === 'en'
   const totalSessions = program.weeks.length * program.weeks[0].days.length
   const doneSessions = Object.keys(completed || {}).length
   const completion = totalSessions ? doneSessions / totalSessions : 0
@@ -442,11 +501,12 @@ export function assessProgress(program, logs, completed) {
   const wellDone = completion >= 0.7 && progressRatio >= 0.5
   const suggestLevelUp = canLevelUp && wellDone
 
+  const pct = Math.round(completion * 100)
   let message
-  if (!doneSessions) message = 'Registra le tue sedute: analizzerò i progressi e adatterò volume, tecniche e livello.'
-  else if (suggestLevelUp) message = `Ottimo lavoro! Hai completato il ${Math.round(completion * 100)}% delle sedute e migliorato i carichi: sei pronto a salire a livello "${LEVEL_ORDER[idx + 1]}" (più volume e tecniche avanzate).`
-  else if (wellDone && !canLevelUp) message = 'Sei già a livello avanzato e stai progredendo: continua col sovraccarico progressivo e le tecniche di intensità.'
-  else message = `Progressi: ${Math.round(completion * 100)}% sedute completate, carichi migliorati su ${improved}/${tracked} esercizi. Completa il mesociclo progredendo per sbloccare il livello successivo.`
+  if (!doneSessions) message = en ? 'Log your sessions: I\'ll analyse your progress and adjust volume, techniques and level.' : 'Registra le tue sedute: analizzerò i progressi e adatterò volume, tecniche e livello.'
+  else if (suggestLevelUp) message = en ? `Great job! You completed ${pct}% of sessions and improved your loads: you're ready to level up to "${LEVEL_ORDER[idx + 1]}" (more volume and advanced techniques).` : `Ottimo lavoro! Hai completato il ${pct}% delle sedute e migliorato i carichi: sei pronto a salire a livello "${LEVEL_ORDER[idx + 1]}" (più volume e tecniche avanzate).`
+  else if (wellDone && !canLevelUp) message = en ? 'You\'re already advanced and progressing: keep up progressive overload and intensity techniques.' : 'Sei già a livello avanzato e stai progredendo: continua col sovraccarico progressivo e le tecniche di intensità.'
+  else message = en ? `Progress: ${pct}% sessions completed, loads improved on ${improved}/${tracked} exercises. Finish the mesocycle while progressing to unlock the next level.` : `Progressi: ${pct}% sedute completate, carichi migliorati su ${improved}/${tracked} esercizi. Completa il mesociclo progredendo per sbloccare il livello successivo.`
 
   return { completion, progressRatio, suggestLevelUp, nextLevel: canLevelUp ? LEVEL_ORDER[idx + 1] : null, improved, tracked, message }
 }

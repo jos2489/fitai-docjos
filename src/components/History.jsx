@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { logKey, dayKey } from '../storage.js'
 import { useLang } from '../i18n.jsx'
+import { exName, muscleName, dayName } from '../engine.js'
 
 export default function History({ state }) {
   const { t, lang } = useLang()
@@ -23,7 +24,7 @@ export default function History({ state }) {
             if (r > 0) setCount++
             tonnage += w * r
           })
-          return { name: ex.name, muscle: ex.muscle, log }
+          return { id: ex.id, muscle: ex.muscle, log }
         })
         list.push({ dk, week: wk.week, deload: wk.deload, name: day.name, focus: day.focus, date, tonnage, setCount, note: notes[dk], exLogs })
       })
@@ -50,7 +51,7 @@ export default function History({ state }) {
         <div key={s.dk} className="card" style={{ padding: 0, overflow: 'hidden' }}>
           <button className="hist-head" onClick={() => setOpen(open === s.dk ? null : s.dk)}>
             <div>
-              <div style={{ fontWeight: 800, fontSize: 15 }}>{s.name} {s.deload && '🌙'}</div>
+              <div style={{ fontWeight: 800, fontSize: 15 }}>{dayName(lang, s.name)} {s.deload && '🌙'}</div>
               <div style={{ color: 'var(--muted)', fontSize: 12, marginTop: 2 }}>{fmtDate(s.date, lang)} · {t('weekShort')} {s.week}</div>
             </div>
             <div style={{ textAlign: 'right' }}>
@@ -62,7 +63,7 @@ export default function History({ state }) {
             <div className="hist-body fade">
               {s.exLogs.map((e, i) => (
                 <div key={i} style={{ marginBottom: 10 }}>
-                  <div style={{ fontWeight: 700, fontSize: 13 }}>{e.name} <span style={{ color: 'var(--muted)', fontWeight: 500 }}>· {e.muscle}</span></div>
+                  <div style={{ fontWeight: 700, fontSize: 13 }}>{exName(lang, e.id)} <span style={{ color: 'var(--muted)', fontWeight: 500 }}>· {muscleName(lang, e.muscle)}</span></div>
                   <div style={{ color: 'var(--accent-2)', fontSize: 13, marginTop: 2 }}>
                     {e.log.length ? e.log.map((x) => `${x.weight || '–'}×${x.reps || '–'}`).join('   ') : t('notLogged')}
                   </div>

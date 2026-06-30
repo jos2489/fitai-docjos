@@ -19,7 +19,7 @@ function playBeep() {
 }
 
 export default function Wod({ state }) {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const equip = state.program?.profile?.equipment || 'gym'
   const [style, setStyle] = useState('crossfit')
   const [level, setLevel] = useState('normale')
@@ -27,7 +27,7 @@ export default function Wod({ state }) {
   const [wod, setWod] = useState(null)
   const [timer, setTimer] = useState(false)
 
-  const gen = () => { setWod(generateWod({ style, minutes, level, equipment: equip })); setTimer(false) }
+  const gen = () => { setWod(generateWod({ style, minutes, level, equipment: equip, lang })); setTimer(false) }
 
   return (
     <div className="fade">
