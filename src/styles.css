@@ -157,6 +157,10 @@ textarea.in { min-height: 84px; resize: vertical; }
 .addset.rest { color: var(--accent); }
 .addset.alt { color: var(--amber); }
 
+/* autoregolazione giornaliera */
+.readiness h2 { color: var(--amber); }
+.adjust-banner { margin-top: 12px; padding: 10px 12px; border: 2px dashed var(--accent-2); border-radius: 6px; background: rgba(0, 240, 255, 0.08); font-size: 15px; color: var(--accent-2); line-height: 1.35; }
+
 /* tecnica avanzata */
 .tech { border: 2px solid var(--amber); border-radius: 6px; margin-bottom: 12px; background: rgba(255, 210, 63, 0.08); overflow: hidden; }
 .tech-head { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; background: transparent; color: var(--amber); font-family: var(--pix); font-size: 8px; line-height: 1.5; text-align: left; }

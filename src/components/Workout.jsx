@@ -29,6 +29,19 @@ function videoUrl(name) {
 
 const swapKey = (week, dayIdx, exId) => `${week}-${dayIdx}-${exId}`
 
+// Autoregolazione giornaliera (RIR/RPE): adatta volume e intensità del giorno
+// in base a come ti senti, restando nelle zone corrette.
+const READINESS_ADJ = {
+  scarico: { sets: -1, rir: +1, label: '🪫 Giornata storta: tolgo una serie per esercizio e alzo il RIR (carichi più cauti) per gestire la fatica e non scavare buche.' },
+  normale: { sets: 0, rir: 0, label: null },
+  carico: { sets: 0, rir: -1, label: '🔋 Giornata TOP: RIR più basso, puoi avvicinarti di più al cedimento mantenendo la tecnica. Se te la senti, aggiungi una serie.' },
+}
+const READINESS_OPTS = [
+  { id: 'scarico', emoji: '🪫', label: 'Stanco' },
+  { id: 'normale', emoji: '😐', label: 'Normale' },
+  { id: 'carico', emoji: '🔋', label: 'Carico' },
+]
+
 export default function Workout({ state, setState, week, dayIdx, onBack }) {
   const { program } = state
   const equip = program.profile.equipment || 'gym'
@@ -37,6 +50,9 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
   const dk = dayKey(week, dayIdx)
   const [note, setNote] = useState(state.notes[dk] || '')
   const [rest, setRest] = useState(null)
+  const readiness = (state.readiness || {})[dk] || null
+  const adj = READINESS_ADJ[readiness] || READINESS_ADJ.normale
+  const setReadiness = (level) => setState((s) => ({ ...s, readiness: { ...(s.readiness || {}), [dk]: level } }))
 
   const setLog = (exId, sets) => {
     setState((s) => ({ ...s, logs: { ...s.logs, [logKey(week, dayIdx, exId)]: sets } }))
@@ -71,13 +87,28 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
         <p>{day.focus}</p>
       </div>
 
+      <div className="card readiness">
+        <h2>🌡️ COME TI SENTI OGGI?</h2>
+        <div className="sub">Adatto volume e intensità della seduta di conseguenza (autoregolazione su RIR).</div>
+        <div className="opt-grid" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
+          {READINESS_OPTS.map((o) => (
+            <button key={o.id} className={'opt' + (readiness === o.id ? ' active' : '')} style={{ alignItems: 'center', textAlign: 'center' }} onClick={() => setReadiness(o.id)}>
+              <span className="emoji">{o.emoji}</span>
+              <span className="lbl">{o.label}</span>
+            </button>
+          ))}
+        </div>
+        {adj.label && <div className="adjust-banner fade">{adj.label}</div>}
+      </div>
+
       {day.exercises.map((ex) => {
         const swappedId = (state.swaps || {})[swapKey(week, dayIdx, ex.id)]
         const display = swappedId ? EXERCISE_BY_ID[swappedId] : EXERCISE_BY_ID[ex.id]
+        const adjEx = { ...ex, sets: Math.max(2, ex.sets + adj.sets), rir: Math.max(0, ex.rir + adj.rir) }
         return (
           <ExerciseCard
-            key={ex.id}
-            ex={ex}
+            key={ex.id + '-' + readiness}
+            ex={adjEx}
             display={display}
             swapped={!!swappedId}
             alternatives={alternativesFor(ex.id, equip)}

@@ -8,6 +8,7 @@ const empty = {
   bodyweight: [],       // [{date, value}]
   completed: {},        // chiave: `${week}-${dayIdx}` -> ISO date completamento
   swaps: {},            // chiave: `${week}-${dayIdx}-${exId}` -> nuovo exId (esercizio alternativo)
+  readiness: {},        // chiave: `${week}-${dayIdx}` -> 'scarico' | 'normale' | 'carico'
 }
 
 export function loadState() {
