@@ -23,7 +23,7 @@ export default function Home({ state, setState, onOpenDay }) {
           <h1>{t('hi')}{program.profile.name ? `, ${program.profile.name}` : ''} 👋</h1>
           <p>{goalLabel(lang, program.profile.goal)} · {program.profile.daysPerWeek} {t('daysUnit')} · {program.weeks.length} {t('weeksUnit')}</p>
           <p style={{ marginTop: 8, fontSize: 13 }}>{t('splitLabel')}: <b style={{ color: 'var(--text)' }}>{program.splitName}</b></p>
-          <div className="aigen"><span className="pulse" /> {t('aiGenerated')} · {progressPct}% {t('completed')}</div>
+          <div className="aigen"><span className="pulse" /> {progressPct}% {t('completed')}</div>
         </div>
       </div>
 
