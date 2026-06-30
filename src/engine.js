@@ -233,3 +233,63 @@ export const EQUIPMENTS = [
   { id: 'dumbbell', label: 'Manubri / casa', emoji: '🏠' },
   { id: 'body', label: 'Corpo libero', emoji: '🤸' },
 ]
+
+// ============================================================================
+//  ADATTIVITÀ — alternative esercizi & progressione automatica
+// ============================================================================
+
+export const EXERCISE_BY_ID = Object.fromEntries(EXERCISES.map((e) => [e.id, e]))
+
+// Esercizi alternativi per lo stesso muscolo (macchina occupata o assente).
+// Ordina mettendo prima chi condivide il tipo (compound/isolation) e che usa
+// attrezzatura diversa, così proponiamo davvero una variante utile.
+export function alternativesFor(exId, equip = 'gym') {
+  const base = EXERCISE_BY_ID[exId]
+  if (!base) return []
+  return EXERCISES
+    .filter((e) => e.id !== exId && e.muscle === base.muscle && e.equip.includes(equip))
+    .sort((a, b) => {
+      const sameTypeA = a.type === base.type ? 0 : 1
+      const sameTypeB = b.type === base.type ? 0 : 1
+      return sameTypeA - sameTypeB
+    })
+}
+
+// --- Progressione automatica: DOPPIA PROGRESSIONE + RIR ----------------------
+// Principio (consenso meta-analitico, cfr. Schoenfeld/Israetel/Nippard):
+// si lavora dentro un range di ripetizioni a un RIR target; quando TUTTE le
+// serie raggiungono il tetto del range, si incrementa il carico e si riparte
+// dal fondo del range. Se invece si è sotto, si aggiunge 1 ripetizione.
+function loadIncrement(ex) {
+  // incrementi minimi sensati: fondamentali +2.5 kg, isolamento +1-2.5 kg
+  if (ex.type === 'compound') return 2.5
+  return 1.25
+}
+
+export function suggestNextSet(lastLog, ex) {
+  if (!lastLog || !lastLog.length) {
+    return { text: `Parti con un carico che ti lasci ~${ex.rir} ripetizioni in serbatoio (RIR ${ex.rir}) entro ${ex.repsLow}-${ex.repsHigh}.`, weight: null, reps: ex.repsLow }
+  }
+  // considera l'ultima serie "valida" (con peso e ripetizioni)
+  const valid = lastLog.filter((s) => parseFloat(s.weight) > 0 && parseInt(s.reps) > 0)
+  if (!valid.length) {
+    return { text: `Registra le serie: poi ti dirò automaticamente carico e ripetizioni della volta dopo.`, weight: null, reps: ex.repsLow }
+  }
+  const topWeight = Math.max(...valid.map((s) => parseFloat(s.weight)))
+  // ripetizioni fatte alle serie eseguite con il carico più alto
+  const repsAtTop = valid.filter((s) => parseFloat(s.weight) === topWeight).map((s) => parseInt(s.reps))
+  const minRepsAtTop = Math.min(...repsAtTop)
+  const inc = loadIncrement(ex)
+
+  if (minRepsAtTop >= ex.repsHigh) {
+    // tetto del range raggiunto su tutte → aumenta carico, riparti dal fondo
+    const next = +(topWeight + inc).toFixed(2)
+    return { text: `Hai chiuso ${ex.repsHigh}+ rip: sali a ${next} kg e riparti da ${ex.repsLow} rip (doppia progressione).`, weight: next, reps: ex.repsLow, up: true }
+  }
+  if (minRepsAtTop < ex.repsLow) {
+    // sotto il range → mantieni o cala leggermente per restare a RIR corretto
+    return { text: `Sei sotto ${ex.repsLow} rip: mantieni ${topWeight} kg e punta a una ripetizione in più, tenendo RIR ${ex.rir}.`, weight: topWeight, reps: minRepsAtTop + 1 }
+  }
+  // dentro il range → aggiungi una ripetizione a parità di carico
+  return { text: `Stesso carico (${topWeight} kg), prova ${minRepsAtTop + 1} rip mantenendo RIR ${ex.rir}.`, weight: topWeight, reps: minRepsAtTop + 1 }
+}

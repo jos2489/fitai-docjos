@@ -5,8 +5,8 @@ import {
 } from 'recharts'
 import { logKey, dayKey } from '../storage.js'
 
-const ACCENT = '#7c5cff'
-const ACCENT2 = '#21d4fd'
+const ACCENT = '#ff2d95'
+const ACCENT2 = '#00f0ff'
 
 export default function Stats({ state, setState }) {
   const { program, logs, completed } = state
@@ -153,5 +153,5 @@ function firstIncompleteWeek(program, completed) {
   return program.weeks.length
 }
 
-const tip = { background: '#161d31', border: '1px solid #25304e', borderRadius: 12, color: '#eef2ff', fontSize: 12 }
+const tip = { background: '#1d0c38', border: '2px solid #4a2b7a', borderRadius: 8, color: '#f3e9ff', fontSize: 13, fontFamily: 'VT323, monospace' }
 const fmt = (n) => n >= 1000 ? (n / 1000).toFixed(1) + 'k' : Math.round(n)
