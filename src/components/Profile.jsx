@@ -33,6 +33,31 @@ export default function Profile({ state, setState }) {
     setState({ program: null, logs: {}, notes: {}, bodyweight: [], completed: {}, swaps: {}, lang })
   }
 
+  const exportData = () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `fitai-backup-${new Date().toISOString().slice(0, 10)}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+  const importData = (e) => {
+    const file = e.target.files[0]; e.target.value = ''
+    if (!file) return
+    const r = new FileReader()
+    r.onload = () => {
+      try {
+        const data = JSON.parse(String(r.result))
+        if (!data || typeof data !== 'object') throw new Error('bad')
+        if (!confirm(t('importConfirm'))) return
+        setState((s) => ({ ...s, ...data }))
+        setMsg(t('importDone')); setTimeout(() => setMsg(''), 4000)
+      } catch { setMsg(t('importErr')); setTimeout(() => setMsg(''), 4000) }
+    }
+    r.readAsText(file)
+  }
+
   return (
     <div className="fade">
       <div className="section-title">{t('language')}</div>
@@ -93,6 +118,17 @@ export default function Profile({ state, setState }) {
           {t('recalibrate')}
         </button>
         {msg && <div className="aigen" style={{ color: 'var(--good)' }}>{msg}</div>}
+      </div>
+
+      <div className="section-title">{t('backupTitle')}</div>
+      <div className="card">
+        <div className="sub">{t('backupSub')}</div>
+        <div className="btn-row">
+          <button className="btn secondary" onClick={exportData}>{t('exportBtn')}</button>
+          <label className="btn secondary" style={{ textAlign: 'center', cursor: 'pointer' }}>
+            {t('importBtn')}<input type="file" accept="application/json,.json" style={{ display: 'none' }} onChange={importData} />
+          </label>
+        </div>
       </div>
 
       <div className="section-title">{t('dataMgmt')}</div>

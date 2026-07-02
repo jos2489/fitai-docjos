@@ -120,6 +120,13 @@ export const STRINGS = {
   dataMgmt: { it: 'Gestione dati', en: 'Data management' },
   dataSub: { it: 'I tuoi dati restano salvati solo su questo dispositivo.', en: 'Your data stays only on this device.' },
   resetAll: { it: '🗑️ Reset completo', en: '🗑️ Full reset' },
+  backupTitle: { it: '💾 Backup dati', en: '💾 Data backup' },
+  backupSub: { it: 'Salva tutti i tuoi dati (programma, pesi, dieta, storico, misure) in un file, per non perderli se cambi telefono o pulisci il browser.', en: 'Save all your data (program, weights, diet, history, measurements) to a file, so you don\'t lose it if you switch phones or clear the browser.' },
+  exportBtn: { it: '⬇️ Esporta backup', en: '⬇️ Export backup' },
+  importBtn: { it: '⬆️ Importa backup', en: '⬆️ Import backup' },
+  importConfirm: { it: 'Importare questo backup? Sovrascrive i dati attuali.', en: 'Import this backup? It overwrites current data.' },
+  importErr: { it: 'File non valido', en: 'Invalid file' },
+  importDone: { it: '✅ Backup importato!', en: '✅ Backup imported!' },
   language: { it: '🌐 Lingua', en: '🌐 Language' },
   levelUpTo: { it: '🚀 Sali a livello', en: '🚀 Level up to' },
 

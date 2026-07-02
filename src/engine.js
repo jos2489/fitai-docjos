@@ -108,6 +108,42 @@ export const EXERCISES = [
   { id: 'standing_calf', name: 'Calf raise in piedi', muscle: 'Polpacci', type: 'isolation', equip: ['gym'] },
   { id: 'seated_calf', name: 'Calf raise da seduto', muscle: 'Polpacci', type: 'isolation', equip: ['gym'] },
   { id: 'calf_raise_bw', name: 'Calf raise a corpo libero', muscle: 'Polpacci', type: 'isolation', equip: ['gym', 'dumbbell', 'body'] },
+
+  // ===== VARIANTI UNILATERALI (braccio/gamba singola) e ulteriori =====
+  // SCHIENA
+  { id: 'single_arm_pulldown', name: 'Lat machine a un braccio', muscle: 'Schiena', type: 'isolation', equip: ['gym'] },
+  { id: 'single_arm_cable_row', name: 'Pulley a un braccio', muscle: 'Schiena', type: 'compound', equip: ['gym'] },
+  { id: 'chest_supported_row', name: 'Rematore con appoggio al petto', muscle: 'Schiena', type: 'compound', equip: ['gym', 'dumbbell'] },
+  // PETTO
+  { id: 'single_arm_db_press', name: 'Panca manubri a un braccio', muscle: 'Petto', type: 'compound', equip: ['gym', 'dumbbell'] },
+  { id: 'single_arm_cable_fly', name: 'Croce ai cavi a un braccio', muscle: 'Petto', type: 'isolation', equip: ['gym'] },
+  // SPALLE
+  { id: 'single_arm_db_ohp', name: 'Lento manubrio a un braccio', muscle: 'Spalle', type: 'compound', equip: ['gym', 'dumbbell'] },
+  { id: 'single_arm_lateral', name: 'Alzata laterale a un braccio al cavo', muscle: 'Spalle', type: 'isolation', equip: ['gym'] },
+  { id: 'landmine_press', name: 'Landmine press', muscle: 'Spalle', type: 'compound', equip: ['gym'] },
+  { id: 'reverse_pec_deck', name: 'Reverse pec deck (posteriori)', muscle: 'Spalle', type: 'isolation', equip: ['gym'] },
+  // QUADRICIPITI
+  { id: 'single_leg_press', name: 'Leg press a una gamba', muscle: 'Quadricipiti', type: 'compound', equip: ['gym'] },
+  { id: 'reverse_lunge', name: 'Affondi indietro', muscle: 'Quadricipiti', type: 'compound', equip: ['gym', 'dumbbell', 'body'] },
+  { id: 'pistol_squat', name: 'Pistol squat (una gamba)', muscle: 'Quadricipiti', type: 'compound', equip: ['body'] },
+  { id: 'single_leg_ext', name: 'Leg extension a una gamba', muscle: 'Quadricipiti', type: 'isolation', equip: ['gym'] },
+  // FEMORALI
+  { id: 'single_leg_curl', name: 'Leg curl a una gamba', muscle: 'Femorali', type: 'isolation', equip: ['gym'] },
+  { id: 'single_leg_rdl', name: 'Stacco rumeno a una gamba', muscle: 'Femorali', type: 'compound', equip: ['gym', 'dumbbell', 'body'] },
+  // GLUTEI
+  { id: 'single_leg_hip_thrust', name: 'Hip thrust a una gamba', muscle: 'Glutei', type: 'compound', equip: ['gym', 'dumbbell', 'body'] },
+  { id: 'single_leg_glute_bridge', name: 'Ponte glutei a una gamba', muscle: 'Glutei', type: 'isolation', equip: ['body'] },
+  // BICIPITI
+  { id: 'spider_curl', name: 'Spider curl', muscle: 'Bicipiti', type: 'isolation', equip: ['gym', 'dumbbell'] },
+  { id: 'zottman_curl', name: 'Zottman curl', muscle: 'Bicipiti', type: 'isolation', equip: ['gym', 'dumbbell'] },
+  // TRICIPITI
+  { id: 'single_arm_pushdown', name: 'Push-down a un braccio', muscle: 'Tricipiti', type: 'isolation', equip: ['gym'] },
+  { id: 'single_arm_oh_ext', name: 'Estensione sopra la testa a un braccio', muscle: 'Tricipiti', type: 'isolation', equip: ['gym', 'dumbbell'] },
+  // POLPACCI
+  { id: 'single_leg_calf', name: 'Calf raise a una gamba', muscle: 'Polpacci', type: 'isolation', equip: ['gym', 'dumbbell', 'body'] },
+  // CORE
+  { id: 'pallof_press', name: 'Pallof press (anti-rotazione)', muscle: 'Core', type: 'isolation', equip: ['gym'] },
+  { id: 'bird_dog', name: 'Bird dog', muscle: 'Core', type: 'isolation', equip: ['gym', 'dumbbell', 'body'] },
 ]
 
 // --- Parametri per obiettivo (evidence-based) --------------------------------
@@ -322,6 +358,15 @@ const EXERCISE_NAME_EN = {
   rope_pushdown: 'Rope push-down', overhead_rope: 'Overhead cable extension', close_grip_bench: 'Close-grip bench press', bench_dip: 'Bench dip', db_kickback: 'Dumbbell kickback',
   leg_raise: 'Lying leg raise', russian_twist: 'Russian twist', ab_wheel: 'Ab wheel rollout', side_plank: 'Side plank', dead_bug: 'Dead bug',
   standing_calf: 'Standing calf raise', seated_calf: 'Seated calf raise', calf_raise_bw: 'Bodyweight calf raise',
+  single_arm_pulldown: 'Single-arm lat pulldown', single_arm_cable_row: 'Single-arm cable row', chest_supported_row: 'Chest-supported row',
+  single_arm_db_press: 'Single-arm dumbbell press', single_arm_cable_fly: 'Single-arm cable fly',
+  single_arm_db_ohp: 'Single-arm dumbbell press', single_arm_lateral: 'Single-arm cable lateral raise', landmine_press: 'Landmine press', reverse_pec_deck: 'Reverse pec deck',
+  single_leg_press: 'Single-leg press', reverse_lunge: 'Reverse lunge', pistol_squat: 'Pistol squat', single_leg_ext: 'Single-leg extension',
+  single_leg_curl: 'Single-leg curl', single_leg_rdl: 'Single-leg Romanian deadlift',
+  single_leg_hip_thrust: 'Single-leg hip thrust', single_leg_glute_bridge: 'Single-leg glute bridge',
+  spider_curl: 'Spider curl', zottman_curl: 'Zottman curl',
+  single_arm_pushdown: 'Single-arm push-down', single_arm_oh_ext: 'Single-arm overhead extension',
+  single_leg_calf: 'Single-leg calf raise', pallof_press: 'Pallof press', bird_dog: 'Bird dog',
 }
 const MUSCLE_EN = { Petto: 'Chest', Schiena: 'Back', Quadricipiti: 'Quads', Femorali: 'Hamstrings', Glutei: 'Glutes', Spalle: 'Shoulders', Bicipiti: 'Biceps', Tricipiti: 'Triceps', Core: 'Core', Polpacci: 'Calves' }
 const DAY_NAME_EN = { 'Push (spinta)': 'Push', 'Pull (tirata)': 'Pull', 'Legs (gambe)': 'Legs', 'Upper (parte alta)': 'Upper', 'Lower (parte bassa)': 'Lower', 'Full Body A': 'Full Body A', 'Full Body B': 'Full Body B', 'Full Body C': 'Full Body C' }
