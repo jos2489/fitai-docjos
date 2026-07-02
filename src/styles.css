@@ -215,6 +215,14 @@ textarea.in { min-height: 84px; resize: vertical; }
 .day-name-in { font-family: var(--pix); font-size: 11px; margin-bottom: 10px; }
 .meal-name-in { font-size: 16px; margin-bottom: 8px; }
 .meal-block { border-top: 2px dashed var(--line); padding-top: 10px; margin-top: 10px; }
+.target-kcal { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 15px; flex-wrap: wrap; }
+.target-kcal b { color: var(--accent-2); }
+.target-eaten { font-family: var(--pix); font-size: 9px; color: var(--good); }
+.target-eaten.over { color: var(--bad); }
+.macro-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+.macro-top { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.macro-bar { height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; border: 1px solid var(--line); }
+.macro-fill { height: 100%; transition: width 0.3s; }
 .nav button.active { color: var(--accent-2); text-shadow: 0 0 8px var(--accent-2); }
 .nav button.active .ic { filter: drop-shadow(0 0 8px var(--accent-2)); }
 

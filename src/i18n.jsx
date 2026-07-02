@@ -195,6 +195,11 @@ export const STRINGS = {
   aiEstimate: { it: '🤖 Stima kcal con AI', en: '🤖 Estimate kcal with AI' },
   estimating: { it: 'Stimo...', en: 'Estimating...' },
   fromTable: { it: 'tabella', en: 'table' },
+  dailyTarget: { it: 'Obiettivo', en: 'Target' },
+  protein: { it: 'Proteine', en: 'Protein' },
+  carbs: { it: 'Carbo', en: 'Carbs' },
+  fat: { it: 'Grassi', en: 'Fat' },
+  proteinG: { it: 'prot. g', en: 'prot. g' },
 }
 
 function interpolate(str, vars) {

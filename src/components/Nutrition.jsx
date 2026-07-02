@@ -2,7 +2,8 @@ import React, { useState } from 'react'
 import { useLang } from '../i18n.jsx'
 import {
   uid, todayKey, dayPlannedKcal, mealKcal, dayEatenKcal,
-  parseDietCSV, searchFood, searchLocal, kcalFor, parseDietWithAI, estimateKcalAI,
+  parseDietCSV, searchFood, searchLocal, kcalFor, macroFor, parseDietWithAI, estimateKcalAI,
+  nutritionTargets, dayEatenMacros,
 } from '../nutrition.js'
 
 export default function Nutrition({ state, setState }) {
@@ -42,6 +43,8 @@ function Today({ state, setState }) {
   const planned = dayPlannedKcal(planDay)
   const eaten = dayEatenKcal(planDay, log)
   const diff = eaten - planned
+  const targets = nutritionTargets(state.program?.profile)
+  const em = dayEatenMacros(planDay, log)
 
   const toggleFood = (fid) => setLog({ ...log, eaten: { ...log.eaten, [fid]: !log.eaten[fid] } })
   const addExtra = (food) => { setLog({ ...log, extras: [...(log.extras || []), { ...food, id: uid() }] }); setAdding(false) }
@@ -55,6 +58,20 @@ function Today({ state, setState }) {
           <button key={d.id} className={'week-pill' + (d.id === planDay.id ? ' active' : '')} onClick={() => setLog({ ...log, planDayId: d.id })}>{d.name}</button>
         ))}
       </div>
+
+      {targets && (
+        <div className="card" style={{ padding: 12 }}>
+          <div className="target-kcal">
+            <span>🎯 {t('dailyTarget')}: <b>{targets.kcal} kcal</b> · {t('protein')} <b>{targets.p}g</b></span>
+            <span className={'target-eaten' + (eaten > targets.kcal ? ' over' : '')}>{eaten} / {targets.kcal} kcal</span>
+          </div>
+          <div className="macro-grid">
+            <Macro label={t('protein')} val={em.p} tgt={targets.p} color="var(--good)" />
+            <Macro label={t('carbs')} val={em.c} tgt={targets.c} color="var(--amber)" />
+            <Macro label={t('fat')} val={em.f} tgt={targets.f} color="var(--accent)" />
+          </div>
+        </div>
+      )}
 
       <div className="stat-grid" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
         <div className="stat"><div className="k">{t('planned')}</div><div className="v">{planned}<small> kcal</small></div></div>
@@ -204,14 +221,14 @@ function FoodPicker({ onAdd, onCancel, apiKey }) {
   const [busy, setBusy] = useState(false)
   const [sel, setSel] = useState(null)   // {name, kcal100}
   const [grams, setGrams] = useState('')
-  const [manual, setManual] = useState({ name: '', qty: '', kcal: '' })
+  const [manual, setManual] = useState({ name: '', qty: '', kcal: '', p: '' })
   const [aiBusy, setAiBusy] = useState(false)
   const [aiErr, setAiErr] = useState('')
 
   const doSearch = async () => {
     if (!q.trim()) return
     setBusy(true); setResults(null); setSel(null)
-    const local = searchLocal(q).map((r) => ({ name: r.name, kcal100: r.kcal100, src: 'tab' }))
+    const local = searchLocal(q).map((r) => ({ name: r.name, kcal100: r.kcal100, p: r.p, c: r.c, f: r.f, src: 'tab' }))
     let off = []
     try { off = (await searchFood(q)).map((r) => ({ ...r, src: 'off' })) } catch { /* rete */ }
     setResults([...local, ...off])
@@ -244,7 +261,7 @@ function FoodPicker({ onAdd, onCancel, apiKey }) {
         <div className="picker-row" style={{ marginTop: 8 }}>
           <span style={{ flex: 1, fontSize: 15 }}>{sel.name}</span>
           <input className="in" style={{ width: 80 }} inputMode="numeric" placeholder="g" value={grams} onChange={(e) => setGrams(e.target.value)} />
-          <button className="btn" style={{ width: 'auto', padding: '0 14px' }} disabled={!grams} onClick={() => onAdd({ name: sel.name.split(' · ')[0], qty: grams + ' g', kcal: kcalFor(sel.kcal100, grams) })}>{t('add')}</button>
+          <button className="btn" style={{ width: 'auto', padding: '0 14px' }} disabled={!grams} onClick={() => onAdd({ name: sel.name.split(' · ')[0], qty: grams + ' g', kcal: kcalFor(sel.kcal100, grams), p: macroFor(sel.p, grams), c: macroFor(sel.c, grams), f: macroFor(sel.f, grams) })}>{t('add')}</button>
         </div>
       )}
 
@@ -253,15 +270,27 @@ function FoodPicker({ onAdd, onCancel, apiKey }) {
         <input className="in" placeholder={t('foodName')} value={manual.name} onChange={(e) => setManual({ ...manual, name: e.target.value })} />
       </div>
       <div className="picker-row" style={{ marginTop: 6 }}>
-        <input className="in" style={{ width: 90 }} inputMode="numeric" placeholder={t('grams')} value={manual.qty} onChange={(e) => setManual({ ...manual, qty: e.target.value })} />
-        <input className="in" style={{ width: 80 }} inputMode="numeric" placeholder={t('kcal')} value={manual.kcal} onChange={(e) => setManual({ ...manual, kcal: e.target.value })} />
-        <button className="btn" style={{ width: 'auto', padding: '0 14px' }} disabled={!manual.name || !manual.kcal} onClick={() => onAdd({ name: manual.name, qty: manual.qty ? manual.qty + ' g' : '', kcal: parseInt(manual.kcal) || 0 })}>{t('add')}</button>
+        <input className="in" style={{ width: 70 }} inputMode="numeric" placeholder={t('grams')} value={manual.qty} onChange={(e) => setManual({ ...manual, qty: e.target.value })} />
+        <input className="in" style={{ width: 70 }} inputMode="numeric" placeholder={t('kcal')} value={manual.kcal} onChange={(e) => setManual({ ...manual, kcal: e.target.value })} />
+        <input className="in" style={{ width: 70 }} inputMode="numeric" placeholder={t('proteinG')} value={manual.p} onChange={(e) => setManual({ ...manual, p: e.target.value })} />
+        <button className="btn" style={{ width: 'auto', padding: '0 12px' }} disabled={!manual.name || !manual.kcal} onClick={() => onAdd({ name: manual.name, qty: manual.qty ? manual.qty + ' g' : '', kcal: parseInt(manual.kcal) || 0, p: parseFloat(manual.p) || 0, c: 0, f: 0 })}>{t('add')}</button>
       </div>
       {apiKey ? (
         <button className="addset alt" style={{ marginTop: 6 }} disabled={!manual.name || aiBusy} onClick={aiEstimate}>{aiBusy ? t('estimating') : t('aiEstimate')}</button>
       ) : null}
       {aiErr && <div className="csv-hint" style={{ color: 'var(--bad)' }}>{aiErr}</div>}
       <button className="addset" style={{ marginTop: 8 }} onClick={onCancel}>{t('cancel')}</button>
+    </div>
+  )
+}
+
+// ============================ Macro bar ============================
+function Macro({ label, val, tgt, color }) {
+  const pct = tgt ? Math.min(100, Math.round((val / tgt) * 100)) : 0
+  return (
+    <div className="macro">
+      <div className="macro-top"><span>{label}</span><span>{val}/{tgt}g</span></div>
+      <div className="macro-bar"><div className="macro-fill" style={{ width: pct + '%', background: color }} /></div>
     </div>
   )
 }
