@@ -6,6 +6,7 @@ import {
 import { logKey, dayKey } from '../storage.js'
 import { useLang } from '../i18n.jsx'
 import { exercisesWithLogs, exerciseSeries, exName, workoutStats } from '../engine.js'
+import { Measurements, ProgressPhotos } from './BodyProgress.jsx'
 
 const ACCENT = '#ff2d95'
 const ACCENT2 = '#00f0ff'
@@ -74,6 +75,8 @@ export default function Stats({ state, setState }) {
 
       <ExerciseProgress state={state} />
       <BodyweightTracker state={state} setState={setState} />
+      <Measurements state={state} setState={setState} />
+      <ProgressPhotos state={state} setState={setState} />
     </div>
   )
 }

@@ -13,6 +13,8 @@ const empty = {
   diet: null,           // piano alimentare: { name, days: [{ id, name, meals: [{ id, name, foods: [{id,name,qty,kcal}] }] }] }
   nutritionLog: {},     // chiave: data 'YYYY-MM-DD' -> { planDayId, eaten: {foodId:true}, extras: [{id,name,qty,kcal}] }
   anthropicKey: '',     // chiave Anthropic SOLO locale (per auto-lettura diete) — mai inviata altrove
+  measurements: [],     // [{ date, vita, braccio, coscia, petto, fianchi }] in cm
+  photos: [],           // [{ id, date, img }] foto progressi (compresse, base64)
 }
 
 export function loadState() {
