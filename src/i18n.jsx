@@ -203,6 +203,7 @@ export const STRINGS = {
   thisWeek: { it: 'questa settimana', en: 'this week' },
   streakDays: { it: 'giorni di fila', en: 'day streak' },
   newRecord: { it: '🏆 NUOVO RECORD!', en: '🏆 NEW RECORD!' },
+  startWorkout: { it: "Inizia l'allenamento!", en: "Let's train!" },
   measures: { it: '📏 Misure corporee', en: '📏 Body measurements' },
   waist: { it: 'Vita', en: 'Waist' },
   arm: { it: 'Braccio', en: 'Arm' },

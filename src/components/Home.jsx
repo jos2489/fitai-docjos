@@ -1,7 +1,29 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { dayKey } from '../storage.js'
 import { buildProgram, dayName, focusName, weekNoteText, workoutStats } from '../engine.js'
 import { useLang, goalLabel } from '../i18n.jsx'
+
+const POSES = [
+  { src: '/mascot.webp', bubble: false },
+  { src: '/mascot-point.webp', bubble: true },
+  { src: '/mascot-drink.webp', bubble: false },
+]
+
+function MascotHero({ onStart }) {
+  const { t } = useLang()
+  const [i, setI] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setI((p) => (p + 1) % POSES.length), 3000)
+    return () => clearInterval(id)
+  }, [])
+  const pose = POSES[i]
+  return (
+    <button className="mascot-anim" onClick={onStart} aria-label={t('startWorkout')}>
+      {pose.bubble && <span className="mascot-bubble">{t('startWorkout')}</span>}
+      <img className="mascot-sm" src={pose.src} alt="Doc Jos" />
+    </button>
+  )
+}
 
 export default function Home({ state, setState, onOpenDay }) {
   const { t, lang } = useLang()
@@ -19,7 +41,7 @@ export default function Home({ state, setState, onOpenDay }) {
     <div className="fade">
       <div className="hero hero-home">
         <div className="glow" />
-        <img className="mascot-sm" src="/mascot.webp" alt="Doc Jos" />
+        <MascotHero onStart={() => onOpenDay(week, firstIncompleteDay(wk, week, completed))} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <h1>{t('hi')}{program.profile.name ? `, ${program.profile.name}` : ''} 👋</h1>
           <p>{goalLabel(lang, program.profile.goal)} · {program.profile.daysPerWeek} {t('daysUnit')} · {program.weeks.length} {t('weeksUnit')}</p>
@@ -79,6 +101,11 @@ export default function Home({ state, setState, onOpenDay }) {
       </button>
     </div>
   )
+}
+
+function firstIncompleteDay(wk, week, completed) {
+  const idx = wk.days.findIndex((_, i) => !completed[dayKey(week, i)])
+  return idx === -1 ? 0 : idx
 }
 
 function firstIncompleteWeek(program, completed) {
