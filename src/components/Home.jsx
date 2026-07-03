@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { dayKey } from '../storage.js'
-import { buildProgram, dayName, focusName, weekNoteText } from '../engine.js'
+import { buildProgram, dayName, focusName, weekNoteText, workoutStats } from '../engine.js'
 import { useLang, goalLabel } from '../i18n.jsx'
 
 export default function Home({ state, setState, onOpenDay }) {
@@ -13,6 +13,7 @@ export default function Home({ state, setState, onOpenDay }) {
   const totalDays = program.weeks.length * program.weeks[0].days.length
   const totalDone = Object.keys(completed).length
   const progressPct = Math.round((totalDone / totalDays) * 100)
+  const stats = workoutStats(completed)
 
   return (
     <div className="fade">
@@ -26,6 +27,15 @@ export default function Home({ state, setState, onOpenDay }) {
           <div className="aigen"><span className="pulse" /> {progressPct}% {t('completed')}</div>
         </div>
       </div>
+
+      {stats.total > 0 && (
+        <div className="gami">
+          <div className="gami-badge">{stats.badge}</div>
+          <div className="gami-stat"><b>{stats.total}</b><span>{t('workoutsTotal')}</span></div>
+          <div className="gami-stat"><b>{stats.thisWeek}</b><span>{t('thisWeek')}</span></div>
+          {stats.streak > 1 && <div className="gami-stat"><b>🔥{stats.streak}</b><span>{t('streakDays')}</span></div>}
+        </div>
+      )}
 
       <div className="section-title">{t('week')}</div>
       <div className="weeks">

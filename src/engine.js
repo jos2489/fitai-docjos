@@ -562,3 +562,70 @@ export function levelUpProgram(program) {
   const next = LEVEL_ORDER[Math.min(idx + 1, LEVEL_ORDER.length - 1)]
   return buildProgram({ ...program.profile, experience: next })
 }
+
+// ============================================================================
+//  STATISTICHE — progressi per esercizio, record (PR), streak & badge
+// ============================================================================
+const _log = (logs, wk, di, exId) => (logs || {})[`${wk}-${di}-${exId}`]
+const _topOf = (log) => {
+  let top = 0, e1rm = 0
+  ;(log || []).forEach((s) => {
+    const w = parseFloat(s.weight) || 0, r = parseInt(s.reps) || 0
+    if (w > 0 && r > 0) { if (w > top) top = w; const e = w * (1 + r / 30); if (e > e1rm) e1rm = e }
+  })
+  return { top, e1rm: Math.round(e1rm) }
+}
+
+// Esercizi che hanno almeno un carico registrato (per il selettore progressi)
+export function exercisesWithLogs(program, logs) {
+  const ids = new Set()
+  program.weeks.forEach((wk) => wk.days.forEach((day, di) => day.exercises.forEach((ex) => {
+    const log = _log(logs, wk.week, di, ex.id)
+    if (log && log.some((s) => parseFloat(s.weight) > 0 && parseInt(s.reps) > 0)) ids.add(ex.id)
+  })))
+  return [...ids]
+}
+
+// Serie temporale del top-set (kg) e 1RM stimato per un esercizio, per settimana
+export function exerciseSeries(program, logs, exId) {
+  const out = []
+  program.weeks.forEach((wk) => wk.days.forEach((day, di) => {
+    if (!day.exercises.some((e) => e.id === exId)) return
+    const log = _log(logs, wk.week, di, exId)
+    if (!log) return
+    const { top, e1rm } = _topOf(log)
+    if (top > 0) out.push({ label: `S${wk.week}`, week: wk.week, top, e1rm })
+  }))
+  return out.sort((a, b) => a.week - b.week)
+}
+
+// Miglior top-set registrato PRIMA di una certa settimana (per rilevare i record)
+export function bestTopBefore(program, logs, exId, week) {
+  let best = 0
+  program.weeks.forEach((wk) => {
+    if (wk.week >= week) return
+    wk.days.forEach((day, di) => {
+      if (!day.exercises.some((e) => e.id === exId)) return
+      const { top } = _topOf(_log(logs, wk.week, di, exId))
+      if (top > best) best = top
+    })
+  })
+  return best
+}
+
+// Statistiche di costanza: totali, questa settimana, streak (giorni di fila), badge
+export function workoutStats(completed) {
+  const dates = Object.values(completed || {}).map((iso) => String(iso).slice(0, 10))
+  const total = dates.length
+  const set = new Set(dates)
+  const now = Date.now()
+  const thisWeek = dates.filter((d) => (now - new Date(d).getTime()) < 7 * 864e5).length
+  // streak: giorni di calendario consecutivi con almeno un allenamento (da oggi/ieri)
+  let streak = 0
+  const d = new Date()
+  const has = (dt) => set.has(dt.toISOString().slice(0, 10))
+  if (!has(d)) { d.setDate(d.getDate() - 1); }
+  while (has(d)) { streak++; d.setDate(d.getDate() - 1) }
+  const badge = total >= 100 ? '💎' : total >= 50 ? '🥇' : total >= 25 ? '🥈' : total >= 10 ? '🥉' : total >= 1 ? '⭐' : ''
+  return { total, thisWeek, streak, badge }
+}

@@ -223,6 +223,14 @@ textarea.in { min-height: 84px; resize: vertical; }
 .macro-top { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
 .macro-bar { height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; border: 1px solid var(--line); }
 .macro-fill { height: 100%; transition: width 0.3s; }
+
+/* gamification (badge/streak) */
+.gami { display: flex; align-items: center; gap: 12px; background: linear-gradient(180deg, var(--card), var(--bg2)); border: 2px solid var(--amber); border-radius: var(--r); padding: 12px 14px; margin-bottom: 14px; box-shadow: 0 0 14px rgba(255, 210, 63, 0.25), var(--shadow); }
+.gami-badge { font-size: 32px; filter: drop-shadow(0 0 8px var(--amber)); }
+.gami-stat { display: flex; flex-direction: column; align-items: center; flex: 1; }
+.gami-stat b { font-family: var(--pix); font-size: 15px; color: var(--accent-2); }
+.gami-stat span { font-size: 12px; color: var(--muted); margin-top: 4px; text-align: center; }
+.pr-badge { font-family: var(--pix); font-size: 8px; color: var(--amber); background: rgba(255, 210, 63, 0.15); border: 1px solid var(--amber); border-radius: 6px; padding: 4px 7px; margin-left: 6px; animation: pulse 1.2s infinite; }
 .nav button.active { color: var(--accent-2); text-shadow: 0 0 8px var(--accent-2); }
 .nav button.active .ic { filter: drop-shadow(0 0 8px var(--accent-2)); }
 

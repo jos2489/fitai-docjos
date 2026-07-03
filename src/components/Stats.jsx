@@ -5,6 +5,7 @@ import {
 } from 'recharts'
 import { logKey, dayKey } from '../storage.js'
 import { useLang } from '../i18n.jsx'
+import { exercisesWithLogs, exerciseSeries, exName, workoutStats } from '../engine.js'
 
 const ACCENT = '#ff2d95'
 const ACCENT2 = '#00f0ff'
@@ -71,8 +72,43 @@ export default function Stats({ state, setState }) {
         </div>
       )}
 
+      <ExerciseProgress state={state} />
       <BodyweightTracker state={state} setState={setState} />
     </div>
+  )
+}
+
+function ExerciseProgress({ state }) {
+  const { t, lang } = useLang()
+  const { program, logs } = state
+  const ids = useMemo(() => exercisesWithLogs(program, logs), [program, logs])
+  const [sel, setSel] = useState('')
+  if (!ids.length) return null
+  const cur = ids.includes(sel) ? sel : ids[0]
+  const series = exerciseSeries(program, logs, cur)
+  return (
+    <>
+      <div className="section-title">{t('exProgress')}</div>
+      <div className="card">
+        <select className="in" value={cur} onChange={(e) => setSel(e.target.value)} style={{ marginBottom: 12 }}>
+          {ids.map((id) => <option key={id} value={id}>{exName(lang, id)}</option>)}
+        </select>
+        {series.length > 1 ? (
+          <div className="chart-wrap" style={{ height: 200 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={series} margin={{ top: 6, right: 10, left: -10, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#25304e" />
+                <XAxis dataKey="label" stroke="#8b96b8" fontSize={11} />
+                <YAxis domain={['auto', 'auto']} stroke="#8b96b8" fontSize={11} />
+                <Tooltip contentStyle={tip} />
+                <Line type="monotone" dataKey="top" name={t('topSet')} stroke={ACCENT} strokeWidth={3} dot={{ r: 3, fill: ACCENT }} />
+                <Line type="monotone" dataKey="e1rm" name={t('est1rm')} stroke={ACCENT2} strokeWidth={2} strokeDasharray="4 3" dot={{ r: 2, fill: ACCENT2 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        ) : <div className="csv-hint">{t('exProgressHint')}</div>}
+      </div>
+    </>
   )
 }
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { logKey, dayKey, lastLogFor } from '../storage.js'
-import { alternativesFor, suggestNextSet, EXERCISE_BY_ID, TECHNIQUES, exName, muscleName, dayName, focusName } from '../engine.js'
+import { alternativesFor, suggestNextSet, EXERCISE_BY_ID, TECHNIQUES, exName, muscleName, dayName, focusName, bestTopBefore } from '../engine.js'
 import { useLang } from '../i18n.jsx'
 
 // Beep con Web Audio API: nessun file audio, funziona offline.
@@ -119,6 +119,7 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
             onChange={(sets) => setLog(ex.id, sets)}
             onRest={() => setRest(ex.rest)}
             onSwap={(newId) => swapExercise(ex.id, newId)}
+            prevBest={bestTopBefore(program, state.logs, ex.id, week)}
           />
         )
       })}
@@ -171,7 +172,7 @@ function RestTimer({ seconds, onClose }) {
   )
 }
 
-function ExerciseCard({ ex, display, swapped, alternatives, existing, last, onChange, onRest, onSwap }) {
+function ExerciseCard({ ex, display, swapped, alternatives, existing, last, onChange, onRest, onSwap, prevBest }) {
   const { t, lang } = useLang()
   const dispName = exName(lang, display.id)
   const init = useMemo(() => {
@@ -192,12 +193,14 @@ function ExerciseCard({ ex, display, swapped, alternatives, existing, last, onCh
   const removeSet = (i) => apply(sets.filter((_, idx) => idx !== i))
 
   const suggestion = useMemo(() => suggestNextSet(last, ex, lang), [last, ex, lang])
+  const curTop = Math.max(0, ...sets.filter((s) => parseInt(s.reps) > 0).map((s) => parseFloat(s.weight) || 0))
+  const isPR = prevBest > 0 && curTop > prevBest
 
   return (
     <div className="ex">
       <div className="ex-head">
         <div>
-          <div className="name">{dispName}{swapped && <span className="swapped-tag">↺ alt</span>}</div>
+          <div className="name">{dispName}{swapped && <span className="swapped-tag">↺ alt</span>}{isPR && <span className="pr-badge">{t('newRecord')}</span>}</div>
           <div className="muscle">{muscleName(lang, display.muscle)}</div>
           <div className="ex-prescription">
             {ex.sets} × {ex.repsLow}-{ex.repsHigh} REP · RIR {ex.rir} · REST {ex.rest}s
