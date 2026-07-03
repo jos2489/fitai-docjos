@@ -32,7 +32,7 @@ function speakGo() {
       const u = new SpeechSynthesisUtterance('Go! Go! Go!')
       const v = pickMaleVoice(synth.getVoices())
       if (v) u.voice = v
-      u.rate = 1.1; u.pitch = 0.7; u.volume = 1 // pitch basso = più profonda/maschile
+      u.rate = 0.95; u.pitch = 0.55; u.volume = 1 // grave + cadenza decisa = più autorevole
       synth.speak(u)
     }
     // le voci a volte si caricano in modo asincrono
