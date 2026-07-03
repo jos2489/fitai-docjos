@@ -77,6 +77,7 @@ export const STRINGS = {
   compoundShort: { it: 'multiart.', en: 'compound' },
   isoShort: { it: 'isolam.', en: 'isolation' },
   go: { it: '✅ GO!', en: '✅ GO!' },
+  goFlash: { it: 'GO! GO! GO!', en: 'GO! GO! GO!' },
   skip: { it: 'SALTA', en: 'SKIP' },
   close: { it: 'CHIUDI', en: 'CLOSE' },
 

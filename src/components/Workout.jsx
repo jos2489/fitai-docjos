@@ -3,24 +3,42 @@ import { logKey, dayKey, lastLogFor } from '../storage.js'
 import { alternativesFor, suggestNextSet, EXERCISE_BY_ID, TECHNIQUES, exName, muscleName, dayName, focusName, bestTopBefore } from '../engine.js'
 import { useLang } from '../i18n.jsx'
 
-// Beep con Web Audio API: nessun file audio, funziona offline.
-function playBeep() {
+// Voce "GO GO GO" con Web Speech API (offline sui più diffusi, gratis).
+function speakGo() {
+  try {
+    const synth = window.speechSynthesis
+    if (!synth) return
+    synth.cancel()
+    const u = new SpeechSynthesisUtterance('Go! Go! Go!')
+    u.rate = 1.15; u.pitch = 1; u.volume = 1
+    synth.speak(u)
+  } catch { /* voce non disponibile */ }
+}
+
+// Suono di fine pausa con Web Audio API: nessun file audio, funziona offline.
+// 3 bip in salita (ritmo GO-GO-GO) + un tono lungo finale.
+function playGo() {
   try {
     const Ctx = window.AudioContext || window.webkitAudioContext
     const ctx = new Ctx()
-    const beep = (t, freq) => {
+    if (ctx.state === 'suspended') ctx.resume()
+    const tone = (t, freq, dur, type = 'square', peak = 0.35) => {
       const osc = ctx.createOscillator()
       const gain = ctx.createGain()
       osc.connect(gain); gain.connect(ctx.destination)
-      osc.type = 'square'; osc.frequency.value = freq
+      osc.type = type; osc.frequency.value = freq
       gain.gain.setValueAtTime(0.001, t)
-      gain.gain.exponentialRampToValueAtTime(0.35, t + 0.02)
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25)
-      osc.start(t); osc.stop(t + 0.25)
+      gain.gain.exponentialRampToValueAtTime(peak, t + 0.02)
+      gain.gain.exponentialRampToValueAtTime(0.001, t + dur)
+      osc.start(t); osc.stop(t + dur + 0.02)
     }
     const now = ctx.currentTime
-    beep(now, 660); beep(now + 0.3, 660); beep(now + 0.6, 990)
-    if (navigator.vibrate) navigator.vibrate([200, 100, 200])
+    tone(now, 660, 0.22); tone(now + 0.28, 660, 0.22); tone(now + 0.56, 880, 0.22)
+    // tono lungo finale (più prolungato)
+    tone(now + 0.9, 990, 1.1, 'sawtooth', 0.4)
+    tone(now + 0.9, 660, 1.1, 'square', 0.18)
+    speakGo()
+    if (navigator.vibrate) navigator.vibrate([250, 120, 250, 120, 400])
   } catch { /* audio non disponibile */ }
 }
 
@@ -145,11 +163,22 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
 function RestTimer({ seconds, onClose }) {
   const { t } = useLang()
   const [left, setLeft] = useState(seconds)
+  const [flash, setFlash] = useState(false)
   const ref = useRef(null)
+  const fired = useRef(false)
   useEffect(() => {
     ref.current = setInterval(() => {
       setLeft((l) => {
-        if (l <= 1) { clearInterval(ref.current); playBeep(); return 0 }
+        if (l <= 1) {
+          clearInterval(ref.current)
+          if (!fired.current) {
+            fired.current = true
+            playGo()
+            setFlash(true)
+            setTimeout(() => setFlash(false), 2600)
+          }
+          return 0
+        }
         return l - 1
       })
     }, 1000)
@@ -159,16 +188,23 @@ function RestTimer({ seconds, onClose }) {
   const ss = String(left % 60).padStart(2, '0')
   const pct = ((seconds - left) / seconds) * 100
   return (
-    <div className="rest-bar">
-      <div className="rest-fill" style={{ width: pct + '%' }} />
-      <div className="rest-inner">
-        <span className="rest-time">{left === 0 ? t('go') : `⏱ ${mm}:${ss}`}</span>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={() => setLeft((l) => l + 15)}>+15s</button>
-          <button onClick={onClose}>{left === 0 ? t('close') : t('skip')}</button>
+    <>
+      {flash && (
+        <div className="go-flash" onClick={() => setFlash(false)}>
+          <span>{t('goFlash')}</span>
+        </div>
+      )}
+      <div className="rest-bar">
+        <div className="rest-fill" style={{ width: pct + '%' }} />
+        <div className="rest-inner">
+          <span className="rest-time">{left === 0 ? t('go') : `⏱ ${mm}:${ss}`}</span>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={() => setLeft((l) => l + 15)}>+15s</button>
+            <button onClick={onClose}>{left === 0 ? t('close') : t('skip')}</button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 
