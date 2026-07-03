@@ -3,15 +3,41 @@ import { logKey, dayKey, lastLogFor } from '../storage.js'
 import { alternativesFor, suggestNextSet, EXERCISE_BY_ID, TECHNIQUES, exName, muscleName, dayName, focusName, bestTopBefore } from '../engine.js'
 import { useLang } from '../i18n.jsx'
 
+// Sceglie una voce il più possibile maschile tra quelle installate sul device.
+function pickMaleVoice(voices) {
+  if (!voices || !voices.length) return null
+  const male = /\b(male|maschile|uomo)\b/i
+  const female = /\b(female|femminile|donna)\b/i
+  // nomi di voci tipicamente maschili (iOS/macOS/Windows/Google)
+  const maleNames = /(luca|diego|cosimo|paolo|matteo|giorgio|carlo|daniel|george|arthur|fred|alex|rishi|guy|david|mark|male)/i
+  const score = (v) => {
+    const n = (v.name + ' ' + (v.voiceURI || '')).toLowerCase()
+    let s = 0
+    if (male.test(n)) s += 5
+    if (maleNames.test(n)) s += 3
+    if (female.test(n)) s -= 6
+    if (v.lang && v.lang.toLowerCase().startsWith('it')) s += 1
+    return s
+  }
+  return voices.slice().sort((a, b) => score(b) - score(a))[0] || null
+}
+
 // Voce "GO GO GO" con Web Speech API (offline sui più diffusi, gratis).
 function speakGo() {
   try {
     const synth = window.speechSynthesis
     if (!synth) return
     synth.cancel()
-    const u = new SpeechSynthesisUtterance('Go! Go! Go!')
-    u.rate = 1.15; u.pitch = 1; u.volume = 1
-    synth.speak(u)
+    const say = () => {
+      const u = new SpeechSynthesisUtterance('Go! Go! Go!')
+      const v = pickMaleVoice(synth.getVoices())
+      if (v) u.voice = v
+      u.rate = 1.1; u.pitch = 0.7; u.volume = 1 // pitch basso = più profonda/maschile
+      synth.speak(u)
+    }
+    // le voci a volte si caricano in modo asincrono
+    if (synth.getVoices().length) say()
+    else synth.addEventListener('voiceschanged', say, { once: true })
   } catch { /* voce non disponibile */ }
 }
 
