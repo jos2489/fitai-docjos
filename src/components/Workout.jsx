@@ -22,7 +22,33 @@ function pickMaleVoice(voices) {
   return voices.slice().sort((a, b) => score(b) - score(a))[0] || null
 }
 
-// Voce "GO GO GO" con Web Speech API (offline sui più diffusi, gratis).
+// Voce "pro" inclusa nell'app: file audio uguale su ogni telefono, offline.
+let goAudio = null
+function getGoAudio() {
+  if (!goAudio) { goAudio = new Audio('/go.wav'); goAudio.preload = 'auto' }
+  return goAudio
+}
+// Sblocca l'audio durante il tap dell'utente (necessario su iOS/Android).
+function primeGoVoice() {
+  try {
+    const a = getGoAudio()
+    a.muted = true
+    const p = a.play()
+    if (p && p.then) p.then(() => { a.pause(); a.currentTime = 0; a.muted = false }).catch(() => { a.muted = false })
+    else { a.pause(); a.currentTime = 0; a.muted = false }
+  } catch { /* niente */ }
+}
+// Riproduce la voce "pro"; se fallisce usa la voce del telefono come riserva.
+function playGoVoice() {
+  try {
+    const a = getGoAudio()
+    a.muted = false; a.currentTime = 0
+    const p = a.play()
+    if (p && p.catch) p.catch(() => speakGo())
+  } catch { speakGo() }
+}
+
+// Riserva: voce "GO GO GO" con Web Speech API (voce del telefono).
 function speakGo() {
   try {
     const synth = window.speechSynthesis
@@ -63,7 +89,7 @@ function playGo() {
     // tono lungo finale (più prolungato)
     tone(now + 0.9, 990, 1.1, 'sawtooth', 0.4)
     tone(now + 0.9, 660, 1.1, 'square', 0.18)
-    speakGo()
+    playGoVoice()
     if (navigator.vibrate) navigator.vibrate([250, 120, 250, 120, 400])
   } catch { /* audio non disponibile */ }
 }
@@ -193,6 +219,7 @@ function RestTimer({ seconds, onClose }) {
   const ref = useRef(null)
   const fired = useRef(false)
   useEffect(() => {
+    primeGoVoice() // sblocca l'audio finché siamo nel gesto che ha avviato il recupero
     ref.current = setInterval(() => {
       setLeft((l) => {
         if (l <= 1) {
