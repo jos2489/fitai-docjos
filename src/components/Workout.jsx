@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { logKey, dayKey, lastLogFor } from '../storage.js'
-import { alternativesFor, suggestNextSet, EXERCISE_BY_ID, TECHNIQUES, exName, muscleName, dayName, focusName, bestTopBefore } from '../engine.js'
+import { alternativesFor, suggestNextSet, EXERCISE_BY_ID, TECHNIQUES, exName, muscleName, dayName, focusName, bestTopBefore, addExerciseToProgram, removeExerciseFromProgram, addableExercises } from '../engine.js'
 import { useLang } from '../i18n.jsx'
 
 // Sceglie una voce il più possibile maschile tra quelle installate sul device.
@@ -143,6 +143,17 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
       return { ...s, swaps }
     })
   }
+  const addExercise = (exId) => {
+    setState((s) => ({ ...s, program: addExerciseToProgram(s.program, dayIdx, exId) }))
+  }
+  const removeExercise = (exId) => {
+    if (!confirm(t('removeExConfirm'))) return
+    setState((s) => {
+      const swaps = { ...(s.swaps || {}) }
+      delete swaps[swapKey(dayIdx, exId)]
+      return { ...s, program: removeExerciseFromProgram(s.program, dayIdx, exId), swaps }
+    })
+  }
   const complete = () => {
     setState((s) => ({ ...s, completed: { ...s.completed, [dk]: new Date().toISOString() } }))
     onBack()
@@ -191,10 +202,13 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
             onChange={(sets) => setLog(ex.id, sets)}
             onRest={() => setRest(ex.rest)}
             onSwap={(newId) => swapExercise(ex.id, newId)}
+            onRemove={() => removeExercise(ex.id)}
             prevBest={bestTopBefore(program, state.logs, ex.id, week)}
           />
         )
       })}
+
+      <AddExercise equip={equip} existingIds={day.exercises.map((e) => e.id)} onAdd={addExercise} />
 
       <div className="card">
         <h2>{t('notesTitle')}</h2>
@@ -263,7 +277,47 @@ function RestTimer({ seconds, onClose }) {
   )
 }
 
-function ExerciseCard({ ex, display, swapped, alternatives, existing, last, onChange, onRest, onSwap, prevBest }) {
+function AddExercise({ equip, existingIds, onAdd }) {
+  const { t, lang } = useLang()
+  const [open, setOpen] = useState(false)
+  const [muscle, setMuscle] = useState('')
+  const byMuscle = useMemo(() => addableExercises(equip, existingIds), [equip, existingIds])
+  const muscles = Object.keys(byMuscle)
+  if (!open) {
+    return (
+      <button className="btn secondary add-ex-btn" onClick={() => setOpen(true)}>
+        ➕ {t('addExercise')}
+      </button>
+    )
+  }
+  const curMuscle = muscles.includes(muscle) ? muscle : ''
+  return (
+    <div className="card add-ex-panel fade">
+      <div className="section-title" style={{ marginTop: 0 }}>{t('addExercise')}</div>
+      <div className="sub">{t('chooseMuscle')}</div>
+      <div className="opt-grid" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
+        {muscles.map((m) => (
+          <button key={m} className={'opt' + (curMuscle === m ? ' active' : '')} style={{ alignItems: 'center', textAlign: 'center', padding: 8 }} onClick={() => setMuscle(m)}>
+            <span className="lbl" style={{ fontSize: 9 }}>{muscleName(lang, m)}</span>
+          </button>
+        ))}
+      </div>
+      {curMuscle && (
+        <div className="alts fade" style={{ marginTop: 10 }}>
+          {byMuscle[curMuscle].map((e) => (
+            <button key={e.id} className="alt-opt" onClick={() => { onAdd(e.id); setOpen(false); setMuscle('') }}>
+              <span>{exName(lang, e.id)}</span>
+              <span className="alt-type">{e.type === 'compound' ? t('compoundShort') : t('isoShort')}</span>
+            </button>
+          ))}
+        </div>
+      )}
+      <button className="btn secondary" style={{ marginTop: 10 }} onClick={() => { setOpen(false); setMuscle('') }}>{t('cancel')}</button>
+    </div>
+  )
+}
+
+function ExerciseCard({ ex, display, swapped, alternatives, existing, last, onChange, onRest, onSwap, onRemove, prevBest }) {
   const { t, lang } = useLang()
   const dispName = exName(lang, display.id)
   const init = useMemo(() => {
@@ -354,6 +408,11 @@ function ExerciseCard({ ex, display, swapped, alternatives, existing, last, onCh
               <span className="alt-type">{a.type === 'compound' ? t('compoundShort') : t('isoShort')}</span>
             </button>
           ))}
+          {onRemove && (
+            <button className="alt-opt remove-ex" onClick={() => { setShowAlts(false); onRemove() }}>
+              🗑 {t('removeExercise')}
+            </button>
+          )}
         </div>
       )}
     </div>

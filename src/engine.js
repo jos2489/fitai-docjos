@@ -163,6 +163,9 @@ const SETS_BY_EXPERIENCE = {
   avanzato:     { perExercise: 4, exercisesPerDay: 7 },
 }
 
+// Muscoli piccoli/spesso sotto-allenati che beneficiano di volume extra.
+const SMALL_MUSCLES = ['Spalle', 'Bicipiti', 'Tricipiti', 'Polpacci']
+
 // RIR (ripetizioni in serbatoio) adattato al LIVELLO e progressivo nel mesociclo.
 // Principio (Helms/RP): il principiante resta lontano dal cedimento; l'avanzato
 // può avvicinarsi. In più si parte più "morbidi" e si stringe verso le ultime
@@ -257,12 +260,16 @@ export function buildProgram(profile) {
       let repsLow = goal.repsLow
       let repsHigh = goal.repsHigh
       if (!isCompound) { repsLow = goal.isoReps[0]; repsHigh = goal.isoReps[1] }
+      // Bump di volume mirato: muscoli piccoli/spesso sotto-allenati (deltoide
+      // laterale, braccia, polpacci) ricevono +1 serie per intermedi/avanzati.
+      const smallIso = e.type === 'isolation' && SMALL_MUSCLES.includes(e.muscle)
+      const bump = (smallIso && profile.experience !== 'principiante') ? 1 : 0
       return {
         id: e.id,
         name: e.name,
         muscle: e.muscle,
         type: e.type,
-        sets: isMain ? exp.perExercise + 1 : exp.perExercise,
+        sets: (isMain ? exp.perExercise + 1 : exp.perExercise) + bump,
         repsLow,
         repsHigh,
         rir: goal.rir,
@@ -310,6 +317,65 @@ export function buildProgram(profile) {
     splitName: split.map(s => s.name.split(' (')[0]).join(' · '),
     weeks,
   }
+}
+
+// --- Aggiunta/rimozione manuale di esercizi (controllo del trainer) ----------
+// Modificano il programma su TUTTE le settimane per quella giornata, con serie/
+// RIR coerenti col livello e la settimana (deload incluso). Si azzerano quando
+// si rigenera il piano (viene ricostruito da zero).
+export function addExerciseToProgram(program, dayIdx, exId) {
+  const def = EXERCISE_BY_ID[exId]
+  if (!def) return program
+  // niente doppioni nella stessa giornata (le chiavi dei log userebbero lo stesso id)
+  if (program.weeks[0]?.days[dayIdx]?.exercises.some((e) => e.id === exId)) return program
+
+  const profile = program.profile
+  const goal = GOAL_PARAMS[profile.goal] || GOAL_PARAMS.ipertrofia
+  const exp = SETS_BY_EXPERIENCE[profile.experience] || SETS_BY_EXPERIENCE.intermedio
+  const isCompound = def.type === 'compound'
+  const repsLow = isCompound ? goal.repsLow : goal.isoReps[0]
+  const repsHigh = isCompound ? goal.repsHigh : goal.isoReps[1]
+  const rest = isCompound ? goal.restCompound : goal.restIso
+  const smallIso = def.type === 'isolation' && SMALL_MUSCLES.includes(def.muscle)
+  const bump = (smallIso && profile.experience !== 'principiante') ? 1 : 0
+  const baseSets = exp.perExercise + bump
+
+  const totalWeeks = program.weeks.length
+  const hasDeload = program.weeks.some((w) => w.deload)
+  const lastWorkingIdx = Math.max(0, totalWeeks - (hasDeload ? 1 : 0) - 1)
+
+  const weeks = program.weeks.map((wk, wi) => {
+    const isDeload = wk.deload
+    const sets = isDeload ? Math.max(2, baseSets - 1) : baseSets
+    const rir = targetRIR(profile.experience, profile.goal, isDeload ? 0 : wi, lastWorkingIdx, isDeload)
+    const entry = {
+      id: def.id, name: def.name, muscle: def.muscle, type: def.type,
+      sets, repsLow, repsHigh, rir, rest, technique: null, custom: true,
+    }
+    const days = wk.days.map((d, di) => (di === dayIdx ? { ...d, exercises: [...d.exercises, entry] } : d))
+    return { ...wk, days }
+  })
+  return { ...program, weeks }
+}
+
+export function removeExerciseFromProgram(program, dayIdx, exId) {
+  const weeks = program.weeks.map((wk) => {
+    const days = wk.days.map((d, di) => (di === dayIdx ? { ...d, exercises: d.exercises.filter((e) => e.id !== exId) } : d))
+    return { ...wk, days }
+  })
+  return { ...program, weeks }
+}
+
+// Esercizi selezionabili per muscolo e attrezzatura, esclusi quelli già in giornata.
+export function addableExercises(equip, excludeIds) {
+  const skip = new Set(excludeIds || [])
+  const byMuscle = {}
+  for (const e of EXERCISES) {
+    if (!e.equip.includes(equip)) continue
+    if (skip.has(e.id)) continue
+    ;(byMuscle[e.muscle] = byMuscle[e.muscle] || []).push(e)
+  }
+  return byMuscle
 }
 
 function progressionNote(progressWeek, goal) {
