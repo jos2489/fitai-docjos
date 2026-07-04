@@ -119,5 +119,5 @@ function firstIncompleteWeek(program, completed) {
 function regenerate(state, setState, lang) {
   const q = lang === 'en' ? 'Regenerate the program? You keep your logged load history but the structure may change.' : 'Vuoi rigenerare il programma? Manterrai lo storico dei pesi registrati ma la struttura potrebbe cambiare.'
   if (!confirm(q)) return
-  setState((s) => ({ ...s, program: buildProgram(s.program.profile), completed: {} }))
+  setState((s) => ({ ...s, program: buildProgram(s.program.profile), completed: {}, swaps: {} }))
 }

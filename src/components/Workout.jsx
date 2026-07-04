@@ -98,7 +98,9 @@ function videoUrl(name) {
   return 'https://www.youtube.com/results?search_query=' + encodeURIComponent('esecuzione corretta ' + name)
 }
 
-const swapKey = (week, dayIdx, exId) => `${week}-${dayIdx}-${exId}`
+// Nota: la chiave NON include la settimana: uno swap vale per tutto il piano
+// (tutte le settimane di quel mesociclo). Si azzera quando rigeneri il piano.
+const swapKey = (dayIdx, exId) => `${dayIdx}-${exId}`
 
 // Autoregolazione giornaliera (RIR/RPE): adatta volume e intensità del giorno
 // in base a come ti senti, restando nelle zone corrette.
@@ -136,8 +138,8 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
   const swapExercise = (origId, newId) => {
     setState((s) => {
       const swaps = { ...(s.swaps || {}) }
-      if (newId) swaps[swapKey(week, dayIdx, origId)] = newId
-      else delete swaps[swapKey(week, dayIdx, origId)]
+      if (newId) swaps[swapKey(dayIdx, origId)] = newId
+      else delete swaps[swapKey(dayIdx, origId)]
       return { ...s, swaps }
     })
   }
@@ -174,7 +176,7 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
       </div>
 
       {day.exercises.map((ex) => {
-        const swappedId = (state.swaps || {})[swapKey(week, dayIdx, ex.id)]
+        const swappedId = (state.swaps || {})[swapKey(dayIdx, ex.id)]
         const display = swappedId ? EXERCISE_BY_ID[swappedId] : EXERCISE_BY_ID[ex.id]
         const adjEx = { ...ex, sets: Math.max(2, ex.sets + adj.sets), rir: Math.max(0, ex.rir + adj.rir) }
         return (

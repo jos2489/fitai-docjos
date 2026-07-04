@@ -163,6 +163,25 @@ const SETS_BY_EXPERIENCE = {
   avanzato:     { perExercise: 4, exercisesPerDay: 7 },
 }
 
+// RIR (ripetizioni in serbatoio) adattato al LIVELLO e progressivo nel mesociclo.
+// Principio (Helms/RP): il principiante resta lontano dal cedimento; l'avanzato
+// può avvicinarsi. In più si parte più "morbidi" e si stringe verso le ultime
+// settimane, gestendo la fatica. In deload si sta molto larghi (RIR alto).
+const RIR_BY_EXPERIENCE = {
+  principiante: { start: 3, floor: 2 },
+  intermedio:   { start: 3, floor: 1 },
+  avanzato:     { start: 2, floor: 0 },
+}
+function targetRIR(experience, goalKey, progressWeek, lastWorkingIdx, isDeload) {
+  if (isDeload) return 4
+  const cfg = RIR_BY_EXPERIENCE[experience] || RIR_BY_EXPERIENCE.intermedio
+  let { start, floor } = cfg
+  if (goalKey === 'forza') floor = Math.max(floor, 1) // in forza non arrivare a cedimento
+  if (lastWorkingIdx <= 0) return start
+  const frac = Math.min(1, Math.max(0, progressWeek / lastWorkingIdx))
+  return Math.max(0, Math.round(start - (start - floor) * frac))
+}
+
 // --- Definizione degli split per numero di giorni ----------------------------
 // Ogni "slot" è un gruppo muscolare prioritario; il primo è il movimento
 // principale (compound) della seduta.
@@ -255,17 +274,21 @@ export function buildProgram(profile) {
 
   // 2) replica per settimane con progressione + deload
   const weeks = []
+  const workingWeeks = totalWeeks - (hasDeload ? 1 : 0)
+  const lastWorkingIdx = Math.max(0, workingWeeks - 1)
   for (let w = 1; w <= totalWeeks; w++) {
     const isDeload = hasDeload && w === totalWeeks
     const progressWeek = isDeload ? 0 : w - 1
+    // RIR adattato al livello dell'utente + progressivo nel blocco
+    const weekRir = targetRIR(profile.experience, profile.goal, progressWeek, lastWorkingIdx, isDeload)
     const days = baseDays.map((d) => ({
       name: d.name,
       focus: d.focus,
       exercises: d.exercises.map((ex, ei, arr) => ({
         ...ex,
-        // in deload: -1 set e RIR più alto (intensità ridotta)
+        // in deload: -1 set (intensità ridotta anche via RIR alto)
         sets: isDeload ? Math.max(2, ex.sets - 1) : ex.sets,
-        rir: isDeload ? ex.rir + 2 : ex.rir,
+        rir: weekRir,
         // tecnica avanzata sbloccata in base a livello/settimana (no in deload)
         technique: assignTechnique(ex, ei, arr, profile.experience, w, isDeload),
       })),
