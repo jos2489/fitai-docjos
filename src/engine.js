@@ -166,6 +166,22 @@ const SETS_BY_EXPERIENCE = {
 // Muscoli piccoli/spesso sotto-allenati che beneficiano di volume extra.
 const SMALL_MUSCLES = ['Spalle', 'Bicipiti', 'Tricipiti', 'Polpacci']
 
+// Alzate laterali (isolamento deltoide laterale): inserite in automatico nelle
+// giornate che allenano le spalle, perché la spinta lavora soprattutto il
+// deltoide anteriore e il laterale resterebbe scoperto.
+const LATERAL_RAISE_IDS = ['lateral_raise', 'cable_lateral', 'single_arm_lateral']
+
+// Rampa del volume nel mesociclo (MEV→MAV): si parte con una serie in meno
+// (vicino al minimo efficace) e si sale a una in più nell'ultima settimana di
+// lavoro, prima dello scarico. Combinata col RIR calante = progressione doppia.
+function weekSetDelta(experience, progressWeek, lastWorkingIdx, isDeload) {
+  if (isDeload) return -1
+  if (experience === 'principiante') return 0 // i principianti tengono volume stabile
+  if (lastWorkingIdx <= 0) return 0
+  const frac = Math.min(1, Math.max(0, progressWeek / lastWorkingIdx))
+  return Math.round(-1 + 2 * frac) // -1 (prima) → +1 (ultima settimana di lavoro)
+}
+
 // RIR (ripetizioni in serbatoio) adattato al LIVELLO e progressivo nel mesociclo.
 // Principio (Helms/RP): il principiante resta lontano dal cedimento; l'avanzato
 // può avvicinarsi. In più si parte più "morbidi" e si stringe verso le ultime
@@ -254,6 +270,14 @@ export function buildProgram(profile) {
   // 1) costruisci i giorni "base" (settimana 1)
   const baseDays = split.map((day) => {
     const exs = pickExercises(day.slots, equip, exp.exercisesPerDay, usedIds)
+    // Alzate laterali automatiche: se la giornata allena le spalle ma non c'è
+    // già un'alzata laterale, aggiungila (copre il deltoide laterale).
+    if (day.slots.includes('Spalle') && !exs.some((e) => LATERAL_RAISE_IDS.includes(e.id))) {
+      const lr = LATERAL_RAISE_IDS
+        .map((id) => EXERCISE_BY_ID[id])
+        .find((e) => e && e.equip.includes(equip) && !exs.some((x) => x.id === e.id))
+      if (lr) { exs.push(lr); usedIds.set(lr.id, (usedIds.get(lr.id) || 0) + 1) }
+    }
     const exercises = exs.map((e, i) => {
       const isMain = i === 0 && e.type === 'compound'
       const isCompound = e.type === 'compound'
@@ -288,13 +312,15 @@ export function buildProgram(profile) {
     const progressWeek = isDeload ? 0 : w - 1
     // RIR adattato al livello dell'utente + progressivo nel blocco
     const weekRir = targetRIR(profile.experience, profile.goal, progressWeek, lastWorkingIdx, isDeload)
+    // Rampa del volume: -1 set la prima settimana, +1 l'ultima di lavoro, -1 in deload
+    const setDelta = weekSetDelta(profile.experience, progressWeek, lastWorkingIdx, isDeload)
     const days = baseDays.map((d) => ({
       name: d.name,
       focus: d.focus,
       exercises: d.exercises.map((ex, ei, arr) => ({
         ...ex,
-        // in deload: -1 set (intensità ridotta anche via RIR alto)
-        sets: isDeload ? Math.max(2, ex.sets - 1) : ex.sets,
+        // volume rampato nel mesociclo (MEV→MAV), min 2 serie
+        sets: Math.max(2, ex.sets + setDelta),
         rir: weekRir,
         // tecnica avanzata sbloccata in base a livello/settimana (no in deload)
         technique: assignTechnique(ex, ei, arr, profile.experience, w, isDeload),
@@ -346,8 +372,9 @@ export function addExerciseToProgram(program, dayIdx, exId) {
 
   const weeks = program.weeks.map((wk, wi) => {
     const isDeload = wk.deload
-    const sets = isDeload ? Math.max(2, baseSets - 1) : baseSets
-    const rir = targetRIR(profile.experience, profile.goal, isDeload ? 0 : wi, lastWorkingIdx, isDeload)
+    const progressWeek = isDeload ? 0 : wi
+    const sets = Math.max(2, baseSets + weekSetDelta(profile.experience, progressWeek, lastWorkingIdx, isDeload))
+    const rir = targetRIR(profile.experience, profile.goal, progressWeek, lastWorkingIdx, isDeload)
     const entry = {
       id: def.id, name: def.name, muscle: def.muscle, type: def.type,
       sets, repsLow, repsHigh, rir, rest, technique: null, custom: true,
