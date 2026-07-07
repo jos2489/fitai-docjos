@@ -229,6 +229,13 @@ textarea.in { min-height: 84px; resize: vertical; }
 
 /* gamification (badge/streak) */
 .gami { display: flex; align-items: center; gap: 12px; background: linear-gradient(180deg, var(--card), var(--bg2)); border: 2px solid var(--amber); border-radius: var(--r); padding: 12px 14px; margin-bottom: 14px; box-shadow: 0 0 14px rgba(255, 210, 63, 0.25), var(--shadow); }
+.block-done { border: 2px solid var(--accent-2); box-shadow: 0 0 18px rgba(0, 240, 255, 0.28), var(--shadow); margin-bottom: 16px; }
+.block-done .bd-head { font-family: var(--pix); font-size: 13px; color: var(--accent-2); text-shadow: 0 0 10px var(--accent-2); margin-bottom: 8px; }
+.block-done .bd-msg { font-size: 14px; color: var(--muted); line-height: 1.5; margin-bottom: 14px; }
+.block-done .bd-cta { display: flex; flex-direction: column; align-items: flex-start; text-align: left; gap: 4px; height: auto; padding: 12px 14px; margin-bottom: 10px; line-height: 1.3; }
+.block-done .bd-cta:last-child { margin-bottom: 0; }
+.block-done .bd-sub { font-family: var(--mono); font-size: 13px; font-weight: 400; opacity: 0.85; white-space: normal; text-transform: none; letter-spacing: 0; }
+.block-done .bd-maxed { font-size: 14px; color: var(--good); margin-bottom: 10px; }
 .gami-badge { font-size: 32px; filter: drop-shadow(0 0 8px var(--amber)); }
 .gami-stat { display: flex; flex-direction: column; align-items: center; flex: 1; }
 .gami-stat b { font-family: var(--pix); font-size: 15px; color: var(--accent-2); }

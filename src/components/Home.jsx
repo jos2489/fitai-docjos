@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { dayKey } from '../storage.js'
-import { buildProgram, dayName, focusName, weekNoteText, workoutStats } from '../engine.js'
+import { buildProgram, dayName, focusName, weekNoteText, workoutStats, assessProgress, levelUpProgram } from '../engine.js'
 import { useLang, goalLabel } from '../i18n.jsx'
 
 const POSES = [
@@ -36,6 +36,8 @@ export default function Home({ state, setState, onOpenDay }) {
   const totalDone = Object.keys(completed).length
   const progressPct = Math.round((totalDone / totalDays) * 100)
   const stats = workoutStats(completed)
+  const blockDone = totalDone >= totalDays
+  const progress = blockDone ? assessProgress(program, state.logs, completed, lang) : null
 
   return (
     <div className="fade">
@@ -49,6 +51,27 @@ export default function Home({ state, setState, onOpenDay }) {
           <div className="aigen"><span className="pulse" /> {progressPct}% {t('completed')}</div>
         </div>
       </div>
+
+      {blockDone && (
+        <div className="card block-done fade">
+          <div className="bd-head">🏁 {t('blockDoneTitle')}</div>
+          <div className="bd-msg">{progress.message}</div>
+
+          {progress.nextLevel ? (
+            <button className={'btn bd-cta' + (progress.suggestLevelUp ? '' : ' secondary')} onClick={() => levelUp(state, setState, lang, progress.nextLevel)}>
+              ⬆️ {t('levelUpCta')}
+              <span className="bd-sub">{progress.suggestLevelUp ? t('levelUpSubGood') : t('levelUpSubOpt')}</span>
+            </button>
+          ) : (
+            <div className="bd-maxed">🏆 {t('levelMaxed')}</div>
+          )}
+
+          <button className="btn secondary bd-cta" onClick={() => regenerate(state, setState, lang)}>
+            🔄 {t('regenSameCta')}
+            <span className="bd-sub">{t('regenSameSub')}</span>
+          </button>
+        </div>
+      )}
 
       {stats.total > 0 && (
         <div className="gami">
@@ -120,4 +143,12 @@ function regenerate(state, setState, lang) {
   const q = lang === 'en' ? 'Regenerate the program? You keep your logged load history but the structure may change.' : 'Vuoi rigenerare il programma? Manterrai lo storico dei pesi registrati ma la struttura potrebbe cambiare.'
   if (!confirm(q)) return
   setState((s) => ({ ...s, program: buildProgram(s.program.profile), completed: {}, swaps: {} }))
+}
+
+function levelUp(state, setState, lang, nextLevel) {
+  const q = lang === 'en'
+    ? `Level up to "${nextLevel}"? I'll generate a new block with more volume and advanced techniques. Your load history stays saved.`
+    : `Salire al livello "${nextLevel}"? Genero un nuovo blocco con più volume e tecniche avanzate. Lo storico dei pesi resta salvato.`
+  if (!confirm(q)) return
+  setState((s) => ({ ...s, program: levelUpProgram(s.program), completed: {}, swaps: {} }))
 }

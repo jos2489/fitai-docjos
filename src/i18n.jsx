@@ -52,6 +52,13 @@ export const STRINGS = {
   deloadBadge: { it: 'scarico', en: 'deload' },
   exercises: { it: 'esercizi', en: 'exercises' },
   regenerate: { it: '🔄 Rigenera programma', en: '🔄 Regenerate program' },
+  blockDoneTitle: { it: 'Blocco completato!', en: 'Block completed!' },
+  levelUpCta: { it: 'Sali di livello → genera il prossimo blocco', en: 'Level up → generate the next block' },
+  levelUpSubGood: { it: 'Consigliato: hai completato le sedute e migliorato i carichi. Più volume e tecniche avanzate.', en: 'Recommended: you finished the sessions and improved your loads. More volume and advanced techniques.' },
+  levelUpSubOpt: { it: 'Opzionale: i progressi non sono ancora ottimali, ma puoi salire se te la senti.', en: 'Optional: progress isn’t optimal yet, but you can level up if you feel ready.' },
+  levelMaxed: { it: 'Sei già al livello massimo: continua col sovraccarico progressivo.', en: 'You’re already at the top level: keep progressive overload.' },
+  regenSameCta: { it: 'Genera da capo (stesso livello)', en: 'Generate again (same level)' },
+  regenSameSub: { it: 'Stessa difficoltà, nuova scheda. Per variare senza cambiare livello.', en: 'Same difficulty, new plan. To vary without changing level.' },
 
   // --- workout ---
   feelToday: { it: '🌡️ COME TI SENTI OGGI?', en: '🌡️ HOW DO YOU FEEL TODAY?' },
