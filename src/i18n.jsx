@@ -82,6 +82,7 @@ export const STRINGS = {
   isoShort: { it: 'isolam.', en: 'isolation' },
   go: { it: '✅ GO!', en: '✅ GO!' },
   goFlash: { it: 'GO! GO! GO!', en: 'GO! GO! GO!' },
+  screenStaysOn: { it: 'Schermo attivo durante il recupero', en: 'Screen stays on during rest' },
   skip: { it: 'SALTA', en: 'SKIP' },
   close: { it: 'CHIUDI', en: 'CLOSE' },
 

@@ -228,31 +228,69 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
   )
 }
 
+// Wake Lock: tiene lo schermo ACCESO durante il recupero, così il timer, il
+// suono e la voce partono anche se il telefono si oscurerebbe da solo. Si
+// ri-acquisisce quando si torna sull'app. (Il blocco manuale del telefono
+// resta un limite delle web-app: il sistema le sospende.)
+function useWakeLock() {
+  const [active, setActive] = useState(false)
+  useEffect(() => {
+    let lock = null, dead = false
+    const request = async () => {
+      try {
+        if ('wakeLock' in navigator) {
+          lock = await navigator.wakeLock.request('screen')
+          if (!dead) setActive(true)
+          lock.addEventListener('release', () => setActive(false))
+        }
+      } catch { /* non supportato o negato */ }
+    }
+    const onVis = () => { if (document.visibilityState === 'visible' && !dead) request() }
+    request()
+    document.addEventListener('visibilitychange', onVis)
+    return () => {
+      dead = true
+      document.removeEventListener('visibilitychange', onVis)
+      try { lock && lock.release() } catch { /* ignora */ }
+    }
+  }, [])
+  return active
+}
+
 function RestTimer({ seconds, onClose }) {
   const { t } = useLang()
+  const endAt = useRef(Date.now() + seconds * 1000)
   const [left, setLeft] = useState(seconds)
   const [flash, setFlash] = useState(false)
-  const ref = useRef(null)
   const fired = useRef(false)
+  const screenOn = useWakeLock()
+
   useEffect(() => {
     primeGoVoice() // sblocca l'audio finché siamo nel gesto che ha avviato il recupero
-    ref.current = setInterval(() => {
-      setLeft((l) => {
-        if (l <= 1) {
-          clearInterval(ref.current)
-          if (!fired.current) {
-            fired.current = true
-            playGo()
-            setFlash(true)
-            setTimeout(() => setFlash(false), 2600)
-          }
-          return 0
-        }
-        return l - 1
-      })
-    }, 1000)
-    return () => clearInterval(ref.current)
+    // Timer basato su timestamp: preciso anche se il sistema rallenta i tick.
+    const tick = () => {
+      const rem = Math.max(0, Math.round((endAt.current - Date.now()) / 1000))
+      setLeft(rem)
+      if (rem <= 0 && !fired.current) {
+        fired.current = true
+        playGo()
+        setFlash(true)
+        setTimeout(() => setFlash(false), 2600)
+      }
+    }
+    const id = setInterval(tick, 250)
+    const onVis = () => { if (document.visibilityState === 'visible') tick() }
+    document.addEventListener('visibilitychange', onVis)
+    return () => { clearInterval(id); document.removeEventListener('visibilitychange', onVis) }
   }, [])
+
+  const add15 = () => {
+    const rem = Math.max(0, left) + 15
+    endAt.current = Date.now() + rem * 1000
+    setLeft(rem)
+    fired.current = false
+  }
+
   const mm = String(Math.floor(left / 60)).padStart(1, '0')
   const ss = String(left % 60).padStart(2, '0')
   const pct = ((seconds - left) / seconds) * 100
@@ -266,9 +304,9 @@ function RestTimer({ seconds, onClose }) {
       <div className="rest-bar">
         <div className="rest-fill" style={{ width: pct + '%' }} />
         <div className="rest-inner">
-          <span className="rest-time">{left === 0 ? t('go') : `⏱ ${mm}:${ss}`}</span>
+          <span className="rest-time">{left === 0 ? t('go') : `⏱ ${mm}:${ss}`}{screenOn && <span className="wake-dot" title={t('screenStaysOn')}> 🔆</span>}</span>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={() => setLeft((l) => l + 15)}>+15s</button>
+            <button onClick={add15}>+15s</button>
             <button onClick={onClose}>{left === 0 ? t('close') : t('skip')}</button>
           </div>
         </div>
@@ -356,7 +394,7 @@ function ExerciseCard({ ex, display, swapped, alternatives, existing, last, onCh
             </div>
           )}
         </div>
-        <a className="video-btn" href={videoUrl(dispName)} target="_blank" rel="noreferrer">{t('videoBtn')}</a>
+        <a className="video-btn" href={display.video || videoUrl(dispName)} target="_blank" rel="noreferrer">{t('videoBtn')}</a>
       </div>
 
       <div className="suggestion">💡 {suggestion.text}</div>

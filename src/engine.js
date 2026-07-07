@@ -67,6 +67,7 @@ export const EXERCISES = [
   { id: 'wide_pulldown', name: 'Lat machine presa larga', muscle: 'Schiena', type: 'compound', equip: ['gym'] },
   { id: 'straight_arm_pd', name: 'Pulldown a braccia tese', muscle: 'Schiena', type: 'isolation', equip: ['gym'] },
   { id: 'db_pullover', name: 'Pullover con manubrio', muscle: 'Schiena', type: 'isolation', equip: ['gym', 'dumbbell'] },
+  { id: 'kelso_shrug', name: 'Kelso shrug su panca', muscle: 'Schiena', type: 'isolation', equip: ['gym', 'dumbbell'], video: 'https://www.youtube.com/results?search_query=kelso+shrug+incline+bench' },
   // SPALLE
   { id: 'arnold_press', name: 'Arnold press', muscle: 'Spalle', type: 'compound', equip: ['gym', 'dumbbell'] },
   { id: 'machine_shoulder', name: 'Shoulder press alla macchina', muscle: 'Spalle', type: 'compound', equip: ['gym'] },
@@ -465,7 +466,7 @@ const EXERCISE_NAME_EN = {
   barbell_curl: 'Barbell curl', db_curl: 'Dumbbell curl', chinup: 'Chin-up', triceps_pushdown: 'Cable push-down', db_skull: 'Dumbbell skull crusher', dips: 'Parallel bar dips',
   plank: 'Plank', hanging_raise: 'Hanging knee raise', cable_crunch: 'Cable crunch',
   incline_barbell: 'Incline barbell press', machine_press: 'Machine chest press', decline_db: 'Decline dumbbell press', pec_deck: 'Pec deck', low_cable_fly: 'Low cable fly',
-  tbar_row: 'T-bar row', pendlay_row: 'Pendlay row', machine_row: 'Machine row', wide_pulldown: 'Wide-grip pulldown', straight_arm_pd: 'Straight-arm pulldown', db_pullover: 'Dumbbell pullover',
+  tbar_row: 'T-bar row', pendlay_row: 'Pendlay row', machine_row: 'Machine row', wide_pulldown: 'Wide-grip pulldown', straight_arm_pd: 'Straight-arm pulldown', db_pullover: 'Dumbbell pullover', kelso_shrug: 'Kelso shrug (bench)',
   arnold_press: 'Arnold press', machine_shoulder: 'Machine shoulder press', upright_row: 'Upright row', cable_lateral: 'Cable lateral raise', rear_delt_fly: 'Rear delt fly',
   front_squat: 'Front squat', hack_squat: 'Hack squat', walking_lunge: 'Walking lunge', sissy_squat: 'Sissy squat',
   seated_leg_curl: 'Seated leg curl', nordic_curl: 'Nordic hamstring curl', good_morning: 'Good morning',
