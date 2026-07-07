@@ -1,9 +1,16 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { adaptProgram, assessProgress, levelUpProgram, dayName, buildProgram, PRIORITY_GROUPS, INJURY_OPTIONS, EMPHASIS_OPTIONS, SESSION_TIMES } from '../engine.js'
 import { useLang, LANGUAGES, goalLabel, expLabel, equipLabel } from '../i18n.jsx'
 
-export default function Profile({ state, setState }) {
+export default function Profile({ state, setState, focus, onFocusDone }) {
   const { t, lang, setLang } = useLang()
+
+  useEffect(() => {
+    if (focus !== 'perso') return
+    const el = document.getElementById('perso-anchor')
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    onFocusDone && onFocusDone()
+  }, [focus])
   const en = lang === 'en'
   const { program } = state
   const p = program.profile
@@ -90,6 +97,7 @@ export default function Profile({ state, setState }) {
         <Row k={t('mesocycle')} v={`${program.weeks.length} ${t('weeksFull')}`} last />
       </div>
 
+      <div id="perso-anchor" style={{ scrollMarginTop: 12 }} />
       <PersonalizationCard program={program} setState={setState} lang={lang} t={t} setMsg={setMsg} />
 
       <div className="section-title">{t('adaptTitle')}</div>

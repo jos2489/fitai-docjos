@@ -28,6 +28,7 @@ function Shell({ state, setState }) {
   const { t } = useLang()
   const [tab, setTab] = useState('home')
   const [workout, setWorkout] = useState(null)
+  const [profileFocus, setProfileFocus] = useState(null)
 
   // nessun programma -> onboarding
   if (!state.program) {
@@ -60,12 +61,12 @@ function Shell({ state, setState }) {
         </div>
       </div>
 
-      {tab === 'home' && <Home state={state} setState={setState} onOpenDay={(week, dayIdx) => setWorkout({ week, dayIdx })} />}
+      {tab === 'home' && <Home state={state} setState={setState} onOpenDay={(week, dayIdx) => setWorkout({ week, dayIdx })} onPersonalize={() => { setProfileFocus('perso'); setTab('profile') }} />}
       {tab === 'stats' && <Stats state={state} setState={setState} />}
       {tab === 'history' && <History state={state} />}
       {tab === 'wod' && <Wod state={state} />}
       {tab === 'nutrition' && <Nutrition state={state} setState={setState} />}
-      {tab === 'profile' && <Profile state={state} setState={setState} />}
+      {tab === 'profile' && <Profile state={state} setState={setState} focus={profileFocus} onFocusDone={() => setProfileFocus(null)} />}
 
       <nav className="nav">
         <NavBtn id="home" tab={tab} setTab={setTab} ic="🗓️" label={t('plan')} />

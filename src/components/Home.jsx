@@ -25,7 +25,7 @@ function MascotHero({ onStart }) {
   )
 }
 
-export default function Home({ state, setState, onOpenDay }) {
+export default function Home({ state, setState, onOpenDay, onPersonalize }) {
   const { t, lang } = useLang()
   const { program, completed } = state
   const [week, setWeek] = useState(() => firstIncompleteWeek(program, completed))
@@ -119,6 +119,9 @@ export default function Home({ state, setState, onOpenDay }) {
         )
       })}
 
+      <button className="btn secondary" style={{ marginTop: 8 }} onClick={onPersonalize}>
+        {t('personalizeBtn')}
+      </button>
       <button className="btn secondary" style={{ marginTop: 8 }} onClick={() => regenerate(state, setState, lang)}>
         {t('regenerate')}
       </button>

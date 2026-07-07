@@ -41,6 +41,7 @@ export const STRINGS = {
   persoSub: { it: 'Tutto facoltativo: lascia vuoto e premi "Genera" per la scheda standard.', en: 'All optional: leave empty and press "Generate" for the standard plan.' },
   persoProfileSub: { it: 'Imposta le tue preferenze e rigenera la scheda quando vuoi. Lo storico dei pesi resta salvato.', en: 'Set your preferences and regenerate the plan anytime. Your load history stays saved.' },
   persoApply: { it: '✨ Applica e rigenera la scheda', en: '✨ Apply and regenerate the plan' },
+  personalizeBtn: { it: '⚙️ Personalizza scheda', en: '⚙️ Personalize plan' },
   persoPriority: { it: 'Muscoli prioritari (max 2)', en: 'Priority muscles (max 2)' },
   persoTime: { it: 'Tempo per seduta', en: 'Time per session' },
   persoInjury: { it: 'Zone da proteggere', en: 'Areas to protect' },
