@@ -91,6 +91,10 @@ button { font-family: var(--pix); cursor: pointer; border: none; }
 
 /* ---- Option grid ---- */
 .opt-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.opt-grid.opt-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.opt-grid.opt-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.opt-grid.opt-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.opt-grid + .section-title { margin-top: 14px; }
 .opt {
   padding: 14px; border-radius: var(--r); background: var(--card-2); border: 2px solid var(--line);
   text-align: left; color: var(--text); transition: all 0.12s; display: flex; flex-direction: column; gap: 4px; box-shadow: var(--shadow);

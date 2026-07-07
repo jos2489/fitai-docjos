@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { adaptProgram, assessProgress, levelUpProgram, dayName } from '../engine.js'
+import { adaptProgram, assessProgress, levelUpProgram, dayName, buildProgram, PRIORITY_GROUPS, INJURY_OPTIONS, EMPHASIS_OPTIONS, SESSION_TIMES } from '../engine.js'
 import { useLang, LANGUAGES, goalLabel, expLabel, equipLabel } from '../i18n.jsx'
 
 export default function Profile({ state, setState }) {
@@ -90,6 +90,8 @@ export default function Profile({ state, setState }) {
         <Row k={t('mesocycle')} v={`${program.weeks.length} ${t('weeksFull')}`} last />
       </div>
 
+      <PersonalizationCard program={program} setState={setState} lang={lang} t={t} setMsg={setMsg} />
+
       <div className="section-title">{t('adaptTitle')}</div>
       <div className="card">
         <div className="sub">{t('adaptSub')}</div>
@@ -138,6 +140,80 @@ export default function Profile({ state, setState }) {
       </div>
       <div style={{ height: 10 }} />
     </div>
+  )
+}
+
+function PersonalizationCard({ program, setState, lang, t, setMsg }) {
+  const pr = program.profile
+  const [pref, setPref] = useState({
+    priorityGroups: pr.priorityGroups || [],
+    sessionTime: pr.sessionTime ?? null,
+    injuries: pr.injuries || [],
+    emphasis: pr.emphasis || 'equilibrato',
+  })
+  const en = lang === 'en'
+  const toggle = (key, val, max) => setPref((s) => {
+    const cur = s[key] || []
+    if (cur.includes(val)) return { ...s, [key]: cur.filter((x) => x !== val) }
+    if (max && cur.length >= max) return s
+    return { ...s, [key]: [...cur, val] }
+  })
+
+  const apply = () => {
+    const q = en
+      ? 'Regenerate the plan with these settings? You keep your load history; the structure will change.'
+      : 'Rigenerare la scheda con queste impostazioni? Mantieni lo storico dei pesi; la struttura cambierà.'
+    if (!confirm(q)) return
+    setState((s) => ({ ...s, program: buildProgram({ ...s.program.profile, ...pref }), completed: {}, swaps: {} }))
+    setMsg(en ? '✅ Plan regenerated with your personalization.' : '✅ Scheda rigenerata con la tua personalizzazione.')
+    setTimeout(() => setMsg(''), 4000)
+  }
+
+  return (
+    <>
+      <div className="section-title">{t('persoTitle')}</div>
+      <div className="card">
+        <div className="sub">{t('persoProfileSub')}</div>
+
+        <div className="section-title" style={{ marginTop: 4 }}>{t('persoPriority')}</div>
+        <div className="opt-grid opt-grid-3">
+          {PRIORITY_GROUPS.map((g) => (
+            <button key={g.id} className={'opt' + (pref.priorityGroups.includes(g.id) ? ' active' : '')} style={{ alignItems: 'center', textAlign: 'center', padding: 10 }} onClick={() => toggle('priorityGroups', g.id, 2)}>
+              <span className="lbl" style={{ fontSize: 10 }}>{t('pm_' + g.id)}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="section-title">{t('persoTime')}</div>
+        <div className="opt-grid opt-grid-4">
+          {SESSION_TIMES.map((m) => (
+            <button key={m} className={'opt' + (pref.sessionTime === m ? ' active' : '')} style={{ alignItems: 'center', textAlign: 'center', padding: 10 }} onClick={() => setPref((s) => ({ ...s, sessionTime: s.sessionTime === m ? null : m }))}>
+              <span className="lbl" style={{ fontSize: 11 }}>{m}{m === 75 ? '+' : ''}′</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="section-title">{t('persoInjury')}</div>
+        <div className="opt-grid opt-grid-3">
+          {INJURY_OPTIONS.map((id) => (
+            <button key={id} className={'opt' + (pref.injuries.includes(id) ? ' active' : '')} style={{ alignItems: 'center', textAlign: 'center', padding: 10 }} onClick={() => toggle('injuries', id)}>
+              <span className="lbl" style={{ fontSize: 10 }}>{t('inj_' + id)}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="section-title">{t('persoEmphasis')}</div>
+        <div className="opt-grid opt-grid-2">
+          {EMPHASIS_OPTIONS.map((id) => (
+            <button key={id} className={'opt' + (pref.emphasis === id ? ' active' : '')} style={{ textAlign: 'left', padding: 10 }} onClick={() => setPref((s) => ({ ...s, emphasis: id }))}>
+              <span className="lbl" style={{ fontSize: 10 }}>{t('emp_' + id)}</span>
+            </button>
+          ))}
+        </div>
+
+        <button className="btn" style={{ marginTop: 14 }} onClick={apply}>{t('persoApply')}</button>
+      </div>
+    </>
   )
 }
 

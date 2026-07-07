@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { buildProgram, GOALS, EXPERIENCES, EQUIPMENTS } from '../engine.js'
+import { buildProgram, GOALS, EXPERIENCES, EQUIPMENTS, PRIORITY_GROUPS, INJURY_OPTIONS, EMPHASIS_OPTIONS, SESSION_TIMES } from '../engine.js'
 import { useLang, LANGUAGES, goalLabel, expLabel, expDesc, equipLabel } from '../i18n.jsx'
 
 // Wizard di profilazione del cliente: l'Ai userà queste risposte per costruire
@@ -11,8 +11,16 @@ export default function Onboarding({ onCreate }) {
     name: '', sex: 'm', age: 28, weight: '', height: '',
     goal: 'ipertrofia', experience: 'intermedio', equipment: 'gym',
     daysPerWeek: 4, weeks: 4,
+    // personalizzazione opzionale (vuota = scheda standard)
+    priorityGroups: [], sessionTime: null, injuries: [], emphasis: 'equilibrato',
   })
   const set = (patch) => setP((s) => ({ ...s, ...patch }))
+  const toggleIn = (key, val, max) => setP((s) => {
+    const cur = s[key] || []
+    if (cur.includes(val)) return { ...s, [key]: cur.filter((x) => x !== val) }
+    if (max && cur.length >= max) return s
+    return { ...s, [key]: [...cur, val] }
+  })
 
   const steps = [
     // 0 - intro + nome
@@ -109,6 +117,49 @@ export default function Onboarding({ onCreate }) {
         <div className="section-title">{t('mesoTitle')}</div>
         <Stepper value={p.weeks} min={2} max={12} unit={t('weeksUnit')} onChange={(v) => set({ weeks: v })} />
         <div className="aigen"><span className="pulse" /> {t('deloadHint')}</div>
+      </div>
+    ),
+    // 5 - personalizzazione (opzionale / saltabile)
+    (
+      <div className="card fade">
+        <h2>{t('persoTitle')}</h2>
+        <div className="sub">{t('persoSub')}</div>
+
+        <div className="section-title">{t('persoPriority')}</div>
+        <div className="opt-grid opt-grid-3">
+          {PRIORITY_GROUPS.map((g) => (
+            <button key={g.id} className={'opt' + ((p.priorityGroups || []).includes(g.id) ? ' active' : '')} style={{ alignItems: 'center', textAlign: 'center', padding: 10 }} onClick={() => toggleIn('priorityGroups', g.id, 2)}>
+              <span className="lbl" style={{ fontSize: 10 }}>{t('pm_' + g.id)}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="section-title">{t('persoTime')}</div>
+        <div className="opt-grid opt-grid-4">
+          {SESSION_TIMES.map((m) => (
+            <button key={m} className={'opt' + (p.sessionTime === m ? ' active' : '')} style={{ alignItems: 'center', textAlign: 'center', padding: 10 }} onClick={() => set({ sessionTime: p.sessionTime === m ? null : m })}>
+              <span className="lbl" style={{ fontSize: 11 }}>{m}{m === 75 ? '+' : ''}′</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="section-title">{t('persoInjury')}</div>
+        <div className="opt-grid opt-grid-3">
+          {INJURY_OPTIONS.map((id) => (
+            <button key={id} className={'opt' + ((p.injuries || []).includes(id) ? ' active' : '')} style={{ alignItems: 'center', textAlign: 'center', padding: 10 }} onClick={() => toggleIn('injuries', id)}>
+              <span className="lbl" style={{ fontSize: 10 }}>{t('inj_' + id)}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="section-title">{t('persoEmphasis')}</div>
+        <div className="opt-grid opt-grid-2">
+          {EMPHASIS_OPTIONS.map((id) => (
+            <button key={id} className={'opt' + (p.emphasis === id ? ' active' : '')} style={{ textAlign: 'left', padding: 10 }} onClick={() => set({ emphasis: id })}>
+              <span className="lbl" style={{ fontSize: 10 }}>{t('emp_' + id)}</span>
+            </button>
+          ))}
+        </div>
       </div>
     ),
   ]

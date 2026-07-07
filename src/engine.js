@@ -202,6 +202,54 @@ function targetRIR(experience, goalKey, progressWeek, lastWorkingIdx, isDeload) 
   return Math.max(0, Math.round(start - (start - floor) * frac))
 }
 
+// ============================================================================
+//  PERSONALIZZAZIONE OPZIONALE (questionario saltabile)
+//  Muscoli prioritari, tempo per seduta, infortuni, enfasi del fisico.
+// ============================================================================
+
+// Gruppi selezionabili come "muscoli prioritari" → +1 serie sui loro esercizi.
+export const PRIORITY_GROUPS = [
+  { id: 'glutei', muscles: ['Glutei'] },
+  { id: 'gambe', muscles: ['Quadricipiti', 'Femorali'] },
+  { id: 'spalle', muscles: ['Spalle'] },
+  { id: 'schiena', muscles: ['Schiena'] },
+  { id: 'petto', muscles: ['Petto'] },
+  { id: 'braccia', muscles: ['Bicipiti', 'Tricipiti'] },
+]
+export const INJURY_OPTIONS = ['schiena', 'spalle', 'ginocchia']
+export const EMPHASIS_OPTIONS = ['equilibrato', 'glutei_gambe', 'v_taper', 'forza']
+export const SESSION_TIMES = [30, 45, 60, 75]
+
+// Esercizi da evitare per zona da proteggere (li sostituisce con alternative).
+const INJURY_EXCLUDE = {
+  schiena: ['deadlift', 'rdl', 'single_leg_rdl', 'good_morning', 'barbell_row', 'pendlay_row', 'tbar_row'],
+  spalle: ['ohp', 'db_ohp', 'arnold_press', 'machine_shoulder', 'upright_row', 'pike_pushup', 'landmine_press', 'single_arm_db_ohp'],
+  ginocchia: ['squat', 'goblet_squat', 'front_squat', 'hack_squat', 'sissy_squat', 'pistol_squat', 'walking_lunge', 'split_squat', 'reverse_lunge', 'step_up'],
+}
+// Enfasi del fisico → muscoli che ricevono volume extra.
+const EMPHASIS_MUSCLES = {
+  equilibrato: [], glutei_gambe: ['Glutei', 'Femorali', 'Quadricipiti'], v_taper: ['Spalle', 'Schiena'], forza: [],
+}
+// Tempo per seduta → numero max di esercizi e scala dei recuperi (densità).
+const SESSION_TIME_CAP = {
+  30: { maxEx: 3, restScale: 0.8 }, 45: { maxEx: 4, restScale: 0.9 }, 60: { maxEx: 6, restScale: 1 }, 75: { maxEx: 7, restScale: 1.05 },
+}
+
+function excludedIdsFor(injuries) {
+  const s = new Set()
+  ;(injuries || []).forEach((inj) => (INJURY_EXCLUDE[inj] || []).forEach((id) => s.add(id)))
+  return s
+}
+function priorityMusclesFor(profile) {
+  const s = new Set()
+  ;(profile.priorityGroups || []).forEach((g) => {
+    const def = PRIORITY_GROUPS.find((x) => x.id === g)
+    if (def) def.muscles.forEach((m) => s.add(m))
+  })
+  ;(EMPHASIS_MUSCLES[profile.emphasis] || []).forEach((m) => s.add(m))
+  return s
+}
+
 // --- Definizione degli split per numero di giorni ----------------------------
 // Ogni "slot" è un gruppo muscolare prioritario; il primo è il movimento
 // principale (compound) della seduta.
@@ -229,8 +277,8 @@ function splitForDays(days, experience) {
 // I primi slot della seduta sono fondamentali (compound), gli ultimi accessori
 // di isolamento: struttura sana per ipertrofia e necessaria perché le tecniche
 // di intensità (drop set, myo-reps...) abbiano un esercizio adatto su cui girare.
-function pickExercises(slots, equip, exercisesPerDay, usedIds) {
-  const pool = EXERCISES.filter(e => e.equip.includes(equip))
+function pickExercises(slots, equip, exercisesPerDay, usedIds, excludeIds = null) {
+  const pool = EXERCISES.filter(e => e.equip.includes(equip) && !(excludeIds && excludeIds.has(e.id)))
   const chosen = []
   const localUsed = new Set()
   const n = Math.min(slots.length, exercisesPerDay)
@@ -268,15 +316,23 @@ export function buildProgram(profile) {
   const hasDeload = totalWeeks >= 4
   const usedIds = new Map()
 
+  // --- personalizzazione opzionale (vuota = comportamento standard) ---
+  const excludeIds = excludedIdsFor(profile.injuries)
+  const priority = priorityMusclesFor(profile)
+  const timeCap = SESSION_TIME_CAP[profile.sessionTime]
+  const maxEx = timeCap ? Math.min(exp.exercisesPerDay, timeCap.maxEx) : exp.exercisesPerDay
+  const restScale = timeCap ? timeCap.restScale : 1
+  const forzaEmphasis = profile.emphasis === 'forza'
+
   // 1) costruisci i giorni "base" (settimana 1)
   const baseDays = split.map((day) => {
-    const exs = pickExercises(day.slots, equip, exp.exercisesPerDay, usedIds)
+    const exs = pickExercises(day.slots, equip, maxEx, usedIds, excludeIds)
     // Alzate laterali automatiche: se la giornata allena le spalle ma non c'è
     // già un'alzata laterale, aggiungila (copre il deltoide laterale).
-    if (day.slots.includes('Spalle') && !exs.some((e) => LATERAL_RAISE_IDS.includes(e.id))) {
+    if (day.slots.includes('Spalle') && exs.length < maxEx && !exs.some((e) => LATERAL_RAISE_IDS.includes(e.id))) {
       const lr = LATERAL_RAISE_IDS
         .map((id) => EXERCISE_BY_ID[id])
-        .find((e) => e && e.equip.includes(equip) && !exs.some((x) => x.id === e.id))
+        .find((e) => e && e.equip.includes(equip) && !excludeIds.has(e.id) && !exs.some((x) => x.id === e.id))
       if (lr) { exs.push(lr); usedIds.set(lr.id, (usedIds.get(lr.id) || 0) + 1) }
     }
     const exercises = exs.map((e, i) => {
@@ -289,16 +345,24 @@ export function buildProgram(profile) {
       // laterale, braccia, polpacci) ricevono +1 serie per intermedi/avanzati.
       const smallIso = e.type === 'isolation' && SMALL_MUSCLES.includes(e.muscle)
       const bump = (smallIso && profile.experience !== 'principiante') ? 1 : 0
+      // Personalizzazione: +1 serie ai muscoli prioritari (e all'enfasi);
+      // +1 serie al fondamentale principale se enfasi "forza".
+      const prioBump = priority.has(e.muscle) ? 1 : 0
+      const forzaBump = (forzaEmphasis && isMain) ? 1 : 0
+      const baseSets = Math.min(6, (isMain ? exp.perExercise + 1 : exp.perExercise) + bump + prioBump + forzaBump)
+      let rest = isCompound ? goal.restCompound : goal.restIso
+      if (forzaEmphasis && isCompound) rest = Math.max(rest, 150) // recuperi più lunghi per la forza
+      rest = Math.round(rest * restScale)
       return {
         id: e.id,
         name: e.name,
         muscle: e.muscle,
         type: e.type,
-        sets: (isMain ? exp.perExercise + 1 : exp.perExercise) + bump,
+        sets: baseSets,
         repsLow,
         repsHigh,
         rir: goal.rir,
-        rest: isCompound ? goal.restCompound : goal.restIso,
+        rest,
       }
     })
     return { name: day.name, focus: day.focus, exercises }
