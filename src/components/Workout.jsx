@@ -235,9 +235,10 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
 // suono e la voce partono anche se il telefono si oscurerebbe da solo. Si
 // ri-acquisisce quando si torna sull'app. (Il blocco manuale del telefono
 // resta un limite delle web-app: il sistema le sospende.)
-function useWakeLock() {
+function useWakeLock(enabled = true) {
   const [active, setActive] = useState(false)
   useEffect(() => {
+    if (!enabled) { setActive(false); return }
     let lock = null, dead = false
     const request = async () => {
       try {
@@ -256,8 +257,37 @@ function useWakeLock() {
       document.removeEventListener('visibilitychange', onVis)
       try { lock && lock.release() } catch { /* ignora */ }
     }
-  }, [])
+  }, [enabled])
   return active
+}
+
+// Notifica di sistema: chiede il permesso (una volta) e la mostra a fine pausa.
+// Best-effort: se il telefono ha sospeso l'app in background può non arrivare.
+function requestNotifyPermission() {
+  try { if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission() } catch { /* ignora */ }
+}
+function notifyGo(title, body) {
+  try {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(title, { body, icon: '/icon-192.png', tag: 'fitai-timer', renotify: true })
+    }
+  } catch { /* ignora */ }
+}
+
+// Beep breve per i timer di mobilità (a tempo).
+function playBeepShort() {
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext
+    const ctx = new Ctx(); if (ctx.state === 'suspended') ctx.resume()
+    const beep = (t, f) => {
+      const o = ctx.createOscillator(), g = ctx.createGain()
+      o.connect(g); g.connect(ctx.destination); o.type = 'square'; o.frequency.value = f
+      g.gain.setValueAtTime(0.001, t); g.gain.exponentialRampToValueAtTime(0.3, t + 0.02); g.gain.exponentialRampToValueAtTime(0.001, t + 0.3)
+      o.start(t); o.stop(t + 0.32)
+    }
+    const n = ctx.currentTime; beep(n, 780); beep(n + 0.35, 1040)
+    if (navigator.vibrate) navigator.vibrate([150, 80, 200])
+  } catch { /* audio non disponibile */ }
 }
 
 function RestTimer({ seconds, onClose }) {
@@ -270,6 +300,7 @@ function RestTimer({ seconds, onClose }) {
 
   useEffect(() => {
     primeGoVoice() // sblocca l'audio finché siamo nel gesto che ha avviato il recupero
+    requestNotifyPermission() // per avvisare anche se sei su un'altra schermata
     // Timer basato su timestamp: preciso anche se il sistema rallenta i tick.
     const tick = () => {
       const rem = Math.max(0, Math.round((endAt.current - Date.now()) / 1000))
@@ -277,6 +308,7 @@ function RestTimer({ seconds, onClose }) {
       if (rem <= 0 && !fired.current) {
         fired.current = true
         playGo()
+        notifyGo('💪 Recupero finito!', 'GO GO GO — riparti con la serie.')
         setFlash(true)
         setTimeout(() => setFlash(false), 2600)
       }
@@ -318,19 +350,45 @@ function RestTimer({ seconds, onClose }) {
   )
 }
 
+// Icona yoga da libreria web (Material Design Icons "yoga", Apache-2.0),
+// ricolorata col gradiente neon dell'app.
 function YogaIcon() {
   return (
-    <svg viewBox="0 0 64 64" width="46" height="46" aria-hidden="true" className="yoga-ic">
+    <svg viewBox="0 0 24 24" width="44" height="44" aria-hidden="true" className="yoga-ic">
       <defs>
         <linearGradient id="yg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#ff2d95" /><stop offset="1" stopColor="#00f0ff" /></linearGradient>
       </defs>
-      <g fill="none" stroke="url(#yg)" strokeWidth="3.6" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="32" cy="12" r="6" />
-        <path d="M32 19 V33" />
-        <path d="M32 22 L17 10 M32 22 L47 10" />
-        <path d="M32 33 L15 50 M32 33 L49 50 M15 50 L49 50" />
-      </g>
+      <path fill="url(#yg)" d="M13 2a2 2 0 1 0 0 4c1.11 0 2-.89 2-2a2 2 0 0 0-2-2M4 7v2h6v6l-5.07 5.07l1.41 1.43l6.72-6.73L17 17.13V21h2v-4.43c0-.36-.18-.68-.5-.86L15 13.6V9h6V7z" />
     </svg>
+  )
+}
+
+// Timer a tempo per gli esercizi di mobilità (tenute/riscaldamento).
+function MobTimer({ seconds }) {
+  const [running, setRunning] = useState(false)
+  const [left, setLeft] = useState(seconds)
+  const endRef = useRef(0)
+  const fired = useRef(false)
+  useWakeLock(running)
+  useEffect(() => {
+    if (!running) return
+    fired.current = false
+    endRef.current = Date.now() + seconds * 1000
+    setLeft(seconds)
+    const tick = () => {
+      const rem = Math.max(0, Math.round((endRef.current - Date.now()) / 1000))
+      setLeft(rem)
+      if (rem <= 0 && !fired.current) { fired.current = true; playBeepShort(); setRunning(false) }
+    }
+    const id = setInterval(tick, 200)
+    const onVis = () => { if (document.visibilityState === 'visible') tick() }
+    document.addEventListener('visibilitychange', onVis)
+    return () => { clearInterval(id); document.removeEventListener('visibilitychange', onVis) }
+  }, [running, seconds])
+  return (
+    <button className={'mob-link mob-timer' + (running ? ' running' : '')} onClick={() => setRunning((r) => !r)}>
+      {running ? `⏱ ${left}s ✕` : `⏱ ${seconds}s`}
+    </button>
   )
 }
 
@@ -361,6 +419,7 @@ function MobilitySession({ day }) {
               <div className="mob-links">
                 <a className="mob-link vid" href={d.video} target="_blank" rel="noreferrer">▶ {t('mobilityVideo')}</a>
                 <a className="mob-link" href={mobilitySearchUrl(d.search)} target="_blank" rel="noreferrer">🔎 {t('mobilitySearch')}</a>
+                <MobTimer seconds={d.secs || 40} />
               </div>
             </div>
           ))}
