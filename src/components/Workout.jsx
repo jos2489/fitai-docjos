@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { logKey, dayKey, lastLogFor } from '../storage.js'
 import { alternativesFor, suggestNextSet, EXERCISE_BY_ID, TECHNIQUES, exName, muscleName, dayName, focusName, bestTopBefore, addExerciseToProgram, removeExerciseFromProgram, addableExercises } from '../engine.js'
 import { useLang } from '../i18n.jsx'
+import { mobilityForDay, REGION_LABEL, mobilitySearchUrl } from '../mobility.js'
 
 // Sceglie una voce il più possibile maschile tra quelle installate sul device.
 function pickMaleVoice(voices) {
@@ -186,6 +187,8 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
         {adj.label && <div className="adjust-banner fade">{adj.label}</div>}
       </div>
 
+      <MobilitySession day={day} />
+
       {day.exercises.map((ex) => {
         const swappedId = (state.swaps || {})[swapKey(dayIdx, ex.id)]
         const display = swappedId ? EXERCISE_BY_ID[swappedId] : EXERCISE_BY_ID[ex.id]
@@ -312,6 +315,58 @@ function RestTimer({ seconds, onClose }) {
         </div>
       </div>
     </>
+  )
+}
+
+function YogaIcon() {
+  return (
+    <svg viewBox="0 0 64 64" width="46" height="46" aria-hidden="true" className="yoga-ic">
+      <defs>
+        <linearGradient id="yg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#ff2d95" /><stop offset="1" stopColor="#00f0ff" /></linearGradient>
+      </defs>
+      <g fill="none" stroke="url(#yg)" strokeWidth="3.6" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="32" cy="12" r="6" />
+        <path d="M32 19 V33" />
+        <path d="M32 22 L17 10 M32 22 L47 10" />
+        <path d="M32 33 L15 50 M32 33 L49 50 M15 50 L49 50" />
+      </g>
+    </svg>
+  )
+}
+
+function MobilitySession({ day }) {
+  const { t, lang } = useLang()
+  const [open, setOpen] = useState(false)
+  const { region, drills } = useMemo(() => mobilityForDay(day), [day])
+  const regionLabel = (REGION_LABEL[region] && REGION_LABEL[region][lang]) || REGION_LABEL[region].it
+  return (
+    <div className="mob-wrap">
+      <button className={'mob-btn' + (open ? ' open' : '')} onClick={() => setOpen((o) => !o)}>
+        <span className="mob-ic"><YogaIcon /></span>
+        <span className="mob-txt">
+          <b>{t('mobilityTitle')}</b>
+          <small>{t('mobilityOptional')} · {regionLabel}</small>
+        </span>
+        <span className="mob-chev">{open ? '▾' : '▸'}</span>
+      </button>
+      {open && (
+        <div className="mob-panel fade">
+          <div className="sub">{t('mobilityHint')}</div>
+          {drills.map((d) => (
+            <div key={d.id} className="mob-drill">
+              <div className="mob-drill-head">
+                <span className="mob-name">{lang === 'en' ? d.en : d.it}</span>
+                <span className="mob-dose">{lang === 'en' ? d.doseEn : d.doseIt}</span>
+              </div>
+              <div className="mob-links">
+                <a className="mob-link vid" href={d.video} target="_blank" rel="noreferrer">▶ {t('mobilityVideo')}</a>
+                <a className="mob-link" href={mobilitySearchUrl(d.search)} target="_blank" rel="noreferrer">🔎 {t('mobilitySearch')}</a>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 

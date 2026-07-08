@@ -112,6 +112,11 @@ export const STRINGS = {
   go: { it: '✅ GO!', en: '✅ GO!' },
   goFlash: { it: 'GO! GO! GO!', en: 'GO! GO! GO!' },
   screenStaysOn: { it: 'Schermo attivo durante il recupero', en: 'Screen stays on during rest' },
+  mobilityTitle: { it: 'Mobilità di oggi', en: "Today's mobility" },
+  mobilityOptional: { it: 'facoltativa · tocca per aprire', en: 'optional · tap to open' },
+  mobilityHint: { it: 'Riscaldamento dinamico (~5 min) per la zona di oggi. Falla prima dei pesi.', en: 'Dynamic warm-up (~5 min) for today\'s area. Do it before lifting.' },
+  mobilityVideo: { it: 'Video', en: 'Video' },
+  mobilitySearch: { it: 'Cerca', en: 'Search' },
   skip: { it: 'SALTA', en: 'SKIP' },
   close: { it: 'CHIUDI', en: 'CLOSE' },
 
