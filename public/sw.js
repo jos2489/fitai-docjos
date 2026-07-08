@@ -1,6 +1,6 @@
 // Service worker minimale: abilita l'installazione PWA e un caching base
 // per l'uso offline dell'app (i dati utente restano in localStorage).
-const CACHE = 'fitai-v3'
+const CACHE = 'fitai-v4'
 const ASSETS = ['/', '/index.html', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png', '/favicon.png']
 
 self.addEventListener('install', (e) => {
