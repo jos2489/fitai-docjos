@@ -99,6 +99,24 @@ function videoUrl(name) {
   return 'https://www.youtube.com/results?search_query=' + encodeURIComponent('esecuzione corretta ' + name)
 }
 
+// Spiega su QUALE serie applicare la tecnica, in base al numero di serie.
+function techScopeText(techId, nSets, lang) {
+  const en = lang === 'en'
+  const n = Math.max(2, nSets || 2)
+  if (techId === 'back_off') {
+    return en
+      ? `Set 1 = heavy top set · Sets 2-${n} = back-off (drop load 10-20%, more reps, same RIR)`
+      : `Serie 1 = top set pesante · Serie 2-${n} = back-off (−10/20% carico, più ripetizioni, stesso RIR)`
+  }
+  if (techId === 'drop_set' || techId === 'myo_reps') {
+    return en ? `Apply it on the LAST set (set ${n})` : `Applicala sull'ULTIMA serie (serie ${n})`
+  }
+  if (techId === 'rest_pause') {
+    return en ? 'Apply it on the last work set' : "Applicala sull'ultima serie di lavoro"
+  }
+  return null
+}
+
 // Nota: la chiave NON include la settimana: uno swap vale per tutto il piano
 // (tutte le settimane di quel mesociclo). Si azzera quando rigeneri il piano.
 const swapKey = (dayIdx, exId) => `${dayIdx}-${exId}`
@@ -487,6 +505,7 @@ function ExerciseCard({ ex, display, swapped, alternatives, existing, last, onCh
   const [showAlts, setShowAlts] = useState(false)
   const [showTech, setShowTech] = useState(false)
   const tech = ex.technique ? TECHNIQUES[ex.technique] : null
+  const techScope = tech ? techScopeText(ex.technique, sets.length, lang) : null
 
   const apply = (next) => { setSets(next); onChange(next) }
   const setField = (i, field, val) => apply(sets.map((s, idx) => (idx === i ? { ...s, [field]: val } : s)))
@@ -523,6 +542,7 @@ function ExerciseCard({ ex, display, swapped, alternatives, existing, last, onCh
             <span>{tech.emoji} {t('technique')}: {tech.name}</span>
             <span className="tech-toggle">{showTech ? '−' : t('howto')}</span>
           </button>
+          {techScope && <div className="tech-scope">🎯 {techScope}</div>}
           {showTech && (
             <div className="tech-body fade">
               <div><b>{t('execution')}:</b> {lang === 'en' ? tech.howEn : tech.how}</div>

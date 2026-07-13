@@ -170,6 +170,7 @@ textarea.in { min-height: 84px; resize: vertical; }
 .tech { border: 2px solid var(--amber); border-radius: 6px; margin-bottom: 12px; background: rgba(255, 210, 63, 0.08); overflow: hidden; }
 .tech-head { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; background: transparent; color: var(--amber); font-family: var(--pix); font-size: 8px; line-height: 1.5; text-align: left; }
 .tech-toggle { color: var(--text); font-family: var(--mono); font-size: 14px; white-space: nowrap; }
+.tech-scope { padding: 0 12px 10px; font-size: 14px; line-height: 1.4; color: var(--text); font-weight: 700; }
 .tech-body { padding: 0 12px 12px; font-size: 15px; color: var(--text); line-height: 1.35; }
 .tech-body b { color: var(--amber); }
 
