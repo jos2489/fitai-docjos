@@ -192,21 +192,25 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
       {day.exercises.map((ex) => {
         const swappedId = (state.swaps || {})[swapKey(dayIdx, ex.id)]
         const display = swappedId ? EXERCISE_BY_ID[swappedId] : EXERCISE_BY_ID[ex.id]
+        // Pesi/ripetizioni/storico/record seguono l'esercizio EFFETTIVAMENTE svolto
+        // (quello scambiato), non lo slot originale: così le caselle non ereditano
+        // i valori del primo esercizio.
+        const effId = swappedId || ex.id
         const adjEx = { ...ex, sets: Math.max(2, ex.sets + adj.sets), rir: Math.max(0, ex.rir + adj.rir) }
         return (
           <ExerciseCard
-            key={ex.id + '-' + readiness}
+            key={ex.id + '-' + effId + '-' + readiness}
             ex={adjEx}
             display={display}
             swapped={!!swappedId}
-            alternatives={alternativesFor(ex.id, equip)}
-            existing={state.logs[logKey(week, dayIdx, ex.id)]}
-            last={lastLogFor(state.logs, week, dayIdx, ex.id)}
-            onChange={(sets) => setLog(ex.id, sets)}
+            alternatives={alternativesFor(effId, equip)}
+            existing={state.logs[logKey(week, dayIdx, effId)]}
+            last={lastLogFor(state.logs, week, dayIdx, effId)}
+            onChange={(sets) => setLog(effId, sets)}
             onRest={() => setRest(ex.rest)}
             onSwap={(newId) => swapExercise(ex.id, newId)}
             onRemove={() => removeExercise(ex.id)}
-            prevBest={bestTopBefore(program, state.logs, ex.id, week)}
+            prevBest={bestTopBefore(program, state.logs, effId, week)}
           />
         )
       })}
