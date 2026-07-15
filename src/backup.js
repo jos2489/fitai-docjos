@@ -4,11 +4,22 @@ import { autoWrite } from './filebackup.js'
 import { cloudPush } from './cloudsync.js'
 import { sanitizeForBackup, markBackup } from './storage.js'
 
+// Ritorna: 'ok' (almeno un backup riuscito), 'fail' (un backup attivo ma fallito),
+// 'none' (nessun backup attivo).
 export async function backupNow(state) {
-  if (!state || !state.program) return
+  if (!state || !state.program) return 'none'
   const clean = sanitizeForBackup(state) // niente chiave API nel backup
-  try { if ((await autoWrite(clean)) === 'ok') markBackup() } catch { /* file non attivo */ }
+  let ok = false, targetExisted = false
+
+  let fileRes = 'no-handle'
+  try { fileRes = await autoWrite(clean) } catch { fileRes = 'error' }
+  if (fileRes === 'ok') { ok = true; targetExisted = true; markBackup() }
+  else if (fileRes === 'need-permission' || fileRes === 'error') targetExisted = true
+
   if (state.syncCode) {
-    try { await cloudPush(state.syncCode, clean); markBackup() } catch { /* offline: riprova dopo */ }
+    targetExisted = true
+    try { await cloudPush(state.syncCode, clean); ok = true; markBackup() } catch { /* offline */ }
   }
+
+  return ok ? 'ok' : (targetExisted ? 'fail' : 'none')
 }

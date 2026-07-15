@@ -144,6 +144,7 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
   const dk = dayKey(week, dayIdx)
   const [note, setNote] = useState(state.notes[dk] || '')
   const [rest, setRest] = useState(null)
+  const [done, setDone] = useState(null)
   const readiness = (state.readiness || {})[dk] || null
   const adj = READINESS_ADJ[readiness] || READINESS_ADJ.normale
   const setReadiness = (level) => setState((s) => ({ ...s, readiness: { ...(s.readiness || {}), [dk]: level } }))
@@ -177,8 +178,10 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
   const complete = () => {
     const next = { ...state, completed: { ...state.completed, [dk]: new Date().toISOString() } }
     setState(next)
-    backupNow(next) // backup immediato che sovrascrive il precedente (file + cloud)
-    onBack()
+    setDone({ bk: 'saving' }) // conferma a schermo
+    // backup immediato che sovrascrive il precedente (file + cloud)
+    backupNow(next).then((r) => setDone({ bk: r })).catch(() => setDone({ bk: 'fail' }))
+    setTimeout(onBack, 1500)
   }
 
   return (
@@ -252,6 +255,17 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
       <div style={{ height: 20 }} />
 
       {rest != null && <RestTimer seconds={rest} onClose={() => setRest(null)} />}
+
+      {done && (
+        <div className="done-flash">
+          <div className="done-box">
+            <div className="done-main">💪 {t('workoutDoneMsg')}</div>
+            {done.bk === 'saving' && <div className="done-bk">💾 {t('bkSaving')}</div>}
+            {done.bk === 'ok' && <div className="done-bk ok">💾 {t('bkSavedOk')}</div>}
+            {done.bk === 'fail' && <div className="done-bk warn">⚠️ {t('bkSavedFail')}</div>}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
