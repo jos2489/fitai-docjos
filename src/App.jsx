@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { loadState, saveState, sanitizeForBackup, markBackup } from './storage.js'
-import { autoWrite } from './filebackup.js'
-import { cloudPush } from './cloudsync.js'
+import { loadState, saveState } from './storage.js'
+import { backupNow } from './backup.js'
 import { LangProvider, useLang } from './i18n.jsx'
 import Onboarding from './components/Onboarding.jsx'
 import Home from './components/Home.jsx'
@@ -25,13 +24,7 @@ export default function App() {
   useEffect(() => {
     if (!state.program) return
     clearTimeout(abTimer.current)
-    abTimer.current = setTimeout(async () => {
-      const clean = sanitizeForBackup(state)
-      try { if ((await autoWrite(clean)) === 'ok') markBackup() } catch { /* ignora */ }
-      if (state.syncCode) {
-        try { await cloudPush(state.syncCode, clean); markBackup() } catch { /* offline: riprova al prossimo cambio */ }
-      }
-    }, 1500)
+    abTimer.current = setTimeout(() => { backupNow(state) }, 1500)
     return () => clearTimeout(abTimer.current)
   }, [state])
 

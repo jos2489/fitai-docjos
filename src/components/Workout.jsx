@@ -3,6 +3,7 @@ import { logKey, dayKey, lastLogFor } from '../storage.js'
 import { alternativesFor, suggestNextSet, EXERCISE_BY_ID, TECHNIQUES, exName, muscleName, dayName, focusName, bestTopBefore, addExerciseToProgram, removeExerciseFromProgram, addableExercises } from '../engine.js'
 import { useLang } from '../i18n.jsx'
 import { mobilityForDay, REGION_LABEL, mobilitySearchUrl } from '../mobility.js'
+import { backupNow } from '../backup.js'
 
 // Sceglie una voce il più possibile maschile tra quelle installate sul device.
 function pickMaleVoice(voices) {
@@ -174,7 +175,9 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
     })
   }
   const complete = () => {
-    setState((s) => ({ ...s, completed: { ...s.completed, [dk]: new Date().toISOString() } }))
+    const next = { ...state, completed: { ...state.completed, [dk]: new Date().toISOString() } }
+    setState(next)
+    backupNow(next) // backup immediato che sovrascrive il precedente (file + cloud)
     onBack()
   }
 
