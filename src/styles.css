@@ -171,6 +171,8 @@ textarea.in { min-height: 84px; resize: vertical; }
 .tech-head { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; background: transparent; color: var(--amber); font-family: var(--pix); font-size: 8px; line-height: 1.5; text-align: left; }
 .tech-toggle { color: var(--text); font-family: var(--mono); font-size: 14px; white-space: nowrap; }
 .tech-scope { padding: 0 12px 10px; font-size: 14px; line-height: 1.4; color: var(--text); font-weight: 700; }
+.restore-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line); font-size: 13px; color: var(--muted); }
+.restore-btn { flex: 0 0 auto; cursor: pointer; border: 2px solid var(--accent-2); color: var(--accent-2); background: rgba(0, 240, 255, 0.08); border-radius: 6px; padding: 8px 12px; font-family: var(--pix); font-size: 9px; white-space: nowrap; }
 .tech-body { padding: 0 12px 12px; font-size: 15px; color: var(--text); line-height: 1.35; }
 .tech-body b { color: var(--amber); }
 

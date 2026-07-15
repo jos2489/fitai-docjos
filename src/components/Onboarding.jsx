@@ -4,9 +4,24 @@ import { useLang, LANGUAGES, goalLabel, expLabel, expDesc, equipLabel } from '..
 
 // Wizard di profilazione del cliente: l'Ai userà queste risposte per costruire
 // il programma più adatto secondo le evidenze scientifiche.
-export default function Onboarding({ onCreate }) {
+export default function Onboarding({ onCreate, onRestore }) {
   const { t, lang, setLang } = useLang()
   const [step, setStep] = useState(0)
+  const [restoreErr, setRestoreErr] = useState('')
+
+  const restoreBackup = (e) => {
+    const file = e.target.files[0]; e.target.value = ''
+    if (!file) return
+    const r = new FileReader()
+    r.onload = () => {
+      try {
+        const data = JSON.parse(String(r.result))
+        if (!data || !data.program) throw new Error('bad')
+        onRestore(data)
+      } catch { setRestoreErr(t('restoreErr')); setTimeout(() => setRestoreErr(''), 4000) }
+    }
+    r.readAsText(file)
+  }
   const [p, setP] = useState({
     name: '', sex: 'm', age: 28, weight: '', height: '',
     goal: 'ipertrofia', experience: 'intermedio', equipment: 'gym',
@@ -60,6 +75,14 @@ export default function Onboarding({ onCreate }) {
             <input className="in" inputMode="numeric" placeholder="178" value={p.height} onChange={(e) => set({ height: e.target.value })} />
           </label>
         </div>
+        <div className="restore-row">
+          <span>{t('restoreQ')}</span>
+          <label className="restore-btn">
+            {t('restoreBtn')}
+            <input type="file" accept="application/json,.json" style={{ display: 'none' }} onChange={restoreBackup} />
+          </label>
+        </div>
+        {restoreErr && <div className="aigen" style={{ color: 'var(--bad)' }}>{restoreErr}</div>}
       </div>
     ),
     // 1 - obiettivo

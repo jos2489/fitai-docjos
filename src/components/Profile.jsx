@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import { adaptProgram, assessProgress, levelUpProgram, dayName, buildProgram, PRIORITY_GROUPS, INJURY_OPTIONS, EMPHASIS_OPTIONS, SESSION_TIMES } from '../engine.js'
+import { supportsAutoBackup, enableAutoBackup, resumeAutoBackup, disableAutoBackup, backupStatus } from '../filebackup.js'
 import { useLang, LANGUAGES, goalLabel, expLabel, equipLabel } from '../i18n.jsx'
 
 export default function Profile({ state, setState, focus, onFocusDone }) {
@@ -130,6 +131,8 @@ export default function Profile({ state, setState, focus, onFocusDone }) {
         {msg && <div className="aigen" style={{ color: 'var(--good)' }}>{msg}</div>}
       </div>
 
+      <AutoBackupCard state={state} t={t} setMsg={setMsg} />
+
       <div className="section-title">{t('backupTitle')}</div>
       <div className="card">
         <div className="sub">{t('backupSub')}</div>
@@ -148,6 +151,51 @@ export default function Profile({ state, setState, focus, onFocusDone }) {
       </div>
       <div style={{ height: 10 }} />
     </div>
+  )
+}
+
+function AutoBackupCard({ state, t, setMsg }) {
+  const supported = supportsAutoBackup()
+  const [status, setStatus] = useState({ active: false, granted: false, name: null })
+  const [busy, setBusy] = useState(false)
+  useEffect(() => { if (supported) backupStatus().then(setStatus) }, [supported])
+  const refresh = () => backupStatus().then(setStatus)
+
+  const enable = async () => {
+    setBusy(true)
+    try { const name = await enableAutoBackup(state); await refresh(); setMsg(t('autoBkOn') + ' ' + name); setTimeout(() => setMsg(''), 4000) }
+    catch { /* annullato o negato */ }
+    finally { setBusy(false) }
+  }
+  const resume = async () => {
+    setBusy(true)
+    try { if (await resumeAutoBackup(state)) { await refresh(); setMsg(t('autoBkResumed')); setTimeout(() => setMsg(''), 4000) } }
+    finally { setBusy(false) }
+  }
+  const off = async () => { await disableAutoBackup(); await refresh() }
+
+  return (
+    <>
+      <div className="section-title">{t('autoBkTitle')}</div>
+      <div className="card">
+        <div className="sub">{t('autoBkSub')}</div>
+        {!supported ? (
+          <div className="aigen" style={{ color: 'var(--muted)' }}>{t('autoBkUnsupported')}</div>
+        ) : status.active && status.granted ? (
+          <>
+            <div className="aigen" style={{ color: 'var(--good)' }}>✅ {t('autoBkActive')} <b>{status.name}</b></div>
+            <button className="btn secondary" style={{ marginTop: 10 }} onClick={off}>{t('autoBkStop')}</button>
+          </>
+        ) : status.active && !status.granted ? (
+          <>
+            <div className="aigen" style={{ color: 'var(--amber)' }}>⏸️ {t('autoBkPaused')}</div>
+            <button className="btn" style={{ marginTop: 10 }} disabled={busy} onClick={resume}>{t('autoBkResume')}</button>
+          </>
+        ) : (
+          <button className="btn" disabled={busy} onClick={enable}>💾 {t('autoBkEnable')}</button>
+        )}
+      </div>
+    </>
   )
 }
 

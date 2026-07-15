@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { loadState, saveState } from './storage.js'
+import { autoWrite } from './filebackup.js'
 import { LangProvider, useLang } from './i18n.jsx'
 import Onboarding from './components/Onboarding.jsx'
 import Home from './components/Home.jsx'
@@ -14,8 +15,18 @@ export default function App() {
   const [state, setState] = useState(loadState)
   const setLang = (lang) => setState((s) => ({ ...s, lang }))
 
-  // salva ad ogni cambiamento
+  // salva ad ogni cambiamento (localStorage)
   useEffect(() => { saveState(state) }, [state])
+
+  // salvataggio automatico su file (se attivo): sovrascrive lo stesso file,
+  // con un piccolo ritardo per non scrivere ad ogni tasto.
+  const abTimer = useRef(null)
+  useEffect(() => {
+    if (!state.program) return
+    clearTimeout(abTimer.current)
+    abTimer.current = setTimeout(() => { autoWrite(state) }, 1200)
+    return () => clearTimeout(abTimer.current)
+  }, [state])
 
   return (
     <LangProvider lang={state.lang || 'it'} setLang={setLang}>
@@ -32,11 +43,14 @@ function Shell({ state, setState }) {
 
   // nessun programma -> onboarding
   if (!state.program) {
-    return <Onboarding onCreate={(program) => {
-      const w = parseFloat(String(program.profile.weight).replace(',', '.'))
-      const seed = w ? [{ date: new Date().toISOString().slice(0, 10), value: w }] : []
-      setState((s) => ({ ...s, program, bodyweight: seed }))
-    }} />
+    return <Onboarding
+      onCreate={(program) => {
+        const w = parseFloat(String(program.profile.weight).replace(',', '.'))
+        const seed = w ? [{ date: new Date().toISOString().slice(0, 10), value: w }] : []
+        setState((s) => ({ ...s, program, bodyweight: seed }))
+      }}
+      onRestore={(data) => setState((s) => ({ ...s, ...data }))}
+    />
   }
 
   // schermata di allenamento (logging)
