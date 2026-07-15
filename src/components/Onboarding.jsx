@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { buildProgram, GOALS, EXPERIENCES, EQUIPMENTS, PRIORITY_GROUPS, INJURY_OPTIONS, EMPHASIS_OPTIONS, SESSION_TIMES } from '../engine.js'
 import { useLang, LANGUAGES, goalLabel, expLabel, expDesc, equipLabel } from '../i18n.jsx'
+import { cloudPull } from '../cloudsync.js'
 
 // Wizard di profilazione del cliente: l'Ai userà queste risposte per costruire
 // il programma più adatto secondo le evidenze scientifiche.
@@ -21,6 +22,16 @@ export default function Onboarding({ onCreate, onRestore }) {
       } catch { setRestoreErr(t('restoreErr')); setTimeout(() => setRestoreErr(''), 4000) }
     }
     r.readAsText(file)
+  }
+
+  const restoreFromCloud = async () => {
+    const code = (window.prompt(t('cloudPromptCode')) || '').trim().toUpperCase()
+    if (code.replace(/[^A-Z0-9-]/g, '').length < 6) return
+    try {
+      const r = await cloudPull(code)
+      if (!r) { setRestoreErr(t('cloudNotFound')); setTimeout(() => setRestoreErr(''), 4000); return }
+      onRestore({ ...r.data, syncCode: code })
+    } catch { setRestoreErr(t('cloudErr')); setTimeout(() => setRestoreErr(''), 4000) }
   }
   const [p, setP] = useState({
     name: '', sex: 'm', age: 28, weight: '', height: '',
@@ -77,10 +88,13 @@ export default function Onboarding({ onCreate, onRestore }) {
         </div>
         <div className="restore-row">
           <span>{t('restoreQ')}</span>
-          <label className="restore-btn">
-            {t('restoreBtn')}
-            <input type="file" accept="application/json,.json" style={{ display: 'none' }} onChange={restoreBackup} />
-          </label>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button type="button" className="restore-btn" onClick={restoreFromCloud}>☁️ {t('restoreCloud')}</button>
+            <label className="restore-btn">
+              {t('restoreBtn')}
+              <input type="file" accept="application/json,.json" style={{ display: 'none' }} onChange={restoreBackup} />
+            </label>
+          </div>
         </div>
         {restoreErr && <div className="aigen" style={{ color: 'var(--bad)' }}>{restoreErr}</div>}
       </div>
