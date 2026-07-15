@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { loadState, saveState } from './storage.js'
+import { loadState, saveState, sanitizeForBackup, markBackup } from './storage.js'
 import { autoWrite } from './filebackup.js'
+import { cloudPush } from './cloudsync.js'
 import { LangProvider, useLang } from './i18n.jsx'
 import Onboarding from './components/Onboarding.jsx'
 import Home from './components/Home.jsx'
@@ -18,13 +19,19 @@ export default function App() {
   // salva ad ogni cambiamento (localStorage)
   useEffect(() => { saveState(state) }, [state])
 
-  // salvataggio automatico su file (se attivo): sovrascrive lo stesso file,
-  // con un piccolo ritardo per non scrivere ad ogni tasto.
+  // salvataggio automatico (file locale + cloud se attivi): sovrascrive, con un
+  // piccolo ritardo per non scrivere ad ogni tasto. Segreti rimossi.
   const abTimer = useRef(null)
   useEffect(() => {
     if (!state.program) return
     clearTimeout(abTimer.current)
-    abTimer.current = setTimeout(() => { autoWrite(state) }, 1200)
+    abTimer.current = setTimeout(async () => {
+      const clean = sanitizeForBackup(state)
+      try { if ((await autoWrite(clean)) === 'ok') markBackup() } catch { /* ignora */ }
+      if (state.syncCode) {
+        try { await cloudPush(state.syncCode, clean); markBackup() } catch { /* offline: riprova al prossimo cambio */ }
+      }
+    }, 1500)
     return () => clearTimeout(abTimer.current)
   }, [state])
 

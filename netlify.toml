@@ -3,6 +3,11 @@
   command = "npm run build"
   publish = "dist"
 
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# Le Functions (/.netlify/functions/*) hanno priorità sul redirect SPA sottostante.
 [[redirects]]
   from = "/*"
   to = "/index.html"

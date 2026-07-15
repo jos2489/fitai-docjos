@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { dayKey } from '../storage.js'
+import { dayKey, lastBackupTime, exportBackup, markBackup } from '../storage.js'
 import { buildProgram, dayName, focusName, weekNoteText, workoutStats, assessProgress, levelUpProgram } from '../engine.js'
 import { useLang, goalLabel } from '../i18n.jsx'
 
@@ -41,6 +41,7 @@ export default function Home({ state, setState, onOpenDay, onPersonalize }) {
 
   return (
     <div className="fade">
+      <BackupReminder state={state} onCloud={onPersonalize} />
       <div className="hero hero-home">
         <div className="glow" />
         <MascotHero onStart={() => onOpenDay(week, firstIncompleteDay(wk, week, completed))} />
@@ -125,6 +126,29 @@ export default function Home({ state, setState, onOpenDay, onPersonalize }) {
       <button className="btn secondary" style={{ marginTop: 8 }} onClick={() => regenerate(state, setState, lang)}>
         {t('regenerate')}
       </button>
+    </div>
+  )
+}
+
+function BackupReminder({ state, onCloud }) {
+  const { t } = useLang()
+  const [hidden, setHidden] = useState(false)
+  const last = lastBackupTime()
+  const stale = !last || (Date.now() - last) > 7 * 86400000
+  if (hidden || !stale) return null
+  const days = last ? Math.floor((Date.now() - last) / 86400000) : null
+  const save = () => { exportBackup(state); markBackup(); setHidden(true) }
+  return (
+    <div className="bk-remind">
+      <button className="bk-remind-x" onClick={() => setHidden(true)} aria-label="x">×</button>
+      <div className="bk-remind-txt">
+        <b>🛟 {t('bkRemindTitle')}</b>
+        <small>{last ? t('bkRemindDays').replace('{d}', days) : t('bkRemindNever')}</small>
+      </div>
+      <div className="bk-remind-actions">
+        <button className="btn" onClick={save}>{t('bkRemindSave')}</button>
+        {onCloud && <button className="btn secondary" onClick={onCloud}>☁️ {t('bkRemindCloud')}</button>}
+      </div>
     </div>
   )
 }

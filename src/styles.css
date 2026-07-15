@@ -173,6 +173,18 @@ textarea.in { min-height: 84px; resize: vertical; }
 .tech-scope { padding: 0 12px 10px; font-size: 14px; line-height: 1.4; color: var(--text); font-weight: 700; }
 .restore-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line); font-size: 13px; color: var(--muted); }
 .restore-btn { flex: 0 0 auto; cursor: pointer; border: 2px solid var(--accent-2); color: var(--accent-2); background: rgba(0, 240, 255, 0.08); border-radius: 6px; padding: 8px 12px; font-family: var(--pix); font-size: 9px; white-space: nowrap; }
+/* Sincronizzazione cloud */
+.cloud-code { font-family: var(--pix); font-size: 15px; letter-spacing: 1px; color: var(--accent-2); text-align: center; padding: 12px; margin: 4px 0 6px; border: 2px dashed var(--accent-2); border-radius: 8px; background: rgba(0, 240, 255, 0.08); user-select: all; word-break: break-all; }
+.cloud-note { font-size: 12px; color: var(--amber); line-height: 1.4; }
+.cloud-restore { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line); }
+/* Promemoria backup in Home */
+.bk-remind { position: relative; border: 2px solid var(--amber); background: rgba(255, 210, 63, 0.1); border-radius: var(--r); padding: 14px; margin-bottom: 14px; box-shadow: 0 0 14px rgba(255, 210, 63, 0.25); }
+.bk-remind-txt { display: flex; flex-direction: column; gap: 4px; padding-right: 22px; }
+.bk-remind-txt b { font-family: var(--pix); font-size: 10px; color: var(--amber); }
+.bk-remind-txt small { font-size: 13px; color: var(--text); }
+.bk-remind-actions { display: flex; gap: 8px; margin-top: 12px; }
+.bk-remind-actions .btn { margin: 0; }
+.bk-remind-x { position: absolute; top: 8px; right: 10px; background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; line-height: 1; }
 .tech-body { padding: 0 12px 12px; font-size: 15px; color: var(--text); line-height: 1.35; }
 .tech-body b { color: var(--amber); }
 

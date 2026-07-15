@@ -15,6 +15,32 @@ const empty = {
   anthropicKey: '',     // chiave Anthropic SOLO locale (per auto-lettura diete) — mai inviata altrove
   measurements: [],     // [{ date, vita, braccio, coscia, petto, fianchi }] in cm
   photos: [],           // [{ id, date, img }] foto progressi (compresse, base64)
+  syncCode: '',         // codice per la sincronizzazione cloud (se attiva)
+}
+
+// Timestamp ultimo backup (per il promemoria) — chiave dedicata, fuori dallo
+// stato React per non innescare re-render/loop.
+const BK = 'fitai_last_backup'
+export function markBackup() { try { localStorage.setItem(BK, String(Date.now())) } catch { /* ignora */ } }
+export function lastBackupTime() { try { return parseInt(localStorage.getItem(BK) || '0', 10) || 0 } catch { return 0 } }
+
+// Rimuove i segreti (chiave API) prima di esportare/sincronizzare: non deve mai
+// finire in un file condivisibile o nel cloud.
+export function sanitizeForBackup(state) {
+  const s = { ...state }
+  delete s.anthropicKey
+  return s
+}
+
+// Scarica un file di backup (usato da Profilo e dal promemoria in Home).
+export function exportBackup(state) {
+  const blob = new Blob([JSON.stringify(sanitizeForBackup(state), null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `fitai-backup-${new Date().toISOString().slice(0, 10)}.json`
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 export function loadState() {

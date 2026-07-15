@@ -1,6 +1,8 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import { adaptProgram, assessProgress, levelUpProgram, dayName, buildProgram, PRIORITY_GROUPS, INJURY_OPTIONS, EMPHASIS_OPTIONS, SESSION_TIMES } from '../engine.js'
 import { supportsAutoBackup, enableAutoBackup, resumeAutoBackup, disableAutoBackup, backupStatus } from '../filebackup.js'
+import { newSyncCode, cloudPush, cloudPull } from '../cloudsync.js'
+import { sanitizeForBackup, markBackup, exportBackup } from '../storage.js'
 import { useLang, LANGUAGES, goalLabel, expLabel, equipLabel } from '../i18n.jsx'
 
 export default function Profile({ state, setState, focus, onFocusDone }) {
@@ -41,15 +43,7 @@ export default function Profile({ state, setState, focus, onFocusDone }) {
     setState({ program: null, logs: {}, notes: {}, bodyweight: [], completed: {}, swaps: {}, lang })
   }
 
-  const exportData = () => {
-    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `fitai-backup-${new Date().toISOString().slice(0, 10)}.json`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
+  const exportData = () => { exportBackup(state); markBackup() }
   const importData = (e) => {
     const file = e.target.files[0]; e.target.value = ''
     if (!file) return
@@ -131,6 +125,8 @@ export default function Profile({ state, setState, focus, onFocusDone }) {
         {msg && <div className="aigen" style={{ color: 'var(--good)' }}>{msg}</div>}
       </div>
 
+      <CloudSyncCard state={state} setState={setState} t={t} setMsg={setMsg} />
+
       <AutoBackupCard state={state} t={t} setMsg={setMsg} />
 
       <div className="section-title">{t('backupTitle')}</div>
@@ -151,6 +147,62 @@ export default function Profile({ state, setState, focus, onFocusDone }) {
       </div>
       <div style={{ height: 10 }} />
     </div>
+  )
+}
+
+function CloudSyncCard({ state, setState, t, setMsg }) {
+  const code = state.syncCode || ''
+  const [pullCode, setPullCode] = useState('')
+  const [busy, setBusy] = useState(false)
+  const flash = (m) => { setMsg(m); setTimeout(() => setMsg(''), 4000) }
+
+  const activate = async () => {
+    setBusy(true)
+    const c = code || newSyncCode()
+    try {
+      await cloudPush(c, sanitizeForBackup({ ...state, syncCode: c }))
+      setState((s) => ({ ...s, syncCode: c })); markBackup()
+      flash(t('cloudSaved'))
+    } catch { flash(t('cloudErr')) } finally { setBusy(false) }
+  }
+
+  const restore = async () => {
+    const c = pullCode.trim().toUpperCase()
+    if (c.replace(/[^A-Z0-9-]/g, '').length < 6) { flash(t('cloudBadCode')); return }
+    setBusy(true)
+    try {
+      const r = await cloudPull(c)
+      if (!r) { flash(t('cloudNotFound')); return }
+      if (!confirm(t('cloudRestoreConfirm'))) return
+      setState((s) => ({ ...s, ...r.data, syncCode: c })); markBackup()
+      setPullCode(''); flash(t('cloudRestored'))
+    } catch { flash(t('cloudErr')) } finally { setBusy(false) }
+  }
+
+  return (
+    <>
+      <div className="section-title">{t('cloudTitle')}</div>
+      <div className="card">
+        <div className="sub">{t('cloudSub')}</div>
+        {code ? (
+          <>
+            <div className="cloud-code">{code}</div>
+            <div className="cloud-note">🔐 {t('cloudSaveCode')}</div>
+            <button className="btn" style={{ marginTop: 12 }} disabled={busy} onClick={activate}>☁️ {t('cloudPushNow')}</button>
+          </>
+        ) : (
+          <button className="btn" disabled={busy} onClick={activate}>☁️ {t('cloudActivate')}</button>
+        )}
+
+        <div className="cloud-restore">
+          <div className="sub" style={{ marginTop: 4 }}>{t('cloudRestoreTitle')}</div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input className="in" placeholder="FITAI-XXXX-XXXX" value={pullCode} onChange={(e) => setPullCode(e.target.value)} style={{ textTransform: 'uppercase' }} />
+            <button className="btn secondary" style={{ width: 'auto', padding: '0 18px' }} disabled={busy} onClick={restore}>{t('cloudRestoreBtn')}</button>
+          </div>
+        </div>
+      </div>
+    </>
   )
 }
 
