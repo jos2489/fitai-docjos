@@ -403,9 +403,11 @@ function YogaIcon() {
 }
 
 // Timer a tempo per gli esercizi di mobilità (tenute/riscaldamento).
-function MobTimer({ seconds }) {
+function MobTimer({ seconds, perSide }) {
+  const { t } = useLang()
   const [running, setRunning] = useState(false)
   const [left, setLeft] = useState(seconds)
+  const [side, setSide] = useState(1) // 1 o 2 (solo se perSide)
   const endRef = useRef(0)
   const fired = useRef(false)
   useWakeLock(running)
@@ -417,16 +419,26 @@ function MobTimer({ seconds }) {
     const tick = () => {
       const rem = Math.max(0, Math.round((endRef.current - Date.now()) / 1000))
       setLeft(rem)
-      if (rem <= 0 && !fired.current) { fired.current = true; playBeepShort(); setRunning(false) }
+      if (rem <= 0 && !fired.current) {
+        fired.current = true
+        playBeepShort()
+        if (perSide && side === 1) { setSide(2) } // passa automaticamente al lato 2
+        else { setRunning(false); setSide(1) }
+      }
     }
     const id = setInterval(tick, 200)
     const onVis = () => { if (document.visibilityState === 'visible') tick() }
     document.addEventListener('visibilitychange', onVis)
     return () => { clearInterval(id); document.removeEventListener('visibilitychange', onVis) }
-  }, [running, seconds])
+  }, [running, side, seconds, perSide])
+
+  const start = () => { setSide(1); setRunning((r) => !r) }
+  let label
+  if (running) label = perSide ? `⏱ ${t('side')} ${side}/2 · ${left}s ✕` : `⏱ ${left}s ✕`
+  else label = perSide ? `⏱ ${seconds}s ×2` : `⏱ ${seconds}s`
   return (
-    <button className={'mob-link mob-timer' + (running ? ' running' : '')} onClick={() => setRunning((r) => !r)}>
-      {running ? `⏱ ${left}s ✕` : `⏱ ${seconds}s`}
+    <button className={'mob-link mob-timer' + (running ? ' running' : '')} onClick={start}>
+      {label}
     </button>
   )
 }
@@ -458,7 +470,7 @@ function MobilitySession({ day }) {
               <div className="mob-links">
                 <a className="mob-link vid" href={d.video} target="_blank" rel="noreferrer">▶ {t('mobilityVideo')}</a>
                 <a className="mob-link" href={mobilitySearchUrl(d.search)} target="_blank" rel="noreferrer">🔎 {t('mobilitySearch')}</a>
-                <MobTimer seconds={d.secs || 40} />
+                <MobTimer seconds={d.secs || 40} perSide={!!d.perSide} />
               </div>
             </div>
           ))}

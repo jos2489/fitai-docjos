@@ -121,6 +121,7 @@ export const STRINGS = {
   mobilityHint: { it: 'Riscaldamento dinamico (~5 min) per la zona di oggi. Falla prima dei pesi.', en: 'Dynamic warm-up (~5 min) for today\'s area. Do it before lifting.' },
   mobilityVideo: { it: 'Video', en: 'Video' },
   mobilitySearch: { it: 'Cerca', en: 'Search' },
+  side: { it: 'Lato', en: 'Side' },
   skip: { it: 'SALTA', en: 'SKIP' },
   close: { it: 'CHIUDI', en: 'CLOSE' },
 

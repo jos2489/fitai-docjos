@@ -5,15 +5,15 @@
 
 const DRILL = {
   cat_cow:              { it: 'Gatto-cammello', en: 'Cat-cow', doseIt: '8-10 cicli lenti', doseEn: '8-10 slow cycles', secs: 40, search: 'cat cow exercise', video: 'https://www.youtube.com/watch?v=y_cKHKi9UaM' },
-  open_book:            { it: 'Rotazioni toraciche (open book)', en: 'Open book (T-spine rotation)', doseIt: '8 per lato', doseEn: '8 per side', secs: 40, search: 'open book thoracic rotation', video: 'https://www.youtube.com/watch?v=5TdmVlQe64c' },
+  open_book:            { it: 'Rotazioni toraciche (open book)', en: 'Open book (T-spine rotation)', doseIt: '8 per lato', doseEn: '8 per side', secs: 25, perSide: true, search: 'open book thoracic rotation', video: 'https://www.youtube.com/watch?v=5TdmVlQe64c' },
   shoulder_passthrough: { it: 'Passaggi spalle (bastone/elastico)', en: 'Shoulder pass-through', doseIt: '10 lenti', doseEn: '10 slow', secs: 40, search: 'band shoulder pass through dislocates', video: 'https://www.youtube.com/watch?v=riVxa9By-pM' },
   arm_circles:          { it: 'Circonduzioni braccia', en: 'Arm circles', doseIt: '10 avanti + 10 indietro', doseEn: '10 fwd + 10 back', secs: 30, search: 'arm circles warm up', video: 'https://www.youtube.com/watch?v=tYo5ghpLksg' },
   wall_slides:          { it: 'Wall slides (scivolamenti al muro)', en: 'Scapular wall slides', doseIt: '10 ripetizioni', doseEn: '10 reps', secs: 40, search: 'scapular wall slides', video: 'https://www.youtube.com/watch?v=UB_n4DxOTCo' },
-  hip_90_90:            { it: 'Anca 90/90', en: '90/90 hip switch', doseIt: '6 per lato', doseEn: '6 per side', secs: 40, search: '90 90 hip mobility', video: 'https://www.youtube.com/watch?v=t4Zz6-aG8Iw' },
-  worlds_greatest:      { it: "World's greatest stretch", en: "World's greatest stretch", doseIt: '5 per lato', doseEn: '5 per side', secs: 40, search: "world's greatest stretch", video: 'https://www.youtube.com/watch?v=-CiWQ2IvY34' },
+  hip_90_90:            { it: 'Anca 90/90', en: '90/90 hip switch', doseIt: '20 sec per lato', doseEn: '20 sec per side', secs: 20, perSide: true, search: '90 90 hip mobility', video: 'https://www.youtube.com/watch?v=t4Zz6-aG8Iw' },
+  worlds_greatest:      { it: "World's greatest stretch", en: "World's greatest stretch", doseIt: '25 sec per lato', doseEn: '25 sec per side', secs: 25, perSide: true, search: "world's greatest stretch", video: 'https://www.youtube.com/watch?v=-CiWQ2IvY34' },
   deep_squat:           { it: 'Accosciata profonda (tenuta)', en: 'Deep squat hold', doseIt: '30-45 sec', doseEn: '30-45 sec', secs: 45, search: 'deep squat hold mobility', video: 'https://www.youtube.com/watch?v=4pabcKldodc' },
-  leg_swings:           { it: 'Slanci gamba (avanti + lato)', en: 'Leg swings', doseIt: '10 per gamba', doseEn: '10 per leg', secs: 30, search: 'leg swings dynamic warm up', video: 'https://www.youtube.com/watch?v=difYoBtZi2s' },
-  ankle_wall:           { it: 'Mobilità caviglia al muro', en: 'Knee-to-wall ankle', doseIt: '8 per lato', doseEn: '8 per side', secs: 40, search: 'knee to wall ankle dorsiflexion', video: 'https://www.youtube.com/watch?v=NqgwyM9hXMI' },
+  leg_swings:           { it: 'Slanci gamba', en: 'Leg swings', doseIt: '20 sec per gamba', doseEn: '20 sec per leg', secs: 20, perSide: true, search: 'leg swings dynamic warm up', video: 'https://www.youtube.com/watch?v=difYoBtZi2s' },
+  ankle_wall:           { it: 'Mobilità caviglia al muro', en: 'Knee-to-wall ankle', doseIt: '20 sec per lato', doseEn: '20 sec per side', secs: 20, perSide: true, search: 'knee to wall ankle dorsiflexion', video: 'https://www.youtube.com/watch?v=NqgwyM9hXMI' },
 }
 
 const ROUTINES = {
