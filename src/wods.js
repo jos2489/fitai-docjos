@@ -133,6 +133,7 @@ export function generateWod({ style = 'crossfit', minutes = 12, level = 'normale
 export const WOD_STYLES = [
   { id: 'crossfit', label: 'CrossFit', emoji: '🏋️' },
   { id: 'hybrid', label: 'Hybrid', emoji: '⚡' },
+  { id: 'hyrox', label: 'HYROX', emoji: '🏁' },
 ]
 export const WOD_LEVELS = [
   { id: 'scaled' },

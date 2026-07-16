@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { generateWod, WOD_STYLES, WOD_LEVELS } from '../wods.js'
+import { generateHyroxPlan, HYROX_INFO } from '../hyrox.js'
 import { useLang } from '../i18n.jsx'
 
 function playBeep() {
@@ -26,8 +27,14 @@ export default function Wod({ state }) {
   const [minutes, setMinutes] = useState(12)
   const [wod, setWod] = useState(null)
   const [timer, setTimer] = useState(false)
+  const [weeksCfg, setWeeksCfg] = useState(8)
+  const [daysCfg, setDaysCfg] = useState(state.program?.profile?.daysPerWeek || 4)
+  const [plan, setPlan] = useState(null)
 
+  const isHyrox = style === 'hyrox'
   const gen = () => { setWod(generateWod({ style, minutes, level, equipment: equip, lang })); setTimer(false) }
+  const genPlan = () => setPlan(generateHyroxPlan({ weeks: weeksCfg, days: daysCfg, level, equipment: equip, lang }))
+  const styleDesc = (id) => t(id === 'crossfit' ? 'wodCrossfitDesc' : id === 'hybrid' ? 'wodHybridDesc' : 'wodHyroxDesc')
 
   return (
     <div className="fade">
@@ -39,15 +46,15 @@ export default function Wod({ state }) {
 
       <div className="card">
         <div className="section-title" style={{ margin: '2px 2px 10px' }}>{t('style')}</div>
-        <div className="opt-grid">
+        <div className="opt-grid" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
           {WOD_STYLES.map((s) => (
             <button key={s.id} className={'opt' + (style === s.id ? ' active' : '')} onClick={() => setStyle(s.id)}>
               <span className="emoji">{s.emoji}</span>
               <span className="lbl">{s.label}</span>
-              <span className="desc">{t(s.id === 'crossfit' ? 'wodCrossfitDesc' : 'wodHybridDesc')}</span>
             </button>
           ))}
         </div>
+        <div className="csv-hint" style={{ marginTop: 8 }}>{styleDesc(style)}</div>
 
         <div className="section-title" style={{ margin: '16px 2px 10px' }}>{t('level')}</div>
         <div className="opt-grid" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
@@ -58,17 +65,77 @@ export default function Wod({ state }) {
           ))}
         </div>
 
-        <div className="section-title" style={{ margin: '16px 2px 10px' }}>{t('duration')}</div>
-        <div className="stepper">
-          <button onClick={() => setMinutes((m) => Math.max(4, m - 2))}>−</button>
-          <div className="val">{minutes}<small>{t('minutes')}</small></div>
-          <button onClick={() => setMinutes((m) => Math.min(30, m + 2))}>+</button>
-        </div>
-
-        <button className="btn" style={{ marginTop: 16 }} onClick={gen}>{t('genWod')}</button>
+        {!isHyrox ? (
+          <>
+            <div className="section-title" style={{ margin: '16px 2px 10px' }}>{t('duration')}</div>
+            <div className="stepper">
+              <button onClick={() => setMinutes((m) => Math.max(4, m - 2))}>−</button>
+              <div className="val">{minutes}<small>{t('minutes')}</small></div>
+              <button onClick={() => setMinutes((m) => Math.min(30, m + 2))}>+</button>
+            </div>
+            <button className="btn" style={{ marginTop: 16 }} onClick={gen}>{t('genWod')}</button>
+          </>
+        ) : (
+          <>
+            <div className="section-title" style={{ margin: '16px 2px 10px' }}>{t('hyroxWeeks')}</div>
+            <div className="stepper">
+              <button onClick={() => setWeeksCfg((w) => Math.max(4, w - 1))}>−</button>
+              <div className="val">{weeksCfg}<small>{t('weeksUnit')}</small></div>
+              <button onClick={() => setWeeksCfg((w) => Math.min(16, w + 1))}>+</button>
+            </div>
+            <div className="section-title" style={{ margin: '16px 2px 10px' }}>{t('hyroxDays')}</div>
+            <div className="stepper">
+              <button onClick={() => setDaysCfg((v) => Math.max(2, v - 1))}>−</button>
+              <div className="val">{daysCfg}<small>{t('daysUnit')}</small></div>
+              <button onClick={() => setDaysCfg((v) => Math.min(6, v + 1))}>+</button>
+            </div>
+            <button className="btn" style={{ marginTop: 16 }} onClick={genPlan}>🏁 {t('genHyrox')}</button>
+          </>
+        )}
       </div>
 
-      {wod && <WodCard wod={wod} timer={timer} setTimer={setTimer} />}
+      {!isHyrox && wod && <WodCard wod={wod} timer={timer} setTimer={setTimer} />}
+      {isHyrox && plan && <HyroxPlan plan={plan} />}
+    </div>
+  )
+}
+
+function HyroxPlan({ plan }) {
+  const { t, lang } = useLang()
+  const [wk, setWk] = useState(1)
+  const info = HYROX_INFO[lang === 'en' ? 'en' : 'it']
+  const week = plan.weeks.find((w) => w.week === wk) || plan.weeks[0]
+  return (
+    <div className="fade">
+      <div className="card" style={{ background: 'var(--card-2)' }}>
+        <div className="section-title" style={{ marginTop: 0 }}>🏁 {info.title}</div>
+        <div style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.5 }}>{info.body}</div>
+      </div>
+
+      <div className="csv-hint" style={{ margin: '2px 2px 10px' }}>{plan.basis}</div>
+
+      <div className="section-title">{t('week')}</div>
+      <div className="weeks">
+        {plan.weeks.map((w) => (
+          <button key={w.week} className={'week-pill' + (w.week === wk ? ' active' : '') + (w.deload || w.phase === 'taper' ? ' deload' : '')} onClick={() => setWk(w.week)}>
+            {t('weekShort')} {w.week}
+          </button>
+        ))}
+      </div>
+
+      <div className="card" style={{ background: 'var(--card-2)' }}>
+        <div style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.5 }}>{week.note}</div>
+      </div>
+
+      {week.days.map((d, i) => (
+        <div className="card fade hyrox-day" key={i}>
+          <div className="hyrox-day-head"><span className="hyrox-ic">{d.icon}</span><div><div className="hyrox-title">{t('dayShort')} {i + 1} · {d.title}</div><div className="hyrox-focus">{d.focus}</div></div></div>
+          <ul className="hyrox-lines">
+            {d.lines.map((l, j) => <li key={j}>{l}</li>)}
+          </ul>
+          {d.note && <div className="hyrox-note">{d.note}</div>}
+        </div>
+      ))}
     </div>
   )
 }
