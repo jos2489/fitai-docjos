@@ -231,6 +231,8 @@ export const STRINGS = {
   hyroxDays: { it: 'Giorni a settimana', en: 'Days per week' },
   genHyrox: { it: 'Genera piano HYROX', en: 'Generate HYROX plan' },
   dayShort: { it: 'Giorno', en: 'Day' },
+  hyroxGlossTitle: { it: 'Concetti (Zona 2, soglia, taper…)', en: 'Concepts (Zone 2, threshold, taper…)' },
+  hyroxNotePh: { it: 'Note (tempo corsa, carichi…)', en: 'Notes (run time, loads…)' },
   lvlScaled: { it: 'Scalato', en: 'Scaled' },
   lvlNormale: { it: 'Intermedio', en: 'Intermediate' },
   lvlRx: { it: 'Rx (avanzato)', en: 'Rx (advanced)' },

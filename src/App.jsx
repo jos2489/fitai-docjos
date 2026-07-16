@@ -78,7 +78,7 @@ function Shell({ state, setState }) {
       {tab === 'home' && <Home state={state} setState={setState} onOpenDay={(week, dayIdx) => setWorkout({ week, dayIdx })} onPersonalize={() => { setProfileFocus('perso'); setTab('profile') }} />}
       {tab === 'stats' && <Stats state={state} setState={setState} />}
       {tab === 'history' && <History state={state} />}
-      {tab === 'wod' && <Wod state={state} />}
+      {tab === 'wod' && <Wod state={state} setState={setState} />}
       {tab === 'nutrition' && <Nutrition state={state} setState={setState} />}
       {tab === 'profile' && <Profile state={state} setState={setState} focus={profileFocus} onFocusDone={() => setProfileFocus(null)} />}
 

@@ -16,6 +16,8 @@ const empty = {
   measurements: [],     // [{ date, vita, braccio, coscia, petto, fianchi }] in cm
   photos: [],           // [{ id, date, img }] foto progressi (compresse, base64)
   syncCode: '',         // codice per la sincronizzazione cloud (se attiva)
+  hyrox: null,          // config piano HYROX salvato: { weeks, days, level }
+  hyroxLog: {},         // chiave `${week}-${dayIdx}` -> { done: ISO, note: '' }
 }
 
 // Timestamp ultimo backup (per il promemoria) — chiave dedicata, fuori dallo

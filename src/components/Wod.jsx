@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { generateWod, WOD_STYLES, WOD_LEVELS } from '../wods.js'
-import { generateHyroxPlan, HYROX_INFO } from '../hyrox.js'
+import { generateHyroxPlan, HYROX_INFO, HYROX_GLOSSARY } from '../hyrox.js'
 import { useLang } from '../i18n.jsx'
 
 function playBeep() {
@@ -19,21 +19,30 @@ function playBeep() {
   } catch { /* */ }
 }
 
-export default function Wod({ state }) {
+export default function Wod({ state, setState }) {
   const { t, lang } = useLang()
   const equip = state.program?.profile?.equipment || 'gym'
-  const [style, setStyle] = useState('crossfit')
-  const [level, setLevel] = useState('normale')
+  const saved = state.hyrox
+  const [style, setStyle] = useState(saved ? 'hyrox' : 'crossfit')
+  const [level, setLevel] = useState(saved?.level || 'normale')
   const [minutes, setMinutes] = useState(12)
   const [wod, setWod] = useState(null)
   const [timer, setTimer] = useState(false)
-  const [weeksCfg, setWeeksCfg] = useState(8)
-  const [daysCfg, setDaysCfg] = useState(state.program?.profile?.daysPerWeek || 4)
+  const [weeksCfg, setWeeksCfg] = useState(saved?.weeks || 8)
+  const [daysCfg, setDaysCfg] = useState(saved?.days || state.program?.profile?.daysPerWeek || 4)
   const [plan, setPlan] = useState(null)
 
   const isHyrox = style === 'hyrox'
+  // Se c'è un piano HYROX salvato, ricostruiscilo (è deterministico) all'avvio.
+  useEffect(() => {
+    if (saved && !plan) setPlan(generateHyroxPlan({ weeks: saved.weeks, days: saved.days, level: saved.level, equipment: equip, lang }))
+  }, [lang])
+
   const gen = () => { setWod(generateWod({ style, minutes, level, equipment: equip, lang })); setTimer(false) }
-  const genPlan = () => setPlan(generateHyroxPlan({ weeks: weeksCfg, days: daysCfg, level, equipment: equip, lang }))
+  const genPlan = () => {
+    setPlan(generateHyroxPlan({ weeks: weeksCfg, days: daysCfg, level, equipment: equip, lang }))
+    setState((s) => ({ ...s, hyrox: { weeks: weeksCfg, days: daysCfg, level } }))
+  }
   const styleDesc = (id) => t(id === 'crossfit' ? 'wodCrossfitDesc' : id === 'hybrid' ? 'wodHybridDesc' : 'wodHyroxDesc')
 
   return (
@@ -95,16 +104,35 @@ export default function Wod({ state }) {
       </div>
 
       {!isHyrox && wod && <WodCard wod={wod} timer={timer} setTimer={setTimer} />}
-      {isHyrox && plan && <HyroxPlan plan={plan} />}
+      {isHyrox && plan && <HyroxPlan plan={plan} state={state} setState={setState} />}
     </div>
   )
 }
 
-function HyroxPlan({ plan }) {
+function HyroxPlan({ plan, state, setState }) {
   const { t, lang } = useLang()
   const [wk, setWk] = useState(1)
+  const [showGloss, setShowGloss] = useState(false)
   const info = HYROX_INFO[lang === 'en' ? 'en' : 'it']
+  const gloss = HYROX_GLOSSARY[lang === 'en' ? 'en' : 'it']
   const week = plan.weeks.find((w) => w.week === wk) || plan.weeks[0]
+  const log = state.hyroxLog || {}
+
+  const total = plan.weeks.reduce((n, w) => n + w.days.length, 0)
+  const doneCount = Object.values(log).filter((e) => e && e.done).length
+
+  const dk = (di) => `${wk}-${di}`
+  const toggleDone = (di) => setState((s) => {
+    const l = { ...(s.hyroxLog || {}) }; const k = dk(di); const cur = l[k] || {}
+    l[k] = { ...cur, done: cur.done ? null : new Date().toISOString() }
+    return { ...s, hyroxLog: l }
+  })
+  const setNote = (di, v) => setState((s) => {
+    const l = { ...(s.hyroxLog || {}) }; const k = dk(di)
+    l[k] = { ...(l[k] || {}), note: v }
+    return { ...s, hyroxLog: l }
+  })
+
   return (
     <div className="fade">
       <div className="card" style={{ background: 'var(--card-2)' }}>
@@ -112,9 +140,23 @@ function HyroxPlan({ plan }) {
         <div style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.5 }}>{info.body}</div>
       </div>
 
+      <div className="card">
+        <button className="tech-head" style={{ padding: 0 }} onClick={() => setShowGloss((v) => !v)}>
+          <span>📚 {t('hyroxGlossTitle')}</span>
+          <span className="tech-toggle">{showGloss ? '−' : t('howto')}</span>
+        </button>
+        {showGloss && (
+          <div className="tech-body fade" style={{ padding: '10px 0 0' }}>
+            {gloss.map((g, i) => (
+              <div key={i} style={{ marginBottom: 8 }}><b>{g.term}:</b> {g.def}</div>
+            ))}
+          </div>
+        )}
+      </div>
+
       <div className="csv-hint" style={{ margin: '2px 2px 10px' }}>{plan.basis}</div>
 
-      <div className="section-title">{t('week')}</div>
+      <div className="section-title">{t('week')} · {doneCount}/{total} {t('done')}</div>
       <div className="weeks">
         {plan.weeks.map((w) => (
           <button key={w.week} className={'week-pill' + (w.week === wk ? ' active' : '') + (w.deload || w.phase === 'taper' ? ' deload' : '')} onClick={() => setWk(w.week)}>
@@ -127,15 +169,23 @@ function HyroxPlan({ plan }) {
         <div style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.5 }}>{week.note}</div>
       </div>
 
-      {week.days.map((d, i) => (
-        <div className="card fade hyrox-day" key={i}>
-          <div className="hyrox-day-head"><span className="hyrox-ic">{d.icon}</span><div><div className="hyrox-title">{t('dayShort')} {i + 1} · {d.title}</div><div className="hyrox-focus">{d.focus}</div></div></div>
-          <ul className="hyrox-lines">
-            {d.lines.map((l, j) => <li key={j}>{l}</li>)}
-          </ul>
-          {d.note && <div className="hyrox-note">{d.note}</div>}
-        </div>
-      ))}
+      {week.days.map((d, i) => {
+        const entry = log[dk(i)] || {}
+        return (
+          <div className={'card fade hyrox-day' + (entry.done ? ' hyrox-done' : '')} key={i}>
+            <div className="hyrox-day-head">
+              <span className="hyrox-ic">{d.icon}</span>
+              <div style={{ flex: 1 }}><div className="hyrox-title">{t('dayShort')} {i + 1} · {d.title}</div><div className="hyrox-focus">{d.focus}</div></div>
+              <button className={'hyrox-check' + (entry.done ? ' on' : '')} onClick={() => toggleDone(i)}>{entry.done ? '✓' : ''}</button>
+            </div>
+            <ul className="hyrox-lines">
+              {d.lines.map((l, j) => <li key={j}>{l}</li>)}
+            </ul>
+            {d.note && <div className="hyrox-note">{d.note}</div>}
+            <input className="in hyrox-log-note" placeholder={t('hyroxNotePh')} value={entry.note || ''} onChange={(e) => setNote(i, e.target.value)} />
+          </div>
+        )
+      })}
     </div>
   )
 }

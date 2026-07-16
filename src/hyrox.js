@@ -19,6 +19,34 @@ export const HYROX_INFO = {
   },
 }
 
+// Glossario dei concetti usati nel piano (spiegati in parole semplici).
+export const HYROX_GLOSSARY = {
+  it: [
+    { term: '🟢 Zona 2 (corsa facile)', def: 'Intensità bassa, "ritmo conversazione": riesci a parlare a frasi intere e respirare col naso. È dove si costruisce la base aerobica (il "motore"). Deve sembrare facile: la maggior parte della corsa va qui.' },
+    { term: '📊 ~80/20', def: 'Distribuzione polarizzata: circa l\'80% della corsa facile (Zona 2) e solo il 20% intensa. È il modo più efficace di allenare la resistenza (Seiler).' },
+    { term: '🟠 Soglia', def: 'Ritmo "comodo-duro", il massimo che riesci a tenere per ~30-60 min. Alza il livello a cui puoi correre senza accumulare troppa fatica.' },
+    { term: '🔴 VO2max', def: 'Intensità molto alta, in intervalli brevi (2-4 min). Sviluppa la massima capacità aerobica: il tetto della tua resistenza.' },
+    { term: '🥵 Corsa compromessa', def: 'Correre subito dopo una stazione o la forza, cioè già affaticato. È la specialità di HYROX: alleni il corpo a correre stanco.' },
+    { term: '🎯 Ritmo gara', def: 'Il passo che vuoi tenere in gara. Negli intervalli in fase Peak lo provi per abituarti alle sensazioni.' },
+    { term: '⚪ Taper', def: 'Rifinitura pre-gara: nelle ultime settimane riduci il volume ma mantieni un po\' di intensità. Arrivi riposato e "carico".' },
+    { term: '🔵 Scarico (deload)', def: 'Settimana più leggera (meno volume) per recuperare e assorbire il lavoro, evitando di accumulare troppa fatica.' },
+    { term: '📉 Negative split', def: 'Fare la seconda metà uguale o più veloce della prima. Non partire troppo forte: gestisci lo sforzo.' },
+    { term: '🔋 RIR', def: 'Ripetizioni in serbatoio: quante ne potresti ancora fare prima del cedimento. Es. RIR 2 = ti fermi 2 rip prima di non farcela.' },
+  ],
+  en: [
+    { term: '🟢 Zone 2 (easy run)', def: 'Low intensity, "conversational pace": you can talk in full sentences and breathe through the nose. This builds the aerobic base (the "engine"). It should feel easy — most running goes here.' },
+    { term: '📊 ~80/20', def: 'Polarized distribution: about 80% easy running (Zone 2) and only 20% hard. The most effective way to train endurance (Seiler).' },
+    { term: '🟠 Threshold', def: 'A "comfortably hard" pace, the most you can hold for ~30-60 min. Raises the pace you can run without accumulating too much fatigue.' },
+    { term: '🔴 VO2max', def: 'Very high intensity in short intervals (2-4 min). Develops your maximum aerobic capacity: the ceiling of your endurance.' },
+    { term: '🥵 Compromised running', def: 'Running right after a station or strength work, i.e. already tired. It\'s HYROX\'s specialty: train the body to run fatigued.' },
+    { term: '🎯 Race pace', def: 'The pace you aim to hold in the race. In Peak-phase intervals you rehearse it to get used to the feel.' },
+    { term: '⚪ Taper', def: 'Pre-race sharpening: in the final weeks reduce volume but keep some intensity. You arrive rested and primed.' },
+    { term: '🔵 Deload', def: 'A lighter week (less volume) to recover and absorb the work, avoiding too much accumulated fatigue.' },
+    { term: '📉 Negative split', def: 'Running the second half equal or faster than the first. Don\'t start too hot: manage the effort.' },
+    { term: '🔋 RIR', def: 'Reps in reserve: how many more you could do before failure. E.g. RIR 2 = you stop 2 reps short.' },
+  ],
+}
+
 // Sostituzioni degli attrezzi speciali in base all'attrezzatura disponibile.
 function sub(key, equip, lang) {
   const en = lang === 'en'
