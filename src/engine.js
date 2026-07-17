@@ -254,30 +254,91 @@ function priorityMusclesFor(profile) {
 // Ogni "slot" è un gruppo muscolare prioritario; il primo è il movimento
 // principale (compound) della seduta.
 function splitForDays(days, experience) {
-  const PUSH = { name: 'Push (spinta)', focus: 'Petto · Spalle · Tricipiti', slots: ['Petto', 'Petto', 'Spalle', 'Spalle', 'Tricipiti', 'Tricipiti'] }
-  const PULL = { name: 'Pull (tirata)', focus: 'Schiena · Bicipiti', slots: ['Schiena', 'Schiena', 'Schiena', 'Spalle', 'Bicipiti', 'Bicipiti'] }
-  const LEGS = { name: 'Legs (gambe)', focus: 'Quadricipiti · Femorali · Glutei', slots: ['Quadricipiti', 'Quadricipiti', 'Femorali', 'Glutei', 'Polpacci', 'Core'] }
-  const UPPER = { name: 'Upper (parte alta)', focus: 'Petto · Schiena · Spalle · Braccia', slots: ['Petto', 'Schiena', 'Spalle', 'Schiena', 'Bicipiti', 'Tricipiti'] }
-  const LOWER = { name: 'Lower (parte bassa)', focus: 'Gambe · Glutei · Core', slots: ['Quadricipiti', 'Femorali', 'Quadricipiti', 'Glutei', 'Polpacci', 'Core'] }
-  const FBA = { name: 'Full Body A', focus: 'Tutto il corpo', slots: ['Quadricipiti', 'Petto', 'Schiena', 'Spalle', 'Bicipiti', 'Core'] }
-  const FBB = { name: 'Full Body B', focus: 'Tutto il corpo', slots: ['Femorali', 'Schiena', 'Petto', 'Spalle', 'Tricipiti', 'Core'] }
-  const FBC = { name: 'Full Body C', focus: 'Tutto il corpo', slots: ['Quadricipiti', 'Petto', 'Schiena', 'Glutei', 'Bicipiti', 'Tricipiti'] }
+  // Nota posizioni: le prime 3 slot preferiscono i compound, le ultime 3 gli
+  // isolamenti. Chi ha 2+ slot di un muscolo prende angoli diversi (varietà).
+  // Petto: 1 slot in zona compound (spinta) + 1 in zona iso (croci).
+  const PUSH = { name: 'Push (spinta)', focus: 'Petto · Spalle · Tricipiti', slots: ['Petto', 'Spalle', 'Petto', 'Spalle', 'Tricipiti', 'Petto'] }
+  const PULL = { name: 'Pull (tirata)', focus: 'Schiena · Spalle · Bicipiti', slots: ['Schiena', 'Schiena', 'Schiena', 'Spalle', 'Bicipiti', 'Bicipiti'] }
+  const LEGS = { name: 'Legs (gambe)', focus: 'Quadricipiti · Femorali · Glutei', slots: ['Quadricipiti', 'Femorali', 'Glutei', 'Quadricipiti', 'Femorali', 'Polpacci'] }
+  const UPPER_A = { name: 'Upper A (parte alta)', focus: 'Petto · Schiena · Spalle · Braccia', slots: ['Petto', 'Schiena', 'Spalle', 'Petto', 'Tricipiti', 'Bicipiti'] }
+  const UPPER_B = { name: 'Upper B (parte alta)', focus: 'Schiena · Petto · Spalle · Braccia', slots: ['Schiena', 'Petto', 'Schiena', 'Spalle', 'Bicipiti', 'Tricipiti'] }
+  const LOWER_A = { name: 'Lower A (parte bassa)', focus: 'Quadricipiti · Femorali · Glutei', slots: ['Quadricipiti', 'Femorali', 'Glutei', 'Quadricipiti', 'Femorali', 'Polpacci'] }
+  const LOWER_B = { name: 'Lower B (parte bassa)', focus: 'Femorali · Quadricipiti · Glutei', slots: ['Femorali', 'Quadricipiti', 'Glutei', 'Femorali', 'Quadricipiti', 'Polpacci'] }
+  const FBA = { name: 'Full Body A', focus: 'Tutto il corpo', slots: ['Quadricipiti', 'Petto', 'Schiena', 'Spalle', 'Femorali', 'Bicipiti'] }
+  const FBB = { name: 'Full Body B', focus: 'Tutto il corpo', slots: ['Femorali', 'Schiena', 'Petto', 'Glutei', 'Spalle', 'Tricipiti'] }
+  const FBC = { name: 'Full Body C', focus: 'Tutto il corpo', slots: ['Quadricipiti', 'Petto', 'Schiena', 'Polpacci', 'Bicipiti', 'Tricipiti'] }
+
+  // Principianti: 1 esercizio per muscolo (volume moderato, focus compound e
+  // tecnica). Le evidenze indicano che crescono con poco volume: non sovraccaricare.
+  if (experience === 'principiante') {
+    const UP_S = { name: 'Upper (parte alta)', focus: 'Petto · Schiena · Spalle · Braccia', slots: ['Petto', 'Schiena', 'Spalle', 'Bicipiti', 'Tricipiti'] }
+    const LO_S = { name: 'Lower (parte bassa)', focus: 'Gambe · Glutei · Core', slots: ['Quadricipiti', 'Femorali', 'Glutei', 'Polpacci', 'Core'] }
+    switch (days) {
+      case 2: return [FBA, FBB]
+      case 3: return [FBA, FBB, FBC]
+      case 4: return [UP_S, LO_S, UP_S, LO_S]
+      case 5: return [UP_S, LO_S, UP_S, LO_S, FBC]
+      case 6: return [UP_S, LO_S, UP_S, LO_S, UP_S, LO_S]
+      default: return [FBA, FBB, FBC]
+    }
+  }
 
   switch (days) {
     case 2: return [FBA, FBB]
-    case 3: return experience === 'principiante' ? [FBA, FBB, FBC] : [PUSH, PULL, LEGS]
-    case 4: return [UPPER, LOWER, UPPER, LOWER]
-    case 5: return [UPPER, LOWER, PUSH, PULL, LEGS]
+    case 3: return [FBA, FBB, FBC] // full-body = ogni muscolo ~3× (frequenza > PPL 1×)
+    case 4: return [UPPER_A, LOWER_A, UPPER_B, LOWER_B]
+    case 5: return [UPPER_A, LOWER_A, PUSH, PULL, LEGS]
     case 6: return [PUSH, PULL, LEGS, PUSH, PULL, LEGS]
     default: return [FBA, FBB, FBC]
   }
 }
 
+// --- Pattern/angolo per esercizio (per garantire VARIETÀ dentro un muscolo) --
+// Evidenze (Nippard, Schoenfeld, Israetel/RP): allenare un muscolo da angoli e
+// regioni diverse (es. petto: spinta piana + inclinata + croci in allungamento)
+// migliora lo sviluppo. La selezione qui sotto evita di ripetere lo stesso
+// pattern e ruota gli angoli.
+const EX_PATTERN = {
+  // Petto
+  bench: 'press', db_bench: 'press', machine_press: 'press', pushup: 'press', single_arm_db_press: 'press',
+  incline_db: 'incline', incline_barbell: 'incline', decline_db: 'incline',
+  cable_fly: 'fly', db_fly: 'fly', pec_deck: 'fly', low_cable_fly: 'fly', single_arm_cable_fly: 'fly',
+  // Schiena
+  pullup: 'vertical', lat_pulldown: 'vertical', wide_pulldown: 'vertical', single_arm_pulldown: 'vertical',
+  barbell_row: 'horizontal', db_row: 'horizontal', cable_row: 'horizontal', inv_row: 'horizontal', tbar_row: 'horizontal', pendlay_row: 'horizontal', machine_row: 'horizontal', single_arm_cable_row: 'horizontal', chest_supported_row: 'horizontal', kelso_shrug: 'horizontal',
+  straight_arm_pd: 'pullover', db_pullover: 'pullover',
+  // Spalle
+  ohp: 'press', db_ohp: 'press', arnold_press: 'press', machine_shoulder: 'press', pike_pushup: 'press', landmine_press: 'press', single_arm_db_ohp: 'press',
+  lateral_raise: 'lateral', cable_lateral: 'lateral', upright_row: 'lateral', single_arm_lateral: 'lateral',
+  face_pull: 'rear', rear_delt_fly: 'rear', reverse_pec_deck: 'rear',
+  // Quadricipiti
+  squat: 'squat', goblet_squat: 'squat', front_squat: 'squat', hack_squat: 'squat', leg_press: 'squat', single_leg_press: 'squat',
+  split_squat: 'lunge', walking_lunge: 'lunge', reverse_lunge: 'lunge', pistol_squat: 'lunge',
+  leg_ext: 'extension', sissy_squat: 'extension', single_leg_ext: 'extension',
+  // Femorali
+  rdl: 'hinge', deadlift: 'hinge', good_morning: 'hinge', single_leg_rdl: 'hinge',
+  leg_curl: 'curl', seated_leg_curl: 'curl', nordic_curl: 'curl', single_leg_curl: 'curl',
+  // Glutei
+  hip_thrust: 'thrust', glute_bridge: 'thrust', single_leg_hip_thrust: 'thrust', single_leg_glute_bridge: 'thrust', cable_pull_through: 'thrust',
+  cable_kickback: 'abduction', hip_abduction: 'abduction', step_up: 'abduction',
+  // Bicipiti
+  barbell_curl: 'curl', db_curl: 'curl', cable_curl: 'curl',
+  hammer_curl: 'hammer', zottman_curl: 'hammer',
+  preacher_curl: 'stretch', incline_db_curl: 'stretch', spider_curl: 'stretch', chinup: 'compound',
+  // Tricipiti
+  triceps_pushdown: 'pushdown', rope_pushdown: 'pushdown', db_kickback: 'pushdown', single_arm_pushdown: 'pushdown',
+  db_skull: 'overhead', overhead_rope: 'overhead', single_arm_oh_ext: 'overhead',
+  dips: 'compound', close_grip_bench: 'compound', bench_dip: 'compound',
+  // Polpacci
+  standing_calf: 'standing', calf_raise_bw: 'standing', single_leg_calf: 'standing', seated_calf: 'seated',
+}
+const patternOf = (e) => EX_PATTERN[e.id] || e.id
+
 // --- Selezione esercizi ------------------------------------------------------
 // I primi slot della seduta sono fondamentali (compound), gli ultimi accessori
-// di isolamento: struttura sana per ipertrofia e necessaria perché le tecniche
-// di intensità (drop set, myo-reps...) abbiano un esercizio adatto su cui girare.
-function pickExercises(slots, equip, exercisesPerDay, usedIds, excludeIds = null) {
+// di isolamento. In più, per ogni muscolo si scelgono pattern/angoli DIVERSI
+// lungo la settimana (usedPatterns): niente "solo panca piana".
+function pickExercises(slots, equip, exercisesPerDay, usedIds, excludeIds, usedPatterns) {
   const pool = EXERCISES.filter(e => e.equip.includes(equip) && !(excludeIds && excludeIds.has(e.id)))
   const chosen = []
   const localUsed = new Set()
@@ -286,13 +347,19 @@ function pickExercises(slots, equip, exercisesPerDay, usedIds, excludeIds = null
     if (chosen.length >= exercisesPerDay) break
     const muscle = slots[i]
     const preferIso = i >= Math.ceil(n / 2) // seconda metà = accessori di isolamento
+    const usedPat = usedPatterns.get(muscle) || new Set()
     const candidates = pool
       .filter(e => e.muscle === muscle && !localUsed.has(e.id))
       .sort((a, b) => {
-        // preferenza di tipo in base alla posizione nella seduta
+        // 1) tipo giusto per la posizione (compound prima, isolamento dopo)
         const ra = (preferIso ? (a.type === 'isolation' ? 0 : 1) : (a.type === 'compound' ? 0 : 1))
         const rb = (preferIso ? (b.type === 'isolation' ? 0 : 1) : (b.type === 'compound' ? 0 : 1))
         if (ra !== rb) return ra - rb
+        // 2) VARIETÀ: preferisci un pattern non ancora usato per questo muscolo
+        const pa = usedPat.has(patternOf(a)) ? 1 : 0
+        const pb = usedPat.has(patternOf(b)) ? 1 : 0
+        if (pa !== pb) return pa - pb
+        // 3) rotazione: meno usato finora
         return (usedIds.get(a.id) || 0) - (usedIds.get(b.id) || 0)
       })
     const pick = candidates[0]
@@ -300,6 +367,8 @@ function pickExercises(slots, equip, exercisesPerDay, usedIds, excludeIds = null
       chosen.push(pick)
       localUsed.add(pick.id)
       usedIds.set(pick.id, (usedIds.get(pick.id) || 0) + 1)
+      if (!usedPatterns.has(muscle)) usedPatterns.set(muscle, new Set())
+      usedPatterns.get(muscle).add(patternOf(pick))
     }
   }
   return chosen
@@ -315,6 +384,7 @@ export function buildProgram(profile) {
   // deload nell'ultima settimana se mesociclo ≥ 4 settimane
   const hasDeload = totalWeeks >= 4
   const usedIds = new Map()
+  const usedPatterns = new Map() // muscolo -> Set di pattern usati (per la varietà)
 
   // --- personalizzazione opzionale (vuota = comportamento standard) ---
   const excludeIds = excludedIdsFor(profile.injuries)
@@ -326,15 +396,7 @@ export function buildProgram(profile) {
 
   // 1) costruisci i giorni "base" (settimana 1)
   const baseDays = split.map((day) => {
-    const exs = pickExercises(day.slots, equip, maxEx, usedIds, excludeIds)
-    // Alzate laterali automatiche: se la giornata allena le spalle ma non c'è
-    // già un'alzata laterale, aggiungila (copre il deltoide laterale).
-    if (day.slots.includes('Spalle') && exs.length < maxEx && !exs.some((e) => LATERAL_RAISE_IDS.includes(e.id))) {
-      const lr = LATERAL_RAISE_IDS
-        .map((id) => EXERCISE_BY_ID[id])
-        .find((e) => e && e.equip.includes(equip) && !excludeIds.has(e.id) && !exs.some((x) => x.id === e.id))
-      if (lr) { exs.push(lr); usedIds.set(lr.id, (usedIds.get(lr.id) || 0) + 1) }
-    }
+    const exs = pickExercises(day.slots, equip, maxEx, usedIds, excludeIds, usedPatterns)
     const exercises = exs.map((e, i) => {
       const isMain = i === 0 && e.type === 'compound'
       const isCompound = e.type === 'compound'
@@ -414,7 +476,7 @@ export function buildProgram(profile) {
 // Modificano il programma su TUTTE le settimane per quella giornata, con serie/
 // RIR coerenti col livello e la settimana (deload incluso). Si azzerano quando
 // si rigenera il piano (viene ricostruito da zero).
-export function addExerciseToProgram(program, dayIdx, exId) {
+export function addExerciseToProgram(program, dayIdx, exId, afterExId = null) {
   const def = EXERCISE_BY_ID[exId]
   if (!def) return program
   // niente doppioni nella stessa giornata (le chiavi dei log userebbero lo stesso id)
@@ -444,7 +506,14 @@ export function addExerciseToProgram(program, dayIdx, exId) {
       id: def.id, name: def.name, muscle: def.muscle, type: def.type,
       sets, repsLow, repsHigh, rir, rest, technique: null, custom: true,
     }
-    const days = wk.days.map((d, di) => (di === dayIdx ? { ...d, exercises: [...d.exercises, entry] } : d))
+    const days = wk.days.map((d, di) => {
+      if (di !== dayIdx) return d
+      const list = [...d.exercises]
+      const at = afterExId ? list.findIndex((e) => e.id === afterExId) : -1
+      if (at >= 0) list.splice(at + 1, 0, entry) // inserisci subito dopo l'esercizio indicato
+      else list.push(entry) // altrimenti in fondo
+      return { ...d, exercises: list }
+    })
     return { ...wk, days }
   })
   return { ...program, weeks }

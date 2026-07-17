@@ -164,8 +164,8 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
       return { ...s, swaps }
     })
   }
-  const addExercise = (exId) => {
-    setState((s) => ({ ...s, program: addExerciseToProgram(s.program, dayIdx, exId) }))
+  const addExercise = (exId, afterExId = null) => {
+    setState((s) => ({ ...s, program: addExerciseToProgram(s.program, dayIdx, exId, afterExId) }))
   }
   const removeExercise = (exId) => {
     if (!confirm(t('removeExConfirm'))) return
@@ -222,24 +222,24 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
         const effId = swappedId || ex.id
         const adjEx = { ...ex, sets: Math.max(2, ex.sets + adj.sets), rir: Math.max(0, ex.rir + adj.rir) }
         return (
-          <ExerciseCard
-            key={ex.id + '-' + effId + '-' + readiness}
-            ex={adjEx}
-            display={display}
-            swapped={!!swappedId}
-            alternatives={alternativesFor(effId, equip)}
-            existing={state.logs[logKey(week, dayIdx, effId)]}
-            last={lastLogFor(state.logs, week, dayIdx, effId)}
-            onChange={(sets) => setLog(effId, sets)}
-            onRest={() => setRest(ex.rest)}
-            onSwap={(newId) => swapExercise(ex.id, newId)}
-            onRemove={() => removeExercise(ex.id)}
-            prevBest={bestTopBefore(program, state.logs, effId, week)}
-          />
+          <React.Fragment key={ex.id + '-' + effId + '-' + readiness}>
+            <ExerciseCard
+              ex={adjEx}
+              display={display}
+              swapped={!!swappedId}
+              alternatives={alternativesFor(effId, equip)}
+              existing={state.logs[logKey(week, dayIdx, effId)]}
+              last={lastLogFor(state.logs, week, dayIdx, effId)}
+              onChange={(sets) => setLog(effId, sets)}
+              onRest={() => setRest(ex.rest)}
+              onSwap={(newId) => swapExercise(ex.id, newId)}
+              onRemove={() => removeExercise(ex.id)}
+              prevBest={bestTopBefore(program, state.logs, effId, week)}
+            />
+            <AddExercise equip={equip} existingIds={day.exercises.map((e) => e.id)} onAdd={(id) => addExercise(id, ex.id)} compact />
+          </React.Fragment>
         )
       })}
-
-      <AddExercise equip={equip} existingIds={day.exercises.map((e) => e.id)} onAdd={addExercise} />
 
       <div className="card">
         <h2>{t('notesTitle')}</h2>
@@ -480,7 +480,7 @@ function MobilitySession({ day }) {
   )
 }
 
-function AddExercise({ equip, existingIds, onAdd }) {
+function AddExercise({ equip, existingIds, onAdd, compact }) {
   const { t, lang } = useLang()
   const [open, setOpen] = useState(false)
   const [muscle, setMuscle] = useState('')
@@ -488,7 +488,7 @@ function AddExercise({ equip, existingIds, onAdd }) {
   const muscles = Object.keys(byMuscle)
   if (!open) {
     return (
-      <button className="btn secondary add-ex-btn" onClick={() => setOpen(true)}>
+      <button className={compact ? 'add-ex-inline' : 'btn secondary add-ex-btn'} onClick={() => setOpen(true)}>
         ➕ {t('addExercise')}
       </button>
     )
