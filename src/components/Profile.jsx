@@ -2,6 +2,7 @@ import React, { useMemo, useState, useEffect } from 'react'
 import { adaptProgram, assessProgress, levelUpProgram, dayName, buildProgram, PRIORITY_GROUPS, INJURY_OPTIONS, EMPHASIS_OPTIONS, SESSION_TIMES } from '../engine.js'
 import { supportsAutoBackup, enableAutoBackup, resumeAutoBackup, disableAutoBackup, backupStatus } from '../filebackup.js'
 import { newSyncCode, cloudPush, cloudPull } from '../cloudsync.js'
+import { APP_VERSION } from '../version.js'
 import { sanitizeForBackup, markBackup, exportBackup } from '../storage.js'
 import { useLang, LANGUAGES, goalLabel, expLabel, equipLabel } from '../i18n.jsx'
 
@@ -145,6 +146,7 @@ export default function Profile({ state, setState, focus, onFocusDone }) {
         <div className="sub">{t('dataSub')}</div>
         <button className="btn secondary" onClick={resetAll}>{t('resetAll')}</button>
       </div>
+      <div style={{ textAlign: 'center', color: 'var(--muted)', fontSize: 12, padding: '6px 0' }}>FitAi {APP_VERSION}</div>
       <div style={{ height: 10 }} />
     </div>
   )

@@ -159,8 +159,15 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
   const swapExercise = (origId, newId) => {
     setState((s) => {
       const swaps = { ...(s.swaps || {}) }
-      if (newId) swaps[swapKey(dayIdx, origId)] = newId
-      else delete swaps[swapKey(dayIdx, origId)]
+      if (newId) {
+        // Guardia anti-collisione: rifiuta lo scambio verso un esercizio già
+        // presente nella giornata (originale o come scambio di un altro slot),
+        // altrimenti due card condividerebbero gli stessi log pesi/ripetizioni.
+        const dayExs = s.program.weeks[0].days[dayIdx].exercises
+        const effNow = new Set(dayExs.filter((e) => e.id !== origId).map((e) => swaps[swapKey(dayIdx, e.id)] || e.id))
+        if (effNow.has(newId)) return s
+        swaps[swapKey(dayIdx, origId)] = newId
+      } else delete swaps[swapKey(dayIdx, origId)]
       return { ...s, swaps }
     })
   }
@@ -213,33 +220,47 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
 
       <MobilitySession day={day} />
 
-      {day.exercises.map((ex) => {
-        const swappedId = (state.swaps || {})[swapKey(dayIdx, ex.id)]
-        const display = swappedId ? EXERCISE_BY_ID[swappedId] : EXERCISE_BY_ID[ex.id]
-        // Pesi/ripetizioni/storico/record seguono l'esercizio EFFETTIVAMENTE svolto
-        // (quello scambiato), non lo slot originale: così le caselle non ereditano
-        // i valori del primo esercizio.
-        const effId = swappedId || ex.id
-        const adjEx = { ...ex, sets: Math.max(2, ex.sets + adj.sets), rir: Math.max(0, ex.rir + adj.rir) }
-        return (
-          <React.Fragment key={ex.id + '-' + effId + '-' + readiness}>
-            <ExerciseCard
-              ex={adjEx}
-              display={display}
-              swapped={!!swappedId}
-              alternatives={alternativesFor(effId, equip)}
-              existing={state.logs[logKey(week, dayIdx, effId)]}
-              last={lastLogFor(state.logs, week, dayIdx, effId)}
-              onChange={(sets) => setLog(effId, sets)}
-              onRest={() => setRest(ex.rest)}
-              onSwap={(newId) => swapExercise(ex.id, newId)}
-              onRemove={() => removeExercise(ex.id)}
-              prevBest={bestTopBefore(program, state.logs, effId, week)}
-            />
-            <AddExercise equip={equip} existingIds={day.exercises.map((e) => e.id)} onAdd={(id) => addExercise(id, ex.id)} compact />
-          </React.Fragment>
-        )
-      })}
+      {(() => {
+        // Mappa slot -> esercizio EFFETTIVO con sanificazione anti-collisione:
+        // se due slot puntano allo stesso esercizio (scambio salvato da versioni
+        // vecchie), lo scambio del secondo viene ignorato. Evita che due card
+        // condividano gli stessi log pesi/ripetizioni.
+        const originalIds = new Set(day.exercises.map((e) => e.id))
+        const effMap = new Map(); const takenSwaps = new Set()
+        day.exercises.forEach((e) => {
+          let eid = (state.swaps || {})[swapKey(dayIdx, e.id)] || e.id
+          // rifiuta lo scambio se punta a un esercizio originale della giornata
+          // o a un esercizio già usato da un altro scambio
+          if (eid !== e.id && (originalIds.has(eid) || takenSwaps.has(eid))) eid = e.id
+          if (eid !== e.id) takenSwaps.add(eid)
+          effMap.set(e.id, eid)
+        })
+        const effIds = new Set(effMap.values())
+        return day.exercises.map((ex) => {
+          const effId = effMap.get(ex.id) || ex.id
+          const swappedId = effId !== ex.id ? effId : null
+          const display = EXERCISE_BY_ID[effId] || EXERCISE_BY_ID[ex.id]
+          const adjEx = { ...ex, sets: Math.max(2, ex.sets + adj.sets), rir: Math.max(0, ex.rir + adj.rir) }
+          return (
+            <React.Fragment key={ex.id + '-' + effId + '-' + readiness}>
+              <ExerciseCard
+                ex={adjEx}
+                display={display}
+                swapped={!!swappedId}
+                alternatives={alternativesFor(effId, equip).filter((a) => !effIds.has(a.id))}
+                existing={state.logs[logKey(week, dayIdx, effId)]}
+                last={lastLogFor(state.logs, week, dayIdx, effId)}
+                onChange={(sets) => setLog(effId, sets)}
+                onRest={() => setRest(ex.rest)}
+                onSwap={(newId) => swapExercise(ex.id, newId)}
+                onRemove={() => removeExercise(ex.id)}
+                prevBest={bestTopBefore(program, state.logs, effId, week)}
+              />
+              <AddExercise equip={equip} existingIds={[...effIds]} onAdd={(id) => addExercise(id, ex.id)} compact />
+            </React.Fragment>
+          )
+        })
+      })()}
 
       <div className="card">
         <h2>{t('notesTitle')}</h2>
