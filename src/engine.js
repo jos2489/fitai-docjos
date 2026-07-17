@@ -160,8 +160,8 @@ const GOAL_PARAMS = {
 // Set settimanali per gruppo muscolare in base all'esperienza (zona MEV→MAV)
 const SETS_BY_EXPERIENCE = {
   principiante: { perExercise: 3, exercisesPerDay: 5 },
-  intermedio:   { perExercise: 3, exercisesPerDay: 6 },
-  avanzato:     { perExercise: 4, exercisesPerDay: 7 },
+  intermedio:   { perExercise: 3, exercisesPerDay: 7 },
+  avanzato:     { perExercise: 4, exercisesPerDay: 8 },
 }
 
 // Muscoli piccoli/spesso sotto-allenati che beneficiano di volume extra.
@@ -232,7 +232,7 @@ const EMPHASIS_MUSCLES = {
 }
 // Tempo per seduta → numero max di esercizi e scala dei recuperi (densità).
 const SESSION_TIME_CAP = {
-  30: { maxEx: 3, restScale: 0.8 }, 45: { maxEx: 4, restScale: 0.9 }, 60: { maxEx: 6, restScale: 1 }, 75: { maxEx: 7, restScale: 1.05 },
+  30: { maxEx: 3, restScale: 0.8 }, 45: { maxEx: 5, restScale: 0.9 }, 60: { maxEx: 7, restScale: 1 }, 75: { maxEx: 8, restScale: 1.05 },
 }
 
 function excludedIdsFor(injuries) {
@@ -254,19 +254,20 @@ function priorityMusclesFor(profile) {
 // Ogni "slot" è un gruppo muscolare prioritario; il primo è il movimento
 // principale (compound) della seduta.
 function splitForDays(days, experience) {
-  // Nota posizioni: le prime 3 slot preferiscono i compound, le ultime 3 gli
-  // isolamenti. Chi ha 2+ slot di un muscolo prende angoli diversi (varietà).
-  // Petto: 1 slot in zona compound (spinta) + 1 in zona iso (croci).
-  const PUSH = { name: 'Push (spinta)', focus: 'Petto · Spalle · Tricipiti', slots: ['Petto', 'Spalle', 'Petto', 'Spalle', 'Tricipiti', 'Petto'] }
-  const PULL = { name: 'Pull (tirata)', focus: 'Schiena · Spalle · Bicipiti', slots: ['Schiena', 'Schiena', 'Schiena', 'Spalle', 'Bicipiti', 'Bicipiti'] }
-  const LEGS = { name: 'Legs (gambe)', focus: 'Quadricipiti · Femorali · Glutei', slots: ['Quadricipiti', 'Femorali', 'Glutei', 'Quadricipiti', 'Femorali', 'Polpacci'] }
-  const UPPER_A = { name: 'Upper A (parte alta)', focus: 'Petto · Schiena · Spalle · Braccia', slots: ['Petto', 'Schiena', 'Spalle', 'Petto', 'Tricipiti', 'Bicipiti'] }
-  const UPPER_B = { name: 'Upper B (parte alta)', focus: 'Schiena · Petto · Spalle · Braccia', slots: ['Schiena', 'Petto', 'Schiena', 'Spalle', 'Bicipiti', 'Tricipiti'] }
-  const LOWER_A = { name: 'Lower A (parte bassa)', focus: 'Quadricipiti · Femorali · Glutei', slots: ['Quadricipiti', 'Femorali', 'Glutei', 'Quadricipiti', 'Femorali', 'Polpacci'] }
-  const LOWER_B = { name: 'Lower B (parte bassa)', focus: 'Femorali · Quadricipiti · Glutei', slots: ['Femorali', 'Quadricipiti', 'Glutei', 'Femorali', 'Quadricipiti', 'Polpacci'] }
-  const FBA = { name: 'Full Body A', focus: 'Tutto il corpo', slots: ['Quadricipiti', 'Petto', 'Schiena', 'Spalle', 'Femorali', 'Bicipiti'] }
-  const FBB = { name: 'Full Body B', focus: 'Tutto il corpo', slots: ['Femorali', 'Schiena', 'Petto', 'Glutei', 'Spalle', 'Tricipiti'] }
-  const FBC = { name: 'Full Body C', focus: 'Tutto il corpo', slots: ['Quadricipiti', 'Petto', 'Schiena', 'Polpacci', 'Bicipiti', 'Tricipiti'] }
+  // Nota posizioni: con N esercizi usati, la prima metà degli slot preferisce i
+  // compound e la seconda gli isolamenti. Chi ha 2+ slot di un muscolo prende
+  // angoli diversi (varietà). Le liste hanno 8 slot: principiante usa i primi 5,
+  // intermedio 7, avanzato 8.
+  const PUSH = { name: 'Push (spinta)', focus: 'Petto · Spalle · Tricipiti', slots: ['Petto', 'Spalle', 'Petto', 'Tricipiti', 'Petto', 'Spalle', 'Tricipiti', 'Spalle'] }
+  const PULL = { name: 'Pull (tirata)', focus: 'Schiena · Spalle · Bicipiti', slots: ['Schiena', 'Schiena', 'Schiena', 'Bicipiti', 'Schiena', 'Spalle', 'Bicipiti', 'Schiena'] }
+  const LEGS = { name: 'Legs (gambe)', focus: 'Quadricipiti · Femorali · Glutei', slots: ['Quadricipiti', 'Femorali', 'Glutei', 'Quadricipiti', 'Femorali', 'Polpacci', 'Quadricipiti', 'Core'] }
+  const UPPER_A = { name: 'Upper A (parte alta)', focus: 'Petto · Schiena · Spalle · Braccia', slots: ['Petto', 'Schiena', 'Spalle', 'Petto', 'Tricipiti', 'Bicipiti', 'Spalle', 'Schiena'] }
+  const UPPER_B = { name: 'Upper B (parte alta)', focus: 'Schiena · Petto · Spalle · Braccia', slots: ['Schiena', 'Petto', 'Schiena', 'Spalle', 'Petto', 'Bicipiti', 'Tricipiti', 'Spalle'] }
+  const LOWER_A = { name: 'Lower A (parte bassa)', focus: 'Quadricipiti · Femorali · Glutei', slots: ['Quadricipiti', 'Femorali', 'Glutei', 'Quadricipiti', 'Femorali', 'Polpacci', 'Core', 'Glutei'] }
+  const LOWER_B = { name: 'Lower B (parte bassa)', focus: 'Femorali · Quadricipiti · Glutei', slots: ['Femorali', 'Quadricipiti', 'Glutei', 'Quadricipiti', 'Femorali', 'Polpacci', 'Core', 'Glutei'] }
+  const FBA = { name: 'Full Body A', focus: 'Tutto il corpo', slots: ['Quadricipiti', 'Petto', 'Schiena', 'Spalle', 'Femorali', 'Bicipiti', 'Core', 'Polpacci'] }
+  const FBB = { name: 'Full Body B', focus: 'Tutto il corpo', slots: ['Femorali', 'Schiena', 'Petto', 'Glutei', 'Spalle', 'Tricipiti', 'Polpacci', 'Core'] }
+  const FBC = { name: 'Full Body C', focus: 'Tutto il corpo', slots: ['Quadricipiti', 'Schiena', 'Petto', 'Femorali', 'Bicipiti', 'Tricipiti', 'Spalle', 'Polpacci'] }
 
   // Principianti: 1 esercizio per muscolo (volume moderato, focus compound e
   // tecnica). Le evidenze indicano che crescono con poco volume: non sovraccaricare.
