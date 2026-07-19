@@ -225,14 +225,21 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
         // se due slot puntano allo stesso esercizio (scambio salvato da versioni
         // vecchie), lo scambio del secondo viene ignorato. Evita che due card
         // condividano gli stessi log pesi/ripetizioni.
-        const originalIds = new Set(day.exercises.map((e) => e.id))
-        const effMap = new Map(); const takenSwaps = new Set()
+        // Due fasi: prima gli slot NON scambiati riservano il proprio esercizio,
+        // poi gli scambi vengono accettati solo se non collidono con un esercizio
+        // EFFETTIVAMENTE mostrato da un altro slot. (Scambiare verso un esercizio
+        // "liberato" da un altro scambio è legittimo e ora funziona.)
+        const swapsMap = state.swaps || {}
+        const desired = new Map(day.exercises.map((e) => [e.id, swapsMap[swapKey(dayIdx, e.id)] || e.id]))
+        const taken = new Set()
+        day.exercises.forEach((e) => { if (desired.get(e.id) === e.id) taken.add(e.id) })
+        const effMap = new Map()
         day.exercises.forEach((e) => {
-          let eid = (state.swaps || {})[swapKey(dayIdx, e.id)] || e.id
-          // rifiuta lo scambio se punta a un esercizio originale della giornata
-          // o a un esercizio già usato da un altro scambio
-          if (eid !== e.id && (originalIds.has(eid) || takenSwaps.has(eid))) eid = e.id
-          if (eid !== e.id) takenSwaps.add(eid)
+          let eid = desired.get(e.id)
+          if (eid !== e.id) {
+            if (taken.has(eid)) eid = e.id // collisione reale: ignora lo scambio
+            taken.add(eid)
+          }
           effMap.set(e.id, eid)
         })
         const effIds = new Set(effMap.values())

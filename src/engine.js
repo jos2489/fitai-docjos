@@ -145,6 +145,44 @@ export const EXERCISES = [
   // CORE
   { id: 'pallof_press', name: 'Pallof press (anti-rotazione)', muscle: 'Core', type: 'isolation', equip: ['gym'] },
   { id: 'bird_dog', name: 'Bird dog', muscle: 'Core', type: 'isolation', equip: ['gym', 'dumbbell', 'body'] },
+
+  // ===== LIBRERIA AMPLIATA v2 =====
+  // PETTO
+  { id: 'chest_dips', name: 'Dip alle parallele (petto, busto avanti)', muscle: 'Petto', type: 'compound', equip: ['gym', 'body'] },
+  { id: 'weighted_pushup', name: 'Piegamenti zavorrati', muscle: 'Petto', type: 'compound', equip: ['dumbbell', 'body'] },
+  { id: 'incline_fly', name: 'Croci su panca inclinata', muscle: 'Petto', type: 'isolation', equip: ['gym', 'dumbbell'] },
+  { id: 'smith_bench', name: 'Panca al multipower (Smith)', muscle: 'Petto', type: 'compound', equip: ['gym'] },
+  // SCHIENA
+  { id: 'seal_row', name: 'Seal row (rematore su panca)', muscle: 'Schiena', type: 'compound', equip: ['gym', 'dumbbell'] },
+  { id: 'meadows_row', name: 'Meadows row', muscle: 'Schiena', type: 'compound', equip: ['gym'] },
+  { id: 'barbell_shrug', name: 'Scrollate (trapezio)', muscle: 'Schiena', type: 'isolation', equip: ['gym', 'dumbbell'] },
+  { id: 'rack_pull', name: 'Rack pull (stacco parziale)', muscle: 'Schiena', type: 'compound', equip: ['gym'] },
+  // SPALLE
+  { id: 'machine_lateral', name: 'Alzate laterali alla macchina', muscle: 'Spalle', type: 'isolation', equip: ['gym'] },
+  { id: 'front_raise', name: 'Alzate frontali', muscle: 'Spalle', type: 'isolation', equip: ['gym', 'dumbbell'] },
+  // QUADRICIPITI
+  { id: 'smith_squat', name: 'Squat al multipower (Smith)', muscle: 'Quadricipiti', type: 'compound', equip: ['gym'] },
+  { id: 'wall_sit', name: 'Wall sit (sedia al muro)', muscle: 'Quadricipiti', type: 'isolation', equip: ['body'] },
+  // FEMORALI
+  { id: 'stiff_leg_deadlift', name: 'Stacco a gambe tese', muscle: 'Femorali', type: 'compound', equip: ['gym', 'dumbbell'] },
+  { id: 'back_extension', name: 'Iperestensioni (hyperextension)', muscle: 'Femorali', type: 'isolation', equip: ['gym'] },
+  { id: 'ghr', name: 'Glute-ham raise', muscle: 'Femorali', type: 'compound', equip: ['gym'] },
+  // GLUTEI
+  { id: 'sumo_deadlift', name: 'Stacco sumo', muscle: 'Glutei', type: 'compound', equip: ['gym'] },
+  { id: 'frog_pump', name: 'Frog pump', muscle: 'Glutei', type: 'isolation', equip: ['body', 'dumbbell'] },
+  // BICIPITI
+  { id: 'ez_curl', name: 'Curl con bilanciere EZ', muscle: 'Bicipiti', type: 'isolation', equip: ['gym'] },
+  { id: 'concentration_curl', name: 'Curl di concentrazione', muscle: 'Bicipiti', type: 'isolation', equip: ['gym', 'dumbbell'] },
+  { id: 'bayesian_curl', name: 'Curl ai cavi da dietro (bayesian)', muscle: 'Bicipiti', type: 'isolation', equip: ['gym'] },
+  // TRICIPITI
+  { id: 'machine_dip', name: 'Dip machine', muscle: 'Tricipiti', type: 'compound', equip: ['gym'] },
+  { id: 'diamond_pushup', name: 'Piegamenti a diamante', muscle: 'Tricipiti', type: 'compound', equip: ['body', 'dumbbell'] },
+  { id: 'ez_skull', name: 'French press con bilanciere EZ', muscle: 'Tricipiti', type: 'isolation', equip: ['gym'] },
+  // POLPACCI
+  { id: 'leg_press_calf', name: 'Calf alla leg press', muscle: 'Polpacci', type: 'isolation', equip: ['gym'] },
+  // CORE
+  { id: 'cable_woodchop', name: 'Woodchop ai cavi', muscle: 'Core', type: 'isolation', equip: ['gym'] },
+  { id: 'ab_machine', name: 'Crunch alla macchina', muscle: 'Core', type: 'isolation', equip: ['gym'] },
 ]
 
 // --- Parametri per obiettivo (evidence-based) --------------------------------
@@ -222,9 +260,9 @@ export const SESSION_TIMES = [30, 45, 60, 75]
 
 // Esercizi da evitare per zona da proteggere (li sostituisce con alternative).
 const INJURY_EXCLUDE = {
-  schiena: ['deadlift', 'rdl', 'single_leg_rdl', 'good_morning', 'barbell_row', 'pendlay_row', 'tbar_row'],
-  spalle: ['ohp', 'db_ohp', 'arnold_press', 'machine_shoulder', 'upright_row', 'pike_pushup', 'landmine_press', 'single_arm_db_ohp'],
-  ginocchia: ['squat', 'goblet_squat', 'front_squat', 'hack_squat', 'sissy_squat', 'pistol_squat', 'walking_lunge', 'split_squat', 'reverse_lunge', 'step_up'],
+  schiena: ['deadlift', 'rdl', 'single_leg_rdl', 'good_morning', 'barbell_row', 'pendlay_row', 'tbar_row', 'rack_pull', 'sumo_deadlift', 'stiff_leg_deadlift', 'back_extension', 'meadows_row', 'barbell_shrug'],
+  spalle: ['ohp', 'db_ohp', 'arnold_press', 'machine_shoulder', 'upright_row', 'pike_pushup', 'landmine_press', 'single_arm_db_ohp', 'chest_dips', 'front_raise'],
+  ginocchia: ['squat', 'goblet_squat', 'front_squat', 'hack_squat', 'sissy_squat', 'pistol_squat', 'walking_lunge', 'split_squat', 'reverse_lunge', 'step_up', 'smith_squat', 'wall_sit'],
 }
 // Enfasi del fisico → muscoli che ricevono volume extra.
 const EMPHASIS_MUSCLES = {
@@ -332,6 +370,16 @@ const EX_PATTERN = {
   dips: 'compound', close_grip_bench: 'compound', bench_dip: 'compound',
   // Polpacci
   standing_calf: 'standing', calf_raise_bw: 'standing', single_leg_calf: 'standing', seated_calf: 'seated',
+  // Libreria ampliata v2
+  chest_dips: 'dip', weighted_pushup: 'press', incline_fly: 'fly', smith_bench: 'press',
+  seal_row: 'horizontal', meadows_row: 'horizontal', barbell_shrug: 'shrug', rack_pull: 'hinge',
+  machine_lateral: 'lateral', front_raise: 'front',
+  smith_squat: 'squat', wall_sit: 'extension',
+  stiff_leg_deadlift: 'hinge', back_extension: 'hinge', ghr: 'curl',
+  sumo_deadlift: 'thrust', frog_pump: 'thrust',
+  ez_curl: 'curl', concentration_curl: 'stretch', bayesian_curl: 'stretch',
+  machine_dip: 'compound', diamond_pushup: 'compound', ez_skull: 'overhead',
+  leg_press_calf: 'seated', cable_woodchop: 'rotation', ab_machine: 'flexion',
 }
 const patternOf = (e) => EX_PATTERN[e.id] || e.id
 
@@ -618,6 +666,15 @@ const EXERCISE_NAME_EN = {
   spider_curl: 'Spider curl', zottman_curl: 'Zottman curl',
   single_arm_pushdown: 'Single-arm push-down', single_arm_oh_ext: 'Single-arm overhead extension',
   single_leg_calf: 'Single-leg calf raise', pallof_press: 'Pallof press', bird_dog: 'Bird dog',
+  chest_dips: 'Chest dips (forward lean)', weighted_pushup: 'Weighted push-up', incline_fly: 'Incline dumbbell fly', smith_bench: 'Smith machine bench press',
+  seal_row: 'Seal row', meadows_row: 'Meadows row', barbell_shrug: 'Barbell shrug', rack_pull: 'Rack pull',
+  machine_lateral: 'Machine lateral raise', front_raise: 'Front raise',
+  smith_squat: 'Smith machine squat', wall_sit: 'Wall sit',
+  stiff_leg_deadlift: 'Stiff-leg deadlift', back_extension: 'Back extension', ghr: 'Glute-ham raise',
+  sumo_deadlift: 'Sumo deadlift', frog_pump: 'Frog pump',
+  ez_curl: 'EZ-bar curl', concentration_curl: 'Concentration curl', bayesian_curl: 'Bayesian cable curl',
+  machine_dip: 'Dip machine', diamond_pushup: 'Diamond push-up', ez_skull: 'EZ-bar skull crusher',
+  leg_press_calf: 'Leg press calf raise', cable_woodchop: 'Cable woodchop', ab_machine: 'Machine crunch',
 }
 const MUSCLE_EN = { Petto: 'Chest', Schiena: 'Back', Quadricipiti: 'Quads', Femorali: 'Hamstrings', Glutei: 'Glutes', Spalle: 'Shoulders', Bicipiti: 'Biceps', Tricipiti: 'Triceps', Core: 'Core', Polpacci: 'Calves' }
 const DAY_NAME_EN = { 'Push (spinta)': 'Push', 'Pull (tirata)': 'Pull', 'Legs (gambe)': 'Legs', 'Upper (parte alta)': 'Upper', 'Lower (parte bassa)': 'Lower', 'Full Body A': 'Full Body A', 'Full Body B': 'Full Body B', 'Full Body C': 'Full Body C' }
