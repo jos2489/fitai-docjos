@@ -445,7 +445,14 @@ export function buildProgram(profile) {
 
   // 1) costruisci i giorni "base" (settimana 1)
   const baseDays = split.map((day) => {
-    const exs = pickExercises(day.slots, equip, maxEx, usedIds, excludeIds, usedPatterns)
+    let exs = pickExercises(day.slots, equip, maxEx, usedIds, excludeIds, usedPatterns)
+    // Ordine per PRIORITÀ (evidenze: ciò che fai per primo migliora di più —
+    // Simão, Nunes; Nippard "priority first"): gli esercizi dei muscoli
+    // prioritari vanno a inizio seduta. Sort stabile: dentro ai gruppi resta
+    // compound→isolamento; il compound prioritario diventa il main (+1 serie).
+    if (priority.size) {
+      exs = [...exs].sort((a, b) => (priority.has(a.muscle) ? 0 : 1) - (priority.has(b.muscle) ? 0 : 1))
+    }
     const exercises = exs.map((e, i) => {
       const isMain = i === 0 && e.type === 'compound'
       const isCompound = e.type === 'compound'
