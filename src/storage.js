@@ -66,12 +66,20 @@ export function saveState(state) {
 export const logKey = (week, dayIdx, exId) => `${week}-${dayIdx}-${exId}`
 export const dayKey = (week, dayIdx) => `${week}-${dayIdx}`
 
-// Recupera l'ultima sessione registrata per lo stesso esercizio nelle settimane
-// precedenti (serve a pre-compilare i campi e suggerire la progressione).
+// Recupera l'ULTIMA sessione registrata per lo stesso esercizio in QUALSIASI
+// giornata precedente (stessa settimana in un giorno prima, o settimane prima,
+// in qualunque giornata). Serve a pre-compilare i campi e suggerire la
+// progressione: es. squat fatto in Lower A → ritrovato aprendo Lower B.
 export function lastLogFor(logs, week, dayIdx, exId) {
-  for (let w = week - 1; w >= 1; w--) {
-    const k = logKey(w, dayIdx, exId)
-    if (logs[k] && logs[k].length) return logs[k]
+  let best = null, bw = -1, bd = -1
+  for (const k of Object.keys(logs || {})) {
+    const m = /^(\d+)-(\d+)-(.+)$/.exec(k)
+    if (!m || m[3] !== exId) continue
+    const w = +m[1], d = +m[2]
+    if (w > week || (w === week && d >= dayIdx)) continue // solo sedute passate
+    const val = logs[k]
+    if (!val || !val.length) continue
+    if (w > bw || (w === bw && d > bd)) { best = val; bw = w; bd = d }
   }
-  return null
+  return best
 }

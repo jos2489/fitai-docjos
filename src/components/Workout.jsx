@@ -261,7 +261,7 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
                 onRest={() => setRest(ex.rest)}
                 onSwap={(newId) => swapExercise(ex.id, newId)}
                 onRemove={() => removeExercise(ex.id)}
-                prevBest={bestTopBefore(program, state.logs, effId, week)}
+                prevBest={bestTopBefore(program, state.logs, effId, week, dayIdx)}
               />
               <AddExercise equip={equip} existingIds={[...effIds]} onAdd={(id) => addExercise(id, ex.id)} compact />
             </React.Fragment>

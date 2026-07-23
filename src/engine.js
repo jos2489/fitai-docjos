@@ -915,16 +915,19 @@ export function exerciseSeries(program, logs, exId) {
 }
 
 // Miglior top-set registrato PRIMA di una certa settimana (per rilevare i record)
-export function bestTopBefore(program, logs, exId, week) {
+export function bestTopBefore(program, logs, exId, week, dayIdx = 0) {
+  // Scansiona direttamente i log: trova il miglior top-set dell'esercizio in
+  // QUALSIASI seduta precedente (anche stessa settimana in un giorno prima, e
+  // anche se registrato tramite scambio in una giornata che non lo prevedeva).
   let best = 0
-  program.weeks.forEach((wk) => {
-    if (wk.week >= week) return
-    wk.days.forEach((day, di) => {
-      if (!day.exercises.some((e) => e.id === exId)) return
-      const { top } = _topOf(_log(logs, wk.week, di, exId))
-      if (top > best) best = top
-    })
-  })
+  for (const k of Object.keys(logs || {})) {
+    const m = /^(\d+)-(\d+)-(.+)$/.exec(k)
+    if (!m || m[3] !== exId) continue
+    const w = +m[1], d = +m[2]
+    if (w > week || (w === week && d >= dayIdx)) continue
+    const { top } = _topOf(logs[k])
+    if (top > best) best = top
+  }
   return best
 }
 
