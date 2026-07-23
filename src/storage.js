@@ -18,6 +18,7 @@ const empty = {
   syncCode: '',         // codice per la sincronizzazione cloud (se attiva)
   hyrox: null,          // config piano HYROX salvato: { weeks, days, level }
   hyroxLog: {},         // chiave `${week}-${dayIdx}` -> { done: ISO, note: '' }
+  exNotes: {},          // chiave exId -> nota personale (sedile, presa, accortezze): segue l'esercizio ovunque
 }
 
 // Timestamp ultimo backup (per il promemoria) — chiave dedicata, fuori dallo

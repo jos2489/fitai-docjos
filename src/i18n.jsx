@@ -107,6 +107,7 @@ export const STRINGS = {
   chooseMuscle: { it: 'Scegli il muscolo, poi l’esercizio (verrà aggiunto a questa giornata in tutte le settimane):', en: 'Pick the muscle, then the exercise (added to this day across all weeks):' },
   removeExercise: { it: 'Rimuovi dalla scheda', en: 'Remove from plan' },
   removeExConfirm: { it: 'Rimuovere questo esercizio dalla giornata (in tutte le settimane del piano)?', en: 'Remove this exercise from the day (across all weeks)?' },
+  exNotePh: { it: '📝 Nota esercizio (sedile, presa, accortezze…) — ti segue ovunque', en: '📝 Exercise note (seat, grip, cues…) — follows you everywhere' },
   compoundShort: { it: 'multiart.', en: 'compound' },
   isoShort: { it: 'isolam.', en: 'isolation' },
   go: { it: '✅ GO!', en: '✅ GO!' },

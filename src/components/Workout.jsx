@@ -152,6 +152,14 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
   const setLog = (exId, sets) => {
     setState((s) => ({ ...s, logs: { ...s.logs, [logKey(week, dayIdx, exId)]: sets } }))
   }
+  const setExNote = (exId, v) => {
+    setState((s) => {
+      const exNotes = { ...(s.exNotes || {}) }
+      if (v && v.trim()) exNotes[exId] = v
+      else delete exNotes[exId]
+      return { ...s, exNotes }
+    })
+  }
   const saveNote = (v) => {
     setNote(v)
     setState((s) => ({ ...s, notes: { ...s.notes, [dk]: v } }))
@@ -261,6 +269,8 @@ export default function Workout({ state, setState, week, dayIdx, onBack }) {
                 onRest={() => setRest(ex.rest)}
                 onSwap={(newId) => swapExercise(ex.id, newId)}
                 onRemove={() => removeExercise(ex.id)}
+                exNote={(state.exNotes || {})[effId] || ''}
+                onExNote={(v) => setExNote(effId, v)}
                 prevBest={bestTopBefore(program, state.logs, effId, week, dayIdx)}
               />
               <AddExercise equip={equip} existingIds={[...effIds]} onAdd={(id) => addExercise(id, ex.id)} compact />
@@ -548,7 +558,7 @@ function AddExercise({ equip, existingIds, onAdd, compact }) {
   )
 }
 
-function ExerciseCard({ ex, display, swapped, alternatives, existing, last, onChange, onRest, onSwap, onRemove, prevBest }) {
+function ExerciseCard({ ex, display, swapped, alternatives, existing, last, onChange, onRest, onSwap, onRemove, exNote, onExNote, prevBest }) {
   const { t, lang } = useLang()
   const dispName = exName(lang, display.id)
   const init = useMemo(() => {
@@ -625,6 +635,13 @@ function ExerciseCard({ ex, display, swapped, alternatives, existing, last, onCh
         <button className="addset rest" onClick={onRest}>{t('restBtn')} {ex.rest}s</button>
         <button className="addset alt" onClick={() => setShowAlts((v) => !v)}>{t('swapBtn')}</button>
       </div>
+
+      <input
+        className="in ex-note"
+        placeholder={t('exNotePh')}
+        value={exNote}
+        onChange={(e) => onExNote(e.target.value)}
+      />
 
       {showAlts && (
         <div className="alts fade">

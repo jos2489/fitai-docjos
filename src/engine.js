@@ -68,6 +68,7 @@ export const EXERCISES = [
   { id: 'straight_arm_pd', name: 'Pulldown a braccia tese', muscle: 'Schiena', type: 'isolation', equip: ['gym'] },
   { id: 'db_pullover', name: 'Pullover con manubrio', muscle: 'Schiena', type: 'isolation', equip: ['gym', 'dumbbell'] },
   { id: 'kelso_shrug', name: 'Kelso shrug su panca', muscle: 'Schiena', type: 'isolation', equip: ['gym', 'dumbbell'], video: 'https://www.youtube.com/results?search_query=kelso+shrug+incline+bench' },
+  { id: 'cable_kelso_shrug', name: 'Kelso shrug ai cavi', muscle: 'Schiena', type: 'isolation', equip: ['gym'], video: 'https://www.youtube.com/results?search_query=cable+kelso+shrug' },
   // SPALLE
   { id: 'arnold_press', name: 'Arnold press', muscle: 'Spalle', type: 'compound', equip: ['gym', 'dumbbell'] },
   { id: 'machine_shoulder', name: 'Shoulder press alla macchina', muscle: 'Spalle', type: 'compound', equip: ['gym'] },
@@ -344,7 +345,7 @@ const EX_PATTERN = {
   cable_fly: 'fly', db_fly: 'fly', pec_deck: 'fly', low_cable_fly: 'fly', single_arm_cable_fly: 'fly',
   // Schiena
   pullup: 'vertical', lat_pulldown: 'vertical', wide_pulldown: 'vertical', single_arm_pulldown: 'vertical',
-  barbell_row: 'horizontal', db_row: 'horizontal', cable_row: 'horizontal', inv_row: 'horizontal', tbar_row: 'horizontal', pendlay_row: 'horizontal', machine_row: 'horizontal', single_arm_cable_row: 'horizontal', chest_supported_row: 'horizontal', kelso_shrug: 'horizontal',
+  barbell_row: 'horizontal', db_row: 'horizontal', cable_row: 'horizontal', inv_row: 'horizontal', tbar_row: 'horizontal', pendlay_row: 'horizontal', machine_row: 'horizontal', single_arm_cable_row: 'horizontal', chest_supported_row: 'horizontal', kelso_shrug: 'scap_retraction', cable_kelso_shrug: 'scap_retraction',
   straight_arm_pd: 'pullover', db_pullover: 'pullover',
   // Spalle
   ohp: 'press', db_ohp: 'press', arnold_press: 'press', machine_shoulder: 'press', pike_pushup: 'press', landmine_press: 'press', single_arm_db_ohp: 'press',
@@ -655,7 +656,7 @@ const EXERCISE_NAME_EN = {
   barbell_curl: 'Barbell curl', db_curl: 'Dumbbell curl', chinup: 'Chin-up', triceps_pushdown: 'Cable push-down', db_skull: 'Dumbbell skull crusher', dips: 'Parallel bar dips',
   plank: 'Plank', hanging_raise: 'Hanging knee raise', cable_crunch: 'Cable crunch',
   incline_barbell: 'Incline barbell press', machine_press: 'Machine chest press', decline_db: 'Decline dumbbell press', pec_deck: 'Pec deck', low_cable_fly: 'Low cable fly',
-  tbar_row: 'T-bar row', pendlay_row: 'Pendlay row', machine_row: 'Machine row', wide_pulldown: 'Wide-grip pulldown', straight_arm_pd: 'Straight-arm pulldown', db_pullover: 'Dumbbell pullover', kelso_shrug: 'Kelso shrug (bench)',
+  tbar_row: 'T-bar row', pendlay_row: 'Pendlay row', machine_row: 'Machine row', wide_pulldown: 'Wide-grip pulldown', straight_arm_pd: 'Straight-arm pulldown', db_pullover: 'Dumbbell pullover', kelso_shrug: 'Kelso shrug (bench)', cable_kelso_shrug: 'Cable Kelso shrug',
   arnold_press: 'Arnold press', machine_shoulder: 'Machine shoulder press', upright_row: 'Upright row', cable_lateral: 'Cable lateral raise', rear_delt_fly: 'Rear delt fly',
   front_squat: 'Front squat', hack_squat: 'Hack squat', walking_lunge: 'Walking lunge', sissy_squat: 'Sissy squat',
   seated_leg_curl: 'Seated leg curl', nordic_curl: 'Nordic hamstring curl', good_morning: 'Good morning',
